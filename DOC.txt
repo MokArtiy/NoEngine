@@ -1,0 +1,148 @@
+-------09.08.2024------- 
+    Добавлял дополнительные зависимости (на данный момент 09.08.24 - "glfw") с помощью команды git - `git submodule add https://github.com/glfw/glfw.git external/glfw`, где `external/glfw` - путь
+до папки, где сохраняется новая зависимость.
+    Таким образом, теперь для клонирования проекта нужно будет прописывать помимо команды `git clone https://link`, команду `git submodule update --init` или писать сразу
+`git clone --recursive https://link`
+
+    Теперь, после установки исходников библиотеки, её нужно прилинковать к движку. В CMakeLists.txt NoEngineCore добавляю sub_directory с помощью команды
+`add_subdirectory(../external/glfw ${CMAKE_CURRENT_BINARY_DIR}/glfw)` - здесь указывается путь до нужного каталога и путь к бинарникам (где будут храниться бинарники библиотеки).
+    И прилинковать эту библиотеку к движку `target_link_libraries(${ENGINE_PROJECT_NAME} PRIVATE glfw) - имя таргета, способ линковки PRIVATE (чтобы эта зависимость не выходила дальше самого же
+движка), само название библиотеки. Этот способ можно было использовать, т.к GLFW поддерживает возможность установки с помощью CMake и в его проекте присутствуют файлы CMakeLists.txt
+
+    Билдим проект в папке build
+    >>>    mkdir build
+    >>>    cd build
+    >>>    cmake ..
+------------------------
+    Создаю класс приложения
+    
+    В каталоге NoEngine\NoEngineCore\src\NoEngineCore создал Application.cpp, в каталоге NoEngine\NoEngineCore\includes\NoEngineCore создал Application.hpp, далее в CMakeLists.txt NoEngineCore
+создаем 2 переменные, в которых будут храниться пути к публичным инклудам и исходным файлам
+
+    set(ENGINE_PUBLIC_INCLUDES
+	    includes/NoEngineCore/Application.hpp
+    )
+
+    set(ENGINE_PUBLIC_SOURCES
+	    src/NoEngineCore/Application.cpp
+    )
+
+и привязываем их к движку 
+
+    add_library(${ENGINE_PROJECT_NAME} STATIC
+	    ${ENGINE_PUBLIC_INCLUDES}
+	    ${ENGINE_PRIVATE_SOURCES}
+    )
+
+    В Application.hpp создаем класс Application, в нем добавляем конструктор, деструктор и удаляем другие конструкторы, чтобы не было возможности создать несколько приложений. В Application.cpp 
+расписываем методы класса. В виртуальную функцию для старта добавляем тестовое создание окна с помощью GLFW 
+
+    virtual start(unsigned int window_width, unsigned int window_height, const char* title);
+
+В main.cpp public наследуем новый класс MyApp от Application и определяем virtual функцию on_update(). В функции int main() создаем указатель на класс с помощью библиотеки <memory> и в 
+переменную returnCode присваиваем результат функции start() и уже в int main() возвращаем переменную returnCode
+
+    class MyApp : public NoEngine::Application
+    {
+	    virtual void on_update() override
+	    {
+		    std::cout << "Update frame: " << frame++ << std::endl;
+	    }
+
+	    int frame = 0;
+    };
+
+    int main()
+    {
+	    auto myApp = std::make_unique<MyApp>();
+
+	    int returnCode = myApp->start(1024, 768, "My first App");
+
+	    return returnCode;
+    }
+
+make_unique создает unique_ptr типа MyApp. Это аналог new, но более безопасный, т.к автоматически удаляется, выходя из зоны видимости.
+------------------------
+-------17.08.2024-------
+    Добавил библиотеку "spdlog" для вывода кастомных логов. Сделал это так же, как и в прошлый раз, с помощью команды 'git submodule add https://github.com/gabime/spdlog.git external/spdlog
+После чего в CMakeLists NoEngineCore прилинковал к движку 
+
+    add_subdirectory(../external/spdlog ${CMAKE_CURRENT_BINARY_DIR}/spdlog)
+    target_link_libraries(${ENGINE_PROJECT_NAME} PRIVATE spdlog)
+
+    В папке с заголовочными файлами(.hpp) NoEngineCore создал Log.hpp и добавил его в тот же CMakeLists, указав путь до файла. В нем определил макросы #define чтобы обернуть функции библиотеки
+и использовать их во всем проекте. Также сделал проверку на версию компилятора, чтобы логи запускались только в версии DEBUG и не замедляли версию RELEASE. 
+
+    #ifdef NDEBUG
+
+    #define LOG_INFO(...)
+    #define LOG_WARN(...)
+    #define LOG_ERROR(...)
+    #define LOG_CRITICAL(...)
+
+    #else
+
+    #define LOG_INFO(...)	spdlog::info(__VA_ARGS__)
+    #define LOG_WARN(...)	spdlog::warn(__VA_ARGS__)
+    #define LOG_ERROR(...)	spdlog::error(__VA_ARGS__)
+    #define LOG_CRITICAL(...)	spdlog::critical(__VA_ARGS__)
+
+    #endif
+
+В файле Application.cpp в конструкторе класса добавил тестовый код для проверки библиотеки.
+
+    LOG_INFO("Welcome to spdlog!");
+    LOG_ERROR("Some error message with arg: {}", 1);
+
+    LOG_WARN("Easy padding in numbers like {:08d}", 12);
+    LOG_CRITICAL("Support for int: {0:d};  hex: {0:x};  oct: {0:o}; bin: {0:b}", 42);
+    LOG_INFO("Support for floats {:03.2f}", 1.23456);
+    LOG_INFO("Positional args are {1} {0}..", "too", "supported");
+    LOG_INFO("{:<30}", "left aligned");
+------------------------
+    Добавил библиотеку "glad". На официальном сайте GLAD https://glad.dav1d.de/ выбрал конфигурацию glad (Profile - Core; gl - 4.6; Options -  Generate a loader=YES) и скачал zip архив библиотеки.
+В папке NoEngine/external создал новую папку glad и перенес туда содержимое архива glad. Т.к там не было CMakeLists, пришлось создать его вручную.
+
+    cmake_minimum_required(VERSION 3.12)
+    project(glad)
+    add_library(glad STATIC include/glad/glad.h src/glad.c)
+    target_include_directories(glad PUBLIC include)
+
+После прилинковал библиотеку к NoEngineCore в его CMakeLists 
+
+    add_subdirectory(../external/glad ${CMAKE_CURRENT_BINARY_DIR}/glad)
+    target_link_libraries(${ENGINE_PROJECT_NAME} PRIVATE glad)
+
+В файле Application.cpp добавил функцию инициализации OpenGL 
+
+    if(!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+    {
+        LOG_CRITICAL("Failed to initialize GLAD");
+        return -1;
+    }
+
+После узнал, что недавно появился более легкий способ инициализации - gladLoadGL();
+------------------------
+    Добавил класс Window. Сам класс не предполагает, чтобы его можно было инклудировать где-то из вне, поэтому в CMakeLists создаем приватные инклуды и линкуем к движку
+
+    set(ENGINE_PRIVATE_INCLUDES
+	    src/NoEngineCore/Window.hpp
+    )
+
+    target_include_directories(${ENGINE_PROJECT_NAME} PRIVATE src)
+
+В Window.hpp озаглавливаем все необходимые методы для создания окна, а в Window.cpp расписываем эти методы. После в Application.cpp мы создаем unique_ptr с помощью make_unique окна и 
+инициализируем окно.
+
+std::move() - переместить содержимое из первого контейнера во второй (выполняется быстрее, но с потерями данных в первом контейнере)
+------------------------
+using - определение псевдонимов для типов, можно использовать, если идет работа с длинным типами данных, для сокращения их названия
+
+>>> using EventCallbackFn = std::function<void(Event&)>; - пример использования в коде
+
+std::function - для более удобной передачи функции (или другого выражения с (...) в аргументы функции)
+
+glfwSetWindowUserPointer(GLFWwindow*, *void); - добавление своей структуры в GLFWwindow
+glfwGetWindowUserPointer(GLFWwindow*) - получение своей структуры
+
+
