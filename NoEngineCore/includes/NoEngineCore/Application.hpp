@@ -1,5 +1,7 @@
 #pragma once
 
+#include "NoEngineCore/Event.hpp"
+
 #include <memory>
 
 namespace NoEngine {
@@ -21,6 +23,9 @@ namespace NoEngine {
 
 	private:
 		std::unique_ptr<class Window> m_pWindow;
+
+		EventDispatcher m_event_dispatcher;
+		bool m_bCloseWindow = false;
 
 	};
 }
