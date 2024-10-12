@@ -17,7 +17,7 @@ int main()
 {
 	auto myApp = std::make_unique<MyApp>();
 
-	int returnCode = myApp->start(1600, 900, "No Engine Core");
+	int returnCode = myApp->start(1024, 768, "No Engine");
 
 	return returnCode;
 }
