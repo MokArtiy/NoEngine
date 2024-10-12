@@ -45,6 +45,6 @@ namespace NoEngine {
 
 		GLFWwindow* m_pWindow = nullptr;
 		WindowData m_data;
-		float m_background_color[4] = { 0.622f, 0.707f, 0.814f, 0.0f };
+		float m_background_color[4] = { 0.11f, 0.12f, 0.132f, 0.0f };
 	};
 }
