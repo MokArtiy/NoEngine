@@ -11,12 +11,16 @@ set(ENGINE_PUBLIC_INCLUDES
 set(ENGINE_PRIVATE_INCLUDES
 	src/NoEngineCore/Window.hpp
 	src/NoEngineCore/Rendering/OpenGL/ShaderProgram.hpp
+	src/NoEngineCore/Rendering/OpenGL/VertexBuffer.hpp
+	src/NoEngineCore/Rendering/OpenGL/VertexArray.hpp
 )
 
 set(ENGINE_PRIVATE_SOURCES
 	src/NoEngineCore/Application.cpp
 	src/NoEngineCore/Window.cpp
 	src/NoEngineCore/Rendering/OpenGL/ShaderProgram.cpp
+	src/NoEngineCore/Rendering/OpenGL/VertexBuffer.cpp
+	src/NoEngineCore/Rendering/OpenGL/VertexArray.cpp
 )
 
 set(ENGINE_ALL_SOURCES

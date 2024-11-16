@@ -1,6 +1,8 @@
 #include "NoEngineCore/Window.hpp"
 #include "NoEngineCore/Log.hpp"
 #include "NoEngineCore/Rendering/OpenGL/ShaderProgram.hpp"
+#include "NoEngineCore/Rendering/OpenGL/VertexBuffer.hpp"
+#include "NoEngineCore/Rendering/OpenGL/VertexArray.hpp"
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -25,6 +27,12 @@ namespace NoEngine {
         0.0f, 0.0f, 1.0f
     };
 
+    GLfloat positions_colors[] = {
+        0.0f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,
+       -0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 1.0f,
+        0.5f, -0.5f, 0.0f,   1.0f, 0.0f, 1.0f
+    };
+
     const char* vertex_shader =
         "#version 460\n"
         "layout(location = 0) in vec3 vertex_position;"
@@ -44,7 +52,12 @@ namespace NoEngine {
         "}";
 
     std::unique_ptr<ShaderProgram> p_shader_program;
-    GLuint vao;
+    std::unique_ptr<VertexBuffer> p_points_vbo;
+    std::unique_ptr<VertexBuffer> p_colors_vbo;
+    std::unique_ptr<VertexArray> p_vao_2buffers;
+
+    std::unique_ptr<VertexBuffer> p_positions_colors_vbo;
+    std::unique_ptr<VertexArray> p_vao_1buffer;
 
 	Window::Window(std::string title, const unsigned int width, const unsigned int height)
         : m_data({ std::move(title), width, height })
@@ -141,26 +154,30 @@ namespace NoEngine {
             return false;
         }
         
-        GLuint points_vbo = 0;
-        glGenBuffers(1, &points_vbo);
-        glBindBuffer(GL_ARRAY_BUFFER, points_vbo);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(points), points, GL_STATIC_DRAW);
+        BufferLayout buffer_layout_1vec3
+        {
+            ShaderDataType::Float3
+        };
 
-        GLuint colors_vbo = 0;
-        glGenBuffers(1, &colors_vbo);
-        glBindBuffer(GL_ARRAY_BUFFER, colors_vbo);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(colors), colors, GL_STATIC_DRAW);
+        p_vao_2buffers = std::make_unique<VertexArray>();
+        p_points_vbo = std::make_unique<VertexBuffer>(points, sizeof(points), buffer_layout_1vec3);
+        p_colors_vbo = std::make_unique<VertexBuffer>(colors, sizeof(colors), buffer_layout_1vec3);
 
-        glGenVertexArrays(1, &vao);
-        glBindVertexArray(vao);
+        p_vao_2buffers->add_buffer(*p_points_vbo);
+        p_vao_2buffers->add_buffer(*p_colors_vbo);
 
-        glEnableVertexAttribArray(0);
-        glBindBuffer(GL_ARRAY_BUFFER, points_vbo);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
 
-        glEnableVertexAttribArray(1);
-        glBindBuffer(GL_ARRAY_BUFFER, colors_vbo);
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+
+        BufferLayout buffer_layout_2vec3
+        {
+            ShaderDataType::Float3,
+            ShaderDataType::Float3
+        };
+
+        p_vao_1buffer = std::make_unique<VertexArray>();
+        p_positions_colors_vbo = std::make_unique<VertexBuffer>(positions_colors, sizeof(positions_colors), buffer_layout_2vec3);
+
+        p_vao_1buffer->add_buffer(*p_positions_colors_vbo);
 
         return 0;
 	}
@@ -176,10 +193,6 @@ namespace NoEngine {
         glClearColor(m_background_color[0], m_background_color[1], m_background_color[2], m_background_color[3]);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        p_shader_program->bind();
-        glBindVertexArray(vao);
-        glDrawArrays(GL_TRIANGLES, 0, 3);
-
         ImGuiIO& io = ImGui::GetIO();
         io.DisplaySize.x = static_cast<float>(get_width());
         io.DisplaySize.y = static_cast<float>(get_height());
@@ -188,10 +201,26 @@ namespace NoEngine {
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-        ImGui::ShowDemoWindow();
+        //ImGui::ShowDemoWindow();
 
         ImGui::Begin("Background Color Window");
         ImGui::ColorEdit4("Background Color", m_background_color);
+
+        static bool use_2_buffers = true;
+        ImGui::Checkbox("2 Buffers", &use_2_buffers);
+        if (use_2_buffers)
+        {
+            p_shader_program->bind();
+            p_vao_2buffers->bind();
+            glDrawArrays(GL_TRIANGLES, 0, 3);
+        }
+        else 
+        {
+            p_shader_program->bind();
+            p_vao_1buffer->bind();
+            glDrawArrays(GL_TRIANGLES, 0, 3);
+        }
+
         ImGui::End();
 
         ImGui::Render();
