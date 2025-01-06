@@ -4,23 +4,31 @@ set(ENGINE_PROJECT_NAME NoEngineCore)
 
 set(ENGINE_PUBLIC_INCLUDES
 	includes/NoEngineCore/Application.hpp
+	includes/NoEngineCore/Camera.hpp
 	includes/NoEngineCore/Log.hpp
 	includes/NoEngineCore/Event.hpp
 )
 
 set(ENGINE_PRIVATE_INCLUDES
 	src/NoEngineCore/Window.hpp
+	src/NoEngineCore/Modules/UIModule.hpp
+	src/NoEngineCore/Rendering/OpenGL/Renderer_OpenGL.hpp
 	src/NoEngineCore/Rendering/OpenGL/ShaderProgram.hpp
 	src/NoEngineCore/Rendering/OpenGL/VertexBuffer.hpp
 	src/NoEngineCore/Rendering/OpenGL/VertexArray.hpp
+	src/NoEngineCore/Rendering/OpenGL/IndexBuffer.hpp
 )
 
 set(ENGINE_PRIVATE_SOURCES
 	src/NoEngineCore/Application.cpp
+	src/NoEngineCore/Camera.cpp
 	src/NoEngineCore/Window.cpp
+	src/NoEngineCore/Modules/UIModule.cpp
+	src/NoEngineCore/Rendering/OpenGL/Renderer_OpenGL.cpp
 	src/NoEngineCore/Rendering/OpenGL/ShaderProgram.cpp
 	src/NoEngineCore/Rendering/OpenGL/VertexBuffer.cpp
 	src/NoEngineCore/Rendering/OpenGL/VertexArray.cpp
+	src/NoEngineCore/Rendering/OpenGL/IndexBuffer.cpp
 )
 
 set(ENGINE_ALL_SOURCES
@@ -50,6 +58,8 @@ target_link_libraries(${ENGINE_PROJECT_NAME} PRIVATE spdlog)
 add_subdirectory(../external/glad ${CMAKE_CURRENT_BINARY_DIR}/glad)
 target_link_libraries(${ENGINE_PROJECT_NAME} PRIVATE glad)
 
+add_subdirectory(../external/glm ${CMAKE_CURRENT_BINARY_DIR}/glm)
+target_link_libraries(${ENGINE_PROJECT_NAME} PRIVATE glm)
 
 set(IMGUI_INCLUDES
 	../external/imgui/imgui.h

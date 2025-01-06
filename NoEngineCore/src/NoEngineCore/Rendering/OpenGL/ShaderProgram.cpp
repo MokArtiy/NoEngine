@@ -3,6 +3,7 @@
 #include "NoEngineCore/Log.hpp"
 
 #include "glad/glad.h"
+#include <glm/gtc/type_ptr.hpp>
 
 namespace NoEngine
 {
@@ -88,7 +89,12 @@ namespace NoEngine
 		glUseProgram(0);
 	}
 
-	ShaderProgram& ShaderProgram::operator=(ShaderProgram&& shaderProgram)
+	void ShaderProgram::setMatrix4(const char* name, const glm::mat4& matrix) const
+	{
+		glUniformMatrix4fv(glGetUniformLocation(m_id, name), 1, GL_FALSE, glm::value_ptr(matrix));
+	}
+
+	ShaderProgram& ShaderProgram::operator=(ShaderProgram&& shaderProgram) noexcept
 	{
 		glDeleteProgram(m_id);
 		m_id = shaderProgram.m_id;
@@ -99,7 +105,7 @@ namespace NoEngine
 		return *this;
 	}
 
-	ShaderProgram::ShaderProgram(ShaderProgram&& shaderProgram)
+	ShaderProgram::ShaderProgram(ShaderProgram&& shaderProgram) noexcept
 	{
 		m_id = shaderProgram.m_id;
 		m_isCompiled = shaderProgram.m_isCompiled;
