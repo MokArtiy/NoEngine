@@ -89,7 +89,7 @@ namespace NoEngine
 		glUseProgram(0);
 	}
 
-	void ShaderProgram::setMatrix4(const char* name, const glm::mat4& matrix) const
+	void ShaderProgram::set_matrix4(const char* name, const glm::mat4& matrix) const
 	{
 		glUniformMatrix4fv(glGetUniformLocation(m_id, name), 1, GL_FALSE, glm::value_ptr(matrix));
 	}

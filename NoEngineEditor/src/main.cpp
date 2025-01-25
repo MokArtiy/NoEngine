@@ -74,7 +74,7 @@ class NoEngineEditor : public NoEngine::Application
 			}
 			else
 			{
-				rotation_delta.z += static_cast<float>(current_cursor_position.x - m_initial_mouse_pos_x) / 5.f;
+				rotation_delta.z += static_cast<float>(m_initial_mouse_pos_x - current_cursor_position.x) / 5.f;
 				rotation_delta.y -= static_cast<float>(m_initial_mouse_pos_y - current_cursor_position.y) / 5.f;
 			}
 			m_initial_mouse_pos_x = current_cursor_position.x;
