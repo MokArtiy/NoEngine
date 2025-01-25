@@ -7,6 +7,8 @@ set(ENGINE_PUBLIC_INCLUDES
 	includes/NoEngineCore/Camera.hpp
 	includes/NoEngineCore/Log.hpp
 	includes/NoEngineCore/Event.hpp
+	includes/NoEngineCore/Keys.hpp
+	includes/NoEngineCore/Input.hpp
 )
 
 set(ENGINE_PRIVATE_INCLUDES
@@ -14,6 +16,7 @@ set(ENGINE_PRIVATE_INCLUDES
 	src/NoEngineCore/Modules/UIModule.hpp
 	src/NoEngineCore/Rendering/OpenGL/Renderer_OpenGL.hpp
 	src/NoEngineCore/Rendering/OpenGL/ShaderProgram.hpp
+	src/NoEngineCore/Rendering/OpenGL/Texture2D.hpp
 	src/NoEngineCore/Rendering/OpenGL/VertexBuffer.hpp
 	src/NoEngineCore/Rendering/OpenGL/VertexArray.hpp
 	src/NoEngineCore/Rendering/OpenGL/IndexBuffer.hpp
@@ -23,9 +26,11 @@ set(ENGINE_PRIVATE_SOURCES
 	src/NoEngineCore/Application.cpp
 	src/NoEngineCore/Camera.cpp
 	src/NoEngineCore/Window.cpp
+	src/NoEngineCore/Input.cpp
 	src/NoEngineCore/Modules/UIModule.cpp
 	src/NoEngineCore/Rendering/OpenGL/Renderer_OpenGL.cpp
 	src/NoEngineCore/Rendering/OpenGL/ShaderProgram.cpp
+	src/NoEngineCore/Rendering/OpenGL/Texture2D.cpp
 	src/NoEngineCore/Rendering/OpenGL/VertexBuffer.cpp
 	src/NoEngineCore/Rendering/OpenGL/VertexArray.cpp
 	src/NoEngineCore/Rendering/OpenGL/IndexBuffer.cpp

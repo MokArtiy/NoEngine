@@ -1,4 +1,5 @@
 #pragma once
+#include "Keys.hpp"
 
 #include <functional>
 #include <array>
@@ -100,6 +101,83 @@ namespace NoEngine {
 		}
 
 		static const EventType type = EventType::WindowClose;
+	};
+
+	struct EventKeyPressed : public BaseEvent
+	{
+		EventKeyPressed(const KeyCode key_code, const bool repeated)
+			: ket_code(key_code), repeated(repeated)
+		{
+
+		}
+
+		KeyCode ket_code;
+		bool repeated;
+
+		virtual EventType get_type() const override
+		{
+			return type;
+		}
+
+		static const EventType type = EventType::KeyPressed;
+	};
+
+	struct EventKeyReleased : public BaseEvent
+	{
+		EventKeyReleased(const KeyCode key_code)
+			: ket_code(key_code)
+		{
+
+		}
+
+		KeyCode ket_code;
+
+		virtual EventType get_type() const override
+		{
+			return type;
+		}
+
+		static const EventType type = EventType::KeyReleased;
+	};
+
+	struct EventMouseButtonPressed : public BaseEvent
+	{
+		EventMouseButtonPressed(const MouseButton mouse_button, const double x_pos, const double y_pos)
+			: mouse_button(mouse_button), x_pos(x_pos), y_pos(y_pos)
+		{
+
+		}
+
+		MouseButton mouse_button;
+		const double x_pos;
+		const double y_pos;
+
+		virtual EventType get_type() const override
+		{
+			return type;
+		}
+
+		static const EventType type = EventType::MouseButtonPressed;
+	};
+
+	struct EventMouseButtonReleased : public BaseEvent
+	{
+		EventMouseButtonReleased(const MouseButton mouse_button, const double x_pos, const double y_pos)
+			: mouse_button(mouse_button), x_pos(x_pos), y_pos(y_pos)
+		{
+
+		}
+
+		MouseButton mouse_button;
+		const double x_pos;
+		const double y_pos;
+
+		virtual EventType get_type() const override
+		{
+			return type;
+		}
+
+		static const EventType type = EventType::MouseButtonReleased;
 	};
 
 }
