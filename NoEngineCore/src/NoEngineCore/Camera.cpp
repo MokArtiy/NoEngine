@@ -1,7 +1,7 @@
 #include "NoEngineCore/Camera.hpp"
 
 #include <glm/trigonometric.hpp>
-#include <glm/ext/matrix_transform.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 namespace NoEngine {
 	Camera::Camera(const glm::vec3& position, const glm::vec3& rotation, const ProjectionMode projection_mode)
@@ -36,7 +36,32 @@ namespace NoEngine {
 		update_projection_matrix();
 	}
 
-	glm::mat4 Camera::get_view_matrix()
+	void Camera::set_far_clip_plane(const float far)
+	{
+		m_far_clip_plane = far;
+		update_projection_matrix();
+	}
+
+	void Camera::set_near_clip_plane(const float near)
+	{
+		m_near_clip_plane = near;
+		update_projection_matrix();
+	}
+
+	void Camera::set_viewport_size(const float width, const float height)
+	{
+		m_viewport_width = width;
+		m_viewport_height = height;
+		update_projection_matrix();
+	}
+
+	void Camera::set_field_of_view(const float fov)
+	{
+		m_field_of_view = fov;
+		update_projection_matrix();
+	}
+
+	const glm::mat4 Camera::get_view_matrix()
 	{
 		if (m_update_view_matrix)
 		{
@@ -104,14 +129,7 @@ namespace NoEngine {
 	{
 		if (m_projection_mode == ProjectionMode::Perspective)
 		{
-			float r = 0.1f;
-			float t = 0.1f;
-			float f = 100;
-			float n = 0.1f;
-			m_projection_matrix = glm::mat4(n / r, 0, 0, 0,
-				0, n / t, 0, 0,
-				0, 0, (-f - n) / (f - n), -1,
-				0, 0, -2 * f * n / (f - n), 0);
+			m_projection_matrix = glm::perspective(glm::radians(m_field_of_view), m_viewport_width / m_viewport_height, m_near_clip_plane, m_far_clip_plane);
 		}
 		else
 		{
