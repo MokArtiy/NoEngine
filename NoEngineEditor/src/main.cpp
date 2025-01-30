@@ -10,6 +10,12 @@ class NoEngineEditor : public NoEngine::Application
 {
 	double m_initial_mouse_pos_x = 0.0;
 	double m_initial_mouse_pos_y = 0.0;
+	float camera_position[3] = { 0.f, 0.f, 1.f };
+	float camera_rotation[3] = { 0.f, 0.f, 0.f };
+	float camera_fov = 60.f;
+	float camera_near_plane = 0.1f;
+	float camera_far_plane = 100.f;
+	bool perspective_camera = true;
 
 	virtual void on_update() override
 	{		
@@ -145,9 +151,9 @@ class NoEngineEditor : public NoEngine::Application
 	{
 		setup_dockspace_menu();
 
-		camera_position[0] = camera.get_posotion().x;
-		camera_position[1] = camera.get_posotion().y;
-		camera_position[2] = camera.get_posotion().z;
+		camera_position[0] = camera.get_position().x;
+		camera_position[1] = camera.get_position().y;
+		camera_position[2] = camera.get_position().z;
 		camera_rotation[0] = camera.get_rotation().x;
 		camera_rotation[1] = camera.get_rotation().y;
 		camera_rotation[2] = camera.get_rotation().z;
@@ -157,6 +163,14 @@ class NoEngineEditor : public NoEngine::Application
 		camera_far_plane = camera.get_far_clip_plane();
 
 		ImGui::Begin("Editor");
+		ImGui::SliderFloat3("Light source position", light_source_position, -10.f, 10.f);
+		ImGui::ColorEdit3("Light source color", light_source_color);
+
+		ImGui::SliderFloat("Ambient factor", &ambient_factor, 0.f, 1.f);
+		ImGui::SliderFloat("Diffuse factor", &diffuse_factor, 0.f, 1.f);
+		ImGui::SliderFloat("Specular factor", &specular_factor, 0.f, 1.f);
+		ImGui::SliderFloat("Shininess", &shininess, 1.f, 128.f);
+
 		if (ImGui::SliderFloat3("Camera position", camera_position, -10.f, 10.f))
 		{
 			camera.set_position(glm::vec3(camera_position[0], camera_position[1], camera_position[2]));

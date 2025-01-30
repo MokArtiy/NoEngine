@@ -37,7 +37,7 @@ namespace NoEngine {
 		void move_right(const float delta);
 		void move_up(const float delta);
 
-		const glm::vec3& get_posotion() const { return m_position; }
+		const glm::vec3& get_position() const { return m_position; }
 		const glm::vec3& get_rotation() const { return m_rotation; }
 
 		// movement_delta.x - forward, movement_delta.x - right/left, movement_delta.z - up/down
