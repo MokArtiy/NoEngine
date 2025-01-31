@@ -35,20 +35,35 @@ namespace NoEngine {
 	void VertexArray::add_vertex_buffer(const VertexBuffer& vertex_buffer)
 	{
 		bind();
-		vertex_buffer.bind();
+		//vertex_buffer.bind();
 
 		for (const BufferElement& current_element : vertex_buffer.get_layout().get_elemets())
 		{
 			glEnableVertexAttribArray(m_elements_count);
-			glVertexAttribPointer(
+			/*glVertexAttribPointer(
 				m_elements_count, 
 				static_cast<GLint>(current_element.components_count),
 				current_element.component_type,
 				GL_FALSE,
 				static_cast<GLsizei>(vertex_buffer.get_layout().get_stride()),
 				reinterpret_cast<const void*>(current_element.offset)
-				);
+				);*/
 
+			glBindVertexBuffer(
+				m_elements_count,
+				vertex_buffer.get_handle(),
+				current_element.offset,
+				static_cast<GLsizei>(vertex_buffer.get_layout().get_stride()));
+
+			glVertexAttribFormat(
+				m_elements_count,
+				static_cast<GLint>(current_element.components_count),
+				current_element.component_type,
+				GL_FALSE, 
+				0);
+
+			glVertexAttribBinding(m_elements_count, m_elements_count);
+			
 			++m_elements_count;
 		}
 	}
