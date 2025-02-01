@@ -2,8 +2,10 @@
 
 #include "NoEngineCore/Event.hpp"
 #include "NoEngineCore/Camera.hpp"
+#include "NoEngineCore/ResourceManager.hpp"
 
 #include <memory>
+#include <string>
 
 namespace NoEngine {
 
@@ -18,7 +20,7 @@ namespace NoEngine {
 		Application& operator=(const Application&) = delete;
 		Application& operator=(Application&&) = delete;
 
-		virtual int start(unsigned int window_width, unsigned int window_height, const char* title);
+		virtual int start(unsigned int window_width, unsigned int window_height, const char* title, std::string executable_path);
 		void close();
 		virtual void on_update() {}
 		virtual void on_ui_draw() {}
@@ -43,6 +45,7 @@ namespace NoEngine {
 
 		EventDispatcher m_event_dispatcher;
 		bool m_bCloseWindow = false;
+		std::string m_executable_path;
 
 	};
 }

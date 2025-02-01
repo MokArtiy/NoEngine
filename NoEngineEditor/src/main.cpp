@@ -201,11 +201,10 @@ class NoEngineEditor : public NoEngine::Application
 	int frame = 0;
 };
 
-int main()
+int main(char argc, char** argv)
 {
 	auto pNoEngineEditor = std::make_unique<NoEngineEditor>();
-
-	int returnCode = pNoEngineEditor->start(1240, 900/*1024*/, "NoEngine Editor");
+	int returnCode = pNoEngineEditor->start(1240, 900/*1024*/, "NoEngine Editor", argv[0]);
 
 	return returnCode;
 }

@@ -20,7 +20,7 @@ namespace NoEngine
 			GLchar info_log[1024];
 			glGetShaderInfoLog(shader_id, 1024, nullptr, info_log);
 
-			LOG_CRITICAL("Shader compilation error:\n{0}", info_log);
+			LOG_CRITICAL("Shader compilation error:\n    {0}", info_log);
 			return false;
 		}
 		return true;

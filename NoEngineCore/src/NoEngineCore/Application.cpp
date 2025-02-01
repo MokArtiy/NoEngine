@@ -3,6 +3,7 @@
 #include "NoEngineCore/Window.hpp"
 #include "NoEngineCore/Event.hpp"
 #include "NoEngineCore/Input.hpp"
+#include "NoEngineCore/ResourceManager.hpp"
 
 #include "NoEngineCore/Rendering/OpenGL/ShaderProgram.hpp"
 #include "NoEngineCore/Rendering/OpenGL/Texture2D.hpp"
@@ -159,98 +160,8 @@ namespace NoEngine {
 		}
 	}
 
-
-	const char* vertex_shader =
-		R"(#version 460
-           layout(location = 0) in vec3 vertex_position;
-           layout(location = 1) in vec3 vertex_normal;
-           layout(location = 2) in vec2 texture_coord;
-
-           uniform mat4 model_view_matrix;
-           uniform mat4 mvp_matrix;
-           uniform mat3 normal_matrix;
-           uniform int current_frame; 
-
-           out vec2 tex_coord_smile;
-           out vec2 tex_coord_quads;
-           out vec3 frag_normal_eye;
-           out vec3 frag_position_eye;
-
-           void main() {
-              tex_coord_smile = texture_coord;
-              tex_coord_quads = texture_coord + vec2(current_frame / 1000.f, current_frame / 1000.f);
-              frag_normal_eye = normal_matrix * vertex_normal;              
-              frag_position_eye = vec3(model_view_matrix * vec4(vertex_position, 1.0));
-              gl_Position = mvp_matrix * vec4(vertex_position, 1.0);
-           }
-        )";
-
-	const char* fragment_shader =
-		R"(#version 460
-           in vec2 tex_coord_smile;
-           in vec2 tex_coord_quads;
-           in vec3 frag_normal_eye;
-           in vec3 frag_position_eye;
-
-           layout (binding = 0) uniform sampler2D InTexture_Smile;
-           layout (binding = 1) uniform sampler2D InTexture_Quads;
-
-           uniform vec3 light_color;
-           uniform vec3 light_position_eye;
-           uniform float ambient_factor;
-           uniform float diffuse_factor;
-           uniform float specular_factor;
-           uniform float shininess;
-
-           out vec4 frag_color;
-
-           void main() {
-			  
-              //ambient
-			  vec3 ambient = ambient_factor * light_color;
-              
-              //diffuse
-              vec3 normal = normalize(frag_normal_eye);
-              vec3 light_dir = normalize(light_position_eye - frag_position_eye);
-              vec3 diffuse = diffuse_factor * light_color * max(dot(normal, light_dir), 0.0);
-
-              //specular
-              vec3 view_dir = normalize(-frag_position_eye);
-              vec3 reflect_dir = reflect(-light_dir, normal);
-              float specular_value = pow(max(dot(view_dir, reflect_dir), 0.0), shininess);
-              vec3 specular = specular_factor * specular_value * light_color;
-
-              //frag_color = texture(InTexture_Smile, tex_coord_smile) * texture(InTexture_Quads, tex_coord_quads);
-              frag_color = texture(InTexture_Smile, tex_coord_smile) * vec4(ambient + diffuse + specular, 1.f);
-           }
-        )";
-
-	const char* light_source_vertex_shader =
-		R"(#version 460
-           layout(location = 0) in vec3 vertex_position;
-           layout(location = 1) in vec3 vertex_normal;
-           layout(location = 2) in vec2 texture_coord;
-
-           uniform mat4 mvp_matrix;
-
-           void main() {
-              gl_Position = mvp_matrix * vec4(vertex_position * 0.1f, 1.0);
-           }
-        )";
-
-	const char* light_source_fragment_shader =
-		R"(#version 460
-           out vec4 frag_color;
-
-			uniform vec3 light_color;
-
-           void main() {
-              frag_color = vec4(light_color, 1.f);
-           }
-        )";
-
-	std::unique_ptr<ShaderProgram> p_shader_program;
-	std::unique_ptr<ShaderProgram> p_light_source_shader_program;
+	std::shared_ptr<ShaderProgram> p_shader_program;
+	std::shared_ptr<ShaderProgram> p_light_source_shader_program;
 	std::unique_ptr<VertexBuffer> p_cube_position_vbo;
 	std::unique_ptr<IndexBuffer> p_cube_index_buffer;
 	std::unique_ptr<Texture2D> p_texture_smile;
@@ -279,8 +190,9 @@ namespace NoEngine {
 		LOG_INFO("Closing Application");
 	}
 
-	int Application::start(unsigned int window_width, unsigned int window_height, const char* title)
+	int Application::start(unsigned int window_width, unsigned int window_height, const char* title, std::string executable_path)
 	{
+		m_executable_path = executable_path;
 		m_pWindow = std::make_unique<Window>(title, window_width, window_height);
 		camera.set_viewport_size(static_cast<float>(window_width), static_cast<float>(window_height));
 
@@ -371,12 +283,9 @@ namespace NoEngine {
 
 
 		//-------------------------------------//
-		p_shader_program = std::make_unique<ShaderProgram>(vertex_shader, fragment_shader);
-		if (!p_shader_program->isCompiled())
-		{
-			return false;
-		}
-		p_light_source_shader_program = std::make_unique<ShaderProgram>(light_source_vertex_shader, light_source_fragment_shader);
+		ResourceManager p_resource_manager(m_executable_path);
+		p_shader_program = p_resource_manager.load_shader("p_shader_program", "res/shaders/default_obj.vert", "res/shaders/default_obj.frag");
+		p_light_source_shader_program = p_resource_manager.load_shader("p_light_source_shader_program", "res/shaders/light_source.vert", "res/shaders/light_source.frag");
 		if (!p_light_source_shader_program->isCompiled())
 		{
 			return false;
