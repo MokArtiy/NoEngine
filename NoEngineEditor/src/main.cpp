@@ -180,6 +180,7 @@ class NoEngineEditor : public NoEngine::Application
 			camera.set_projection_mode(perspective_camera ? NoEngine::Camera::ProjectionMode::Perspective : NoEngine::Camera::ProjectionMode::Orthographic);
 		}
 		ImGui::Checkbox("Test shaders", &check_shader);
+		ImGui::ColorEdit3("Sky color", m_background_color);
 		ImGui::End();
 		
 	}

@@ -39,6 +39,7 @@ namespace NoEngine {
 
 		const glm::mat4 get_view_matrix();
 		const glm::mat4 get_projection_matrix() const { return m_projection_matrix; }
+		const glm::vec3 get_direction() const { return m_direction; }
 		const float get_far_clip_plane() const { return m_far_clip_plane; }
 		const float get_near_clip_plane() const { return m_near_clip_plane; }
 		const float get_field_of_view() const { return m_field_of_view; }

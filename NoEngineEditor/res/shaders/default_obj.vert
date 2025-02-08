@@ -9,12 +9,12 @@ uniform mat4 mvp_matrix;
 uniform mat3 normal_matrix;
 
 out vec2 tex_coord;
-out vec3 frag_normal_eye;
-out vec3 frag_position_eye;
+out vec3 frag_normal;
+out vec3 frag_position;
 
 void main() {
     tex_coord = texture_coord;
-    frag_normal_eye = normal_matrix * vertex_normal;              
-    frag_position_eye = vec3(model_view_matrix * vec4(vertex_position, 1.0));
+    frag_normal = normal_matrix * vertex_normal;              
+    frag_position = vec3(model_view_matrix * vec4(vertex_position, 1.0));
     gl_Position = mvp_matrix * vec4(vertex_position, 1.0);
 }

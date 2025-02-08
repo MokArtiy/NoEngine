@@ -32,6 +32,7 @@ namespace NoEngine {
 		Camera camera{ glm::vec3(-5, 0, 0) };
 
 		float light_source_position[3] = { 0.f, 0.f, 1.f };
+		float m_background_color[4] = { 0.11f, 0.12f, 0.132f, 0.0f };
 		float light_source_color[3] = { 1.f, 1.f, 1.f };
 		float ambient_factor = 0.2f;
 		float diffuse_factor = 0.5f;

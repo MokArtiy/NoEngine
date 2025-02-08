@@ -74,19 +74,25 @@ namespace NoEngine {
 	std::shared_ptr<Texture2D> p_texture_smile;
 	std::shared_ptr<Texture2D> p_texture_container;
 	std::shared_ptr<Texture2D> p_texture_container_specular;
-	std::shared_ptr<Texture2D> p_texture_container_emission;
+	//std::shared_ptr<Texture2D> p_texture_container_emission;
 	std::unique_ptr<VertexArray> p_cube_vao;
 	/*float scale[3] = { 1.f, 1.f, 1.f };
 	float rotate = 0.f;
 	float translate[3] = { 0.f, 0.f, 0.f };*/
-	float m_background_color[4] = { 0.11f, 0.12f, 0.132f, 0.0f };
 
 	std::array<glm::vec3, 5> positions = {
 		glm::vec3(-2.f, -2.f, -4.f),
 		glm::vec3(-5.f,  0.f,  3.f),
 		glm::vec3(2.f,  1.f, -2.f),
-		glm::vec3(4.f, -3.f,  3.f),
+		glm::vec3(10.f, -7.f,  3.f),
 		glm::vec3(1.f, -7.f,  1.f)
+	};
+
+	glm::vec3 pointLightPositions[] = {
+		glm::vec3(0.0f,  0.0f,  1.0f),
+		glm::vec3(2.3f, -3.3f, -4.0f),
+		glm::vec3(-4.0f,  2.0f, -12.0f),
+		glm::vec3(0.0f,  0.0f, -3.0f)
 	};
 
 	Application::Application()
@@ -179,18 +185,14 @@ namespace NoEngine {
 
 		//-------------------------------------//
 		ResourceManager p_resource_manager(m_executable_path);
-		p_shader_program = p_resource_manager.load_shader("p_shader_program", "res/shaders/default_obj.vert", "res/shaders/default_obj.frag");
-		p_new_shader = p_resource_manager.load_shader("p_new_shader", "res/shaders/default_obj.vert", "res/shaders/default_obj_materials.frag");
+		p_shader_program = p_resource_manager.load_shader("p_shader_program", "res/shaders/default_obj.vert", "res/shaders/default_obj_PointLight.frag");
+		p_new_shader = p_resource_manager.load_shader("p_new_shader", "res/shaders/default_obj.vert", "res/shaders/multiple_lights.frag");
 		p_light_source_shader_program = p_resource_manager.load_shader("p_light_source_shader_program", "res/shaders/light_source.vert", "res/shaders/light_source.frag");
 		
-		p_texture_smile = p_resource_manager.load_texture("smile_texture", "res/textures/container_iron.png");
-		p_texture_smile->bind(0);
 		p_texture_container = p_resource_manager.load_texture("container_texture", "res/textures/container_iron.png");
 		p_texture_container->bind(0);
 		p_texture_container_specular = p_resource_manager.load_texture("container_specular", "res/textures/container_specular.png");
 		p_texture_container_specular->bind(1);
-		p_texture_container_emission = p_resource_manager.load_texture("container_emission", "res/textures/matrix.jpg");
-		p_texture_container_emission->bind(2);
 
 		if (!p_light_source_shader_program->isCompiled())
 		{
@@ -259,25 +261,71 @@ namespace NoEngine {
 		{
 			p_new_shader->bind();
 
-			p_new_shader->set_vec3("light_position_eye", glm::vec3(camera.get_view_matrix() * glm::vec4(light_source_position[0], light_source_position[1], light_source_position[2], 1.f)));
-			//p_new_shader->set_vec3("material.ambient", glm::vec3(0.24725f, 0.1995f, 0.0745));
+			p_new_shader->set_float("material.shininess", 32.0f);
 			p_new_shader->set_int("material.diffuse", 0);
 			p_new_shader->set_int("material.specular", 1);
-			p_new_shader->set_int("material.emission", 2);
-			p_new_shader->set_float("material.shininess", 64.f);
-			p_new_shader->set_vec3("light_color", glm::vec3(light_source_color[0], light_source_color[1], light_source_color[2]));
-			p_new_shader->set_vec3("light.ambient_factor", glm::vec3(0.2f));
-			p_new_shader->set_vec3("light.diffuse_factor", glm::vec3(0.5f));
-			p_new_shader->set_vec3("light.specular_factor", glm::vec3(1.0f));
+			// directional light
+			p_new_shader->set_vec3("dirLight.direction",glm::vec3(-0.2f, -1.0f, -0.3f));
+			p_new_shader->set_vec3("dirLight.ambient",  glm::vec3(0.3f, 0.24f, 0.14f));
+			p_new_shader->set_vec3("dirLight.diffuse",  glm::vec3(0.7f, 0.42f, 0.26f));
+			p_new_shader->set_vec3("dirLight.specular", glm::vec3(0.5f, 0.5f, 0.5f));
+			/* point light 1*/
+			p_new_shader->set_vec3("pointLights[0].position", glm::vec3(camera.get_view_matrix() * glm::vec4(pointLightPositions[0], 1.0f)));
+			p_new_shader->set_vec3("pointLights[0].ambient", glm::vec3(light_source_color[0] * 0.1, light_source_color[1] * 0.1, light_source_color[2] * 0.1));
+			p_new_shader->set_vec3("pointLights[0].diffuse", glm::vec3(light_source_color[0], light_source_color[1], light_source_color[2]));
+			p_new_shader->set_vec3("pointLights[0].specular", glm::vec3(light_source_color[0], light_source_color[1], light_source_color[2]));
+			p_new_shader->set_float("pointLights[0].constant", 1.0f);
+			p_new_shader->set_float("pointLights[0].linear", 0.09f);
+			p_new_shader->set_float("pointLights[0].quadratic", 0.032f);
+			// point light 2
+			p_new_shader->set_vec3("pointLights[1].position", glm::vec3(camera.get_view_matrix() * glm::vec4(pointLightPositions[1], 1.0f)));
+			p_new_shader->set_vec3("pointLights[1].ambient", glm::vec3(light_source_color[0] * 0.1, light_source_color[1] * 0.1, light_source_color[2] * 0.1));
+			p_new_shader->set_vec3("pointLights[1].diffuse", glm::vec3(light_source_color[0], light_source_color[1], light_source_color[2]));
+			p_new_shader->set_vec3("pointLights[1].specular", glm::vec3(light_source_color[0], light_source_color[1], light_source_color[2]));
+			p_new_shader->set_float("pointLights[1].constant", 1.0f);
+			p_new_shader->set_float("pointLights[1].linear", 0.09f);
+			p_new_shader->set_float("pointLights[1].quadratic", 0.032f);
+			// point light 3
+			p_new_shader->set_vec3("pointLights[2].position", glm::vec3(camera.get_view_matrix() * glm::vec4(pointLightPositions[2], 1.0f)));
+			p_new_shader->set_vec3("pointLights[2].ambient", glm::vec3(light_source_color[0] * 0.1, light_source_color[1] * 0.1, light_source_color[2] * 0.1));
+			p_new_shader->set_vec3("pointLights[2].diffuse", glm::vec3(light_source_color[0], light_source_color[1], light_source_color[2]));
+			p_new_shader->set_vec3("pointLights[2].specular", glm::vec3(light_source_color[0], light_source_color[1], light_source_color[2]));
+			p_new_shader->set_float("pointLights[2].constant", 1.0f);
+			p_new_shader->set_float("pointLights[2].linear", 0.09f);
+			p_new_shader->set_float("pointLights[2].quadratic", 0.032f);
+			// point light 4
+			p_new_shader->set_vec3("pointLights[3].position", glm::vec3(camera.get_view_matrix() * glm::vec4(pointLightPositions[3], 1.0f)));
+			p_new_shader->set_vec3("pointLights[3].ambient", glm::vec3(light_source_color[0] * 0.1, light_source_color[1] * 0.1, light_source_color[2] * 0.1));
+			p_new_shader->set_vec3("pointLights[3].diffuse", glm::vec3(light_source_color[0], light_source_color[1], light_source_color[2]));
+			p_new_shader->set_vec3("pointLights[3].specular", glm::vec3(light_source_color[0], light_source_color[1], light_source_color[2]));
+			p_new_shader->set_float("pointLights[3].constant", 1.0f);
+			p_new_shader->set_float("pointLights[3].linear", 0.09f);
+			p_new_shader->set_float("pointLights[3].quadratic", 0.032f);
 
 			//cubes
+			int i = 0;
 			for (const glm::vec3& current_position : positions)
 			{
+				++i;
 				glm::mat4 translate_matrix = glm::translate(glm::mat4(1.f), current_position);
-				const glm::mat4 model_view_matrix = camera.get_view_matrix() * translate_matrix;
+				glm::mat4 model_view_matrix = camera.get_view_matrix() * translate_matrix;
+				model_view_matrix = glm::translate(model_view_matrix, glm::vec3(-current_position.x + sqrt(current_position.y * current_position.y + current_position.x * current_position.x) * cos(current_frame * i/2), (-current_position.y + sqrt(current_position.y * current_position.y + current_position.x * current_position.x) * (sin(current_frame * i/2))), current_position.z));
+				float angle = 0;
+				angle = 20.f * i * glfwGetTime();
+				model_view_matrix = glm::rotate(model_view_matrix, glm::radians(angle), glm::vec3(1.0f, 1.0f, 0.5f));
 				p_new_shader->set_matrix4("model_view_matrix", model_view_matrix);
 				p_new_shader->set_matrix4("mvp_matrix", camera.get_projection_matrix() * model_view_matrix);
 				p_new_shader->set_matrix3("normal_matrix", glm::transpose(glm::inverse(glm::mat3(model_view_matrix))));
+				Renderer_OpenGL::draw(*p_cube_vao);
+			}
+			//light cubes
+			i = 0;
+			for (const glm::vec3& current_position : pointLightPositions)
+			{
+				p_light_source_shader_program->bind();
+				glm::mat4 translate_matrix = glm::translate(glm::mat4(1.f), current_position);
+				p_light_source_shader_program->set_matrix4("mvp_matrix", camera.get_projection_matrix() * camera.get_view_matrix() * translate_matrix);
+				p_light_source_shader_program->set_vec3("light_color", glm::vec3(light_source_color[0], light_source_color[1], light_source_color[2]));
 				Renderer_OpenGL::draw(*p_cube_vao);
 			}
 		}
@@ -285,12 +333,16 @@ namespace NoEngine {
 		{
 			p_shader_program->bind();
 
-			p_shader_program->set_vec3("light_color", glm::vec3(light_source_color[0], light_source_color[1], light_source_color[2]));
-			p_shader_program->set_vec3("light_position_eye", glm::vec3(camera.get_view_matrix() * glm::vec4(light_source_position[0], light_source_position[1], light_source_position[2], 1.f)));
-			p_shader_program->set_float("ambient_factor", ambient_factor);
-			p_shader_program->set_float("diffuse_factor", diffuse_factor);
-			p_shader_program->set_float("specular_factor", specular_factor);
-			p_shader_program->set_float("shininess", shininess);
+			p_shader_program->set_vec3("light_position", glm::vec3(camera.get_view_matrix() * glm::vec4(light_source_position[0], light_source_position[1], light_source_position[2], 1.f)));
+			p_shader_program->set_int("material.diffuse", 0);
+			p_shader_program->set_int("material.specular", 1);
+			p_shader_program->set_float("material.shininess", 32.f);
+			p_shader_program->set_vec3("light.ambient", glm::vec3(0.5f));
+			p_shader_program->set_vec3("light.diffuse", glm::vec3(0.8f));
+			p_shader_program->set_vec3("light.specular", glm::vec3(1.0f));
+			p_shader_program->set_float("light.constant", 1.0f);
+			p_shader_program->set_float("light.linear", 0.09f);
+			p_shader_program->set_float("light.quadratic", 0.032f);
 
 			//cubes
 			for (const glm::vec3& current_position : positions)
@@ -302,15 +354,15 @@ namespace NoEngine {
 				p_shader_program->set_matrix3("normal_matrix", glm::transpose(glm::inverse(glm::mat3(model_view_matrix))));
 				Renderer_OpenGL::draw(*p_cube_vao);
 			}
-		}
 
-		//light source
-		{
-			p_light_source_shader_program->bind();
-			glm::mat4 translate_matrix = glm::translate(glm::mat4(1.f), glm::vec3(light_source_position[0], light_source_position[1], light_source_position[2]));
-			p_light_source_shader_program->set_matrix4("mvp_matrix", camera.get_projection_matrix() * camera.get_view_matrix() * translate_matrix);
-			p_light_source_shader_program->set_vec3("light_color", glm::vec3(light_source_color[0], light_source_color[1], light_source_color[2]));
-			Renderer_OpenGL::draw(*p_cube_vao);
+			//light source
+			{
+				p_light_source_shader_program->bind();
+				glm::mat4 translate_matrix = glm::translate(glm::mat4(1.f), glm::vec3(light_source_position[0], light_source_position[1], light_source_position[2]));
+				p_light_source_shader_program->set_matrix4("mvp_matrix", camera.get_projection_matrix() * camera.get_view_matrix() * translate_matrix);
+				p_light_source_shader_program->set_vec3("light_color", glm::vec3(light_source_color[0], light_source_color[1], light_source_color[2]));
+				Renderer_OpenGL::draw(*p_cube_vao);
+			}
 		}
 
 		UIModule::on_ui_draw_begin();
