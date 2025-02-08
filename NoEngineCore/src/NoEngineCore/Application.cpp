@@ -72,7 +72,9 @@ namespace NoEngine {
 	std::unique_ptr<VertexBuffer> p_cube_position_vbo;
 	std::unique_ptr<IndexBuffer> p_cube_index_buffer;
 	std::shared_ptr<Texture2D> p_texture_smile;
-	std::shared_ptr<Texture2D> p_texture_quads;
+	std::shared_ptr<Texture2D> p_texture_container;
+	std::shared_ptr<Texture2D> p_texture_container_specular;
+	std::shared_ptr<Texture2D> p_texture_container_emission;
 	std::unique_ptr<VertexArray> p_cube_vao;
 	/*float scale[3] = { 1.f, 1.f, 1.f };
 	float rotate = 0.f;
@@ -181,8 +183,15 @@ namespace NoEngine {
 		p_new_shader = p_resource_manager.load_shader("p_new_shader", "res/shaders/default_obj.vert", "res/shaders/default_obj_materials.frag");
 		p_light_source_shader_program = p_resource_manager.load_shader("p_light_source_shader_program", "res/shaders/light_source.vert", "res/shaders/light_source.frag");
 		
-		p_texture_smile = p_resource_manager.load_texture("smile_texture", "res/textures/smile.png");
+		p_texture_smile = p_resource_manager.load_texture("smile_texture", "res/textures/container_iron.png");
 		p_texture_smile->bind(0);
+		p_texture_container = p_resource_manager.load_texture("container_texture", "res/textures/container_iron.png");
+		p_texture_container->bind(0);
+		p_texture_container_specular = p_resource_manager.load_texture("container_specular", "res/textures/container_specular.png");
+		p_texture_container_specular->bind(1);
+		p_texture_container_emission = p_resource_manager.load_texture("container_emission", "res/textures/matrix.jpg");
+		p_texture_container_emission->bind(2);
+
 		if (!p_light_source_shader_program->isCompiled())
 		{
 			return false;
@@ -251,13 +260,14 @@ namespace NoEngine {
 			p_new_shader->bind();
 
 			p_new_shader->set_vec3("light_position_eye", glm::vec3(camera.get_view_matrix() * glm::vec4(light_source_position[0], light_source_position[1], light_source_position[2], 1.f)));
-			p_new_shader->set_vec3("material.ambient", glm::vec3(0.24725f, 0.1995f, 0.0745));
-			p_new_shader->set_vec3("material.diffuse", glm::vec3(0.75164f, 0.60648f, 0.22648f));
-			p_new_shader->set_vec3("material.specular", glm::vec3(0.628281f, 0.555802f, 0.366065f));
-			p_new_shader->set_float("material.shininess", 51.2f);
+			//p_new_shader->set_vec3("material.ambient", glm::vec3(0.24725f, 0.1995f, 0.0745));
+			p_new_shader->set_int("material.diffuse", 0);
+			p_new_shader->set_int("material.specular", 1);
+			p_new_shader->set_int("material.emission", 2);
+			p_new_shader->set_float("material.shininess", 64.f);
 			p_new_shader->set_vec3("light_color", glm::vec3(light_source_color[0], light_source_color[1], light_source_color[2]));
-			p_new_shader->set_vec3("light.ambient_factor", glm::vec3(1.0f));
-			p_new_shader->set_vec3("light.diffuse_factor", glm::vec3(1.0f));
+			p_new_shader->set_vec3("light.ambient_factor", glm::vec3(0.2f));
+			p_new_shader->set_vec3("light.diffuse_factor", glm::vec3(0.5f));
 			p_new_shader->set_vec3("light.specular_factor", glm::vec3(1.0f));
 
 			//cubes

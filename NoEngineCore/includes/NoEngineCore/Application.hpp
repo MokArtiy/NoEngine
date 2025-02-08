@@ -33,10 +33,10 @@ namespace NoEngine {
 
 		float light_source_position[3] = { 0.f, 0.f, 1.f };
 		float light_source_color[3] = { 1.f, 1.f, 1.f };
-		float ambient_factor = 0.1f;
-		float diffuse_factor = 1.0f;
-		float specular_factor = 0.5f;
-		float shininess = 32.f;
+		float ambient_factor = 0.2f;
+		float diffuse_factor = 0.5f;
+		float specular_factor = 1.0f;
+		float shininess = 64.f;
 		double current_frame = 0.0f;
 		bool check_shader = false;
 
