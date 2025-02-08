@@ -19,6 +19,7 @@ namespace NoEngine {
 		void bind() const;
 		static void unbind();
 		bool isCompiled() const { return m_isCompiled; }
+
 		void set_float(const char* name, const float value) const;
 		void set_matrix4(const char* name, const glm::mat4& matrix) const;
 		void set_matrix3(const char* name, const glm::mat3& matrix) const;

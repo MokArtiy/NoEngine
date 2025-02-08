@@ -37,6 +37,8 @@ namespace NoEngine {
 		float diffuse_factor = 1.0f;
 		float specular_factor = 0.5f;
 		float shininess = 32.f;
+		double current_frame = 0.0f;
+		bool check_shader = false;
 
 	private:
 		void draw();

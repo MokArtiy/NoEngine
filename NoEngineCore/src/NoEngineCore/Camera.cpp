@@ -2,6 +2,7 @@
 
 #include <glm/trigonometric.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <iostream>
 
 namespace NoEngine {
 	Camera::Camera(const glm::vec3& position, const glm::vec3& rotation, const ProjectionMode projection_mode)
@@ -61,6 +62,11 @@ namespace NoEngine {
 		update_projection_matrix();
 	}
 
+	void Camera::set_movement_speed(const float movement_speed)
+	{
+		m_movement_speed = movement_speed;
+	}
+
 	const glm::mat4 Camera::get_view_matrix()
 	{
 		if (m_update_view_matrix)
@@ -89,6 +95,12 @@ namespace NoEngine {
 		m_update_view_matrix = true;
 	}
 
+	void Camera::rotation(const glm::vec3& rotation_delta)
+	{
+		m_rotation += rotation_delta;
+		m_update_view_matrix = true;
+	}
+
 	void Camera::add_movement_and_rotation(const glm::vec3& movement_delta, const glm::vec3& rotation_delta)
 	{
 		m_position += m_direction * movement_delta.x;
@@ -96,6 +108,45 @@ namespace NoEngine {
 		m_position += m_up * movement_delta.z;
 		m_rotation += rotation_delta;
 		m_update_view_matrix = true;
+	}
+
+	void Camera::add_movement(const glm::vec3& movement_delta)
+	{
+		m_position += m_direction * movement_delta.x;
+		m_position += m_right * movement_delta.y;
+		m_position += m_up * movement_delta.z;
+		m_update_view_matrix = true;
+	}
+
+	void Camera::process_keyboard(CameraDirectaion direction, float delta_time)
+	{
+		float velocity = m_movement_speed * delta_time;
+		glm::vec3 movement_delta{ 0, 0, 0 };
+		if (direction == CameraDirectaion::Forward)
+		{
+			movement_delta.x += velocity;
+		}
+		if (direction == CameraDirectaion::Backward)
+		{
+			movement_delta.x -= velocity;
+		}
+		if (direction == CameraDirectaion::Right)
+		{
+			movement_delta.y += velocity;
+		}
+		if (direction == CameraDirectaion::Left)
+		{
+			movement_delta.y -= velocity;
+		}
+		if (direction == CameraDirectaion::Up)
+		{
+			movement_delta.z += velocity;
+		}
+		if (direction == CameraDirectaion::Down)
+		{
+			movement_delta.z -= velocity;
+		}
+		add_movement(movement_delta);
 	}
 
 	void Camera::update_view_matrix()

@@ -38,6 +38,23 @@ namespace NoEngine {
 		return nullptr;
 	}
 
+	std::shared_ptr<NoEngine::Texture2D> ResourceManager::load_texture(const char* texture_name, const char* texture_path)
+	{
+		int width = 0;
+		int height = 0;
+		int channels = 0;
+		stbi_set_flip_vertically_on_load(true);
+		unsigned char* data = stbi_load(std::string(m_path + "/" + texture_path).c_str(), &width, &height, &channels, 0);
+		if (!data)
+		{
+			LOG_CRITICAL("Failed to load texture: {0}\n    Error: {1}", texture_path, stbi_failure_reason());
+			return nullptr;
+		}
+		std::shared_ptr<NoEngine::Texture2D> new_texture = m_textures.emplace(texture_name, std::make_shared<NoEngine::Texture2D>(data, width, height, channels)).first->second;
+		stbi_image_free(data);
+		return new_texture;
+	}
+
 	std::string ResourceManager::get_file_string(const char* relative_file_path) const
 	{
 		std::ifstream f;

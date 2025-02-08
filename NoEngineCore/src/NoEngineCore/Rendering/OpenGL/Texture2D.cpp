@@ -6,13 +6,29 @@
 
 namespace NoEngine
 {
-	Texture2D::Texture2D(const unsigned char* data, const unsigned int width, const unsigned int height)
+	Texture2D::Texture2D(const unsigned char* data, const unsigned int width, const unsigned int height, const unsigned int channels)
 		: m_width(width), m_height(height)
 	{
+		switch (channels)
+		{
+		case 4:
+			m_mode = GL_RGBA;
+			m_storage_mode = GL_RGBA8;
+			break;
+		case 3:
+			m_mode = GL_RGB;
+			m_storage_mode = GL_RGB8;
+			break;
+		default:
+			m_mode = GL_RGBA;
+			m_storage_mode = GL_RGBA8;
+			break;
+		}
+
 		glCreateTextures(GL_TEXTURE_2D, 1, &m_id);
 		const GLsizei mip_levels = static_cast<GLsizei> (std::log2(std::max(m_width, m_height))) + 1;
-		glTextureStorage2D(m_id, mip_levels, GL_RGB8, m_width, m_height);
-		glTextureSubImage2D(m_id, 0, 0, 0, m_width, m_height, GL_RGB, GL_UNSIGNED_BYTE, data);
+		glTextureStorage2D(m_id, mip_levels, m_storage_mode, m_width, m_height);
+		glTextureSubImage2D(m_id, 0, 0, 0, m_width, m_height, m_mode, GL_UNSIGNED_BYTE, data);
 		glTextureParameteri(m_id, GL_TEXTURE_WRAP_S, GL_REPEAT);
 		glTextureParameteri(m_id, GL_TEXTURE_WRAP_T, GL_REPEAT);
 		glTextureParameteri(m_id, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);

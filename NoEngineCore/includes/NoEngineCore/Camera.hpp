@@ -13,6 +13,15 @@ namespace NoEngine {
 			Perspective,
 			Orthographic
 		};
+		enum class CameraDirectaion
+		{
+			Forward,
+			Backward,
+			Left,
+			Right,
+			Up,
+			Down
+		};
 
 		Camera(const glm::vec3& position = { 0, 0, 0 },
 			   const glm::vec3& rotation = { 0, 0, 0 },
@@ -26,16 +35,19 @@ namespace NoEngine {
 		void set_near_clip_plane(const float near);
 		void set_viewport_size(const float width, const float height);
 		void set_field_of_view(const float fov);
+		void set_movement_speed(const float movement_speed);
 
 		const glm::mat4 get_view_matrix();
 		const glm::mat4 get_projection_matrix() const { return m_projection_matrix; }
 		const float get_far_clip_plane() const { return m_far_clip_plane; }
 		const float get_near_clip_plane() const { return m_near_clip_plane; }
 		const float get_field_of_view() const { return m_field_of_view; }
+		const float get_movement_speed() const { return m_movement_speed; }
 
 		void move_forward(const float delta);
 		void move_right(const float delta);
 		void move_up(const float delta);
+		void rotation(const glm::vec3& rotation_delta);
 
 		const glm::vec3& get_position() const { return m_position; }
 		const glm::vec3& get_rotation() const { return m_rotation; }
@@ -43,6 +55,9 @@ namespace NoEngine {
 		// movement_delta.x - forward, movement_delta.x - right/left, movement_delta.z - up/down
 		// rotation_delta.x - roll, rotation_delta.y - pitch, rotation_delta.z - yaw
 		void add_movement_and_rotation(const glm::vec3& movement_delta, const glm::vec3& rotation_delta);
+		void add_movement(const glm::vec3& movement_delta);
+
+		void process_keyboard(CameraDirectaion direction, float delta_time);
 
 	private:
 		void update_view_matrix();
@@ -55,11 +70,13 @@ namespace NoEngine {
 		glm::vec3 m_direction;
 		glm::vec3 m_right;
 		glm::vec3 m_up;
+
 		float m_far_clip_plane{ 100.f };
 		float m_near_clip_plane{ 0.1f };
 		float m_viewport_width{ 800.f};
 		float m_viewport_height{ 600.f};
 		float m_field_of_view{ 60.f };
+		float m_movement_speed{ 5.f };
 
 		static constexpr glm::vec3 s_world_up{ 0.f, 0.f, 1.f };
 		static constexpr glm::vec3 s_world_right{ 0.f, -1.f, 0.f };

@@ -42,6 +42,7 @@ namespace NoEngine {
 	bool Renderer_OpenGL::init(GLFWwindow* pWindow)
 	{
 		glfwMakeContextCurrent(pWindow);
+		//glfwSwapInterval(1);
 
 		if (!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress)))
 		{

@@ -57,26 +57,7 @@ namespace NoEngine {
 		   1.0f, -1.f, -1.f,    0.f,  0.f, -1.f,     0.f, 0.f,              // 23
 	};
 
-	GLfloat positions_coords[] = {
-	// front
-		-1.0f, -1.f, -1.f,   1.f, 0.f,
-		-1.0f,  1.f, -1.f,   0.f, 0.f,
-		-1.0f, -1.f,  1.f,   1.f, 1.f,
-		-1.0f,  1.f,  1.f,   0.f, 1.f,
-	// back
-		 1.0f, -1.f, -1.f,  1.f,  0.f,
-		 1.0f,  1.f, -1.f,  0.f,  0.f,
-		 1.0f, -1.f,  1.f,  1.f,  1.f,
-		 1.0f,  1.f,  1.f,  0.f,  1.f
-	};
-
 	GLuint indices[] = {
-		//0, 1, 2, 3, 2, 1, // front
-		//4, 5, 6, 7, 6, 5, // back
-		//0, 4, 6, 0, 2, 6, // right
-		//1, 5, 3, 3, 7, 5, // left
-		//3, 7, 2, 7, 6, 2, // top
-		//1, 5, 0, 5, 0, 4  // bottom
 		0,   1,  2,  2,  3,  0, // front
 		4,   5,  6,  6,  7,  4, // back
 		8,   9, 10, 10, 11,  8, // right
@@ -85,87 +66,13 @@ namespace NoEngine {
 		20, 21, 22, 22, 23, 20  // bottom
 	};
 
-	void generate_circle(unsigned char* data,
-		const unsigned int width,
-		const unsigned int height,
-		const unsigned int center_x,
-		const unsigned int center_y,
-		const unsigned int radius,
-		const unsigned char color_r,
-		const unsigned char color_g,
-		const unsigned char color_b)
-	{
-		for (unsigned int x = 0; x < width; ++x)
-		{
-			for (unsigned int y = 0; y < height; ++y)
-			{
-				if ((x - center_x) * (x - center_x) + (y - center_y) * (y - center_y) < radius * radius)
-				{
-					data[3 * (x + width * y) + 0] = color_r;
-					data[3 * (x + width * y) + 1] = color_g;
-					data[3 * (x + width * y) + 2] = color_b;
-				}
-			}
-		}
-	}
-
-	void generate_smile_texture(unsigned char* data,
-		const unsigned int width,
-		const unsigned int height)
-	{
-		// background
-		for (unsigned int x = 0; x < width; ++x)
-		{
-			for (unsigned int y = 0; y < height; ++y)
-			{
-				data[3 * (x + width * y) + 0] = 200;
-				data[3 * (x + width * y) + 1] = 191;
-				data[3 * (x + width * y) + 2] = 231;
-			}
-		}
-
-		// face
-		generate_circle(data, width, height, width * 0.5, height * 0.5, width * 0.4, 255, 255, 0);
-
-		// smile
-		generate_circle(data, width, height, width * 0.5, height * 0.4, width * 0.2, 0, 0, 0);
-		generate_circle(data, width, height, width * 0.5, height * 0.45, width * 0.2, 255, 255, 0);
-
-		// eyes
-		generate_circle(data, width, height, width * 0.35, height * 0.6, width * 0.07, 255, 0, 255);
-		generate_circle(data, width, height, width * 0.65, height * 0.6, width * 0.07, 0, 0, 255);
-	}
-
-	void generate_quads_texture(unsigned char* data,
-		const unsigned int width,
-		const unsigned int height)
-	{
-		for (unsigned int x = 0; x < width; ++x)
-		{
-			for (unsigned int y = 0; y < height; ++y)
-			{
-				if ((x < width / 2 && y < height / 2) || x >= width / 2 && y >= height / 2)
-				{
-					data[3 * (x + width * y) + 0] = 0;
-					data[3 * (x + width * y) + 1] = 0;
-					data[3 * (x + width * y) + 2] = 0;
-				}
-				else
-				{
-					data[3 * (x + width * y) + 0] = 255;
-					data[3 * (x + width * y) + 1] = 255;
-					data[3 * (x + width * y) + 2] = 255;
-				}
-			}
-		}
-	}
-
 	std::shared_ptr<ShaderProgram> p_shader_program;
+	std::shared_ptr<ShaderProgram> p_new_shader;
 	std::shared_ptr<ShaderProgram> p_light_source_shader_program;
 	std::unique_ptr<VertexBuffer> p_cube_position_vbo;
 	std::unique_ptr<IndexBuffer> p_cube_index_buffer;
-	std::unique_ptr<Texture2D> p_texture_smile;
-	std::unique_ptr<Texture2D> p_texture_quads;
+	std::shared_ptr<Texture2D> p_texture_smile;
+	std::shared_ptr<Texture2D> p_texture_quads;
 	std::unique_ptr<VertexArray> p_cube_vao;
 	/*float scale[3] = { 1.f, 1.f, 1.f };
 	float rotate = 0.f;
@@ -268,24 +175,14 @@ namespace NoEngine {
 			}
 		);
 
-		const unsigned int width = 1000;
-		const unsigned int height = 1000;
-		const unsigned int channels = 3;
-		auto* data = new unsigned char[width * height * channels];
-
-		generate_smile_texture(data, width, height);
-		p_texture_smile = std::make_unique<Texture2D>(data, width, height);
-		p_texture_smile->bind(0);
-
-		generate_quads_texture(data, width, height);
-		p_texture_quads = std::make_unique<Texture2D>(data, width, height);
-		p_texture_quads->bind(1);
-
-
 		//-------------------------------------//
 		ResourceManager p_resource_manager(m_executable_path);
 		p_shader_program = p_resource_manager.load_shader("p_shader_program", "res/shaders/default_obj.vert", "res/shaders/default_obj.frag");
+		p_new_shader = p_resource_manager.load_shader("p_new_shader", "res/shaders/default_obj.vert", "res/shaders/default_obj_materials.frag");
 		p_light_source_shader_program = p_resource_manager.load_shader("p_light_source_shader_program", "res/shaders/light_source.vert", "res/shaders/light_source.frag");
+		
+		p_texture_smile = p_resource_manager.load_texture("smile_texture", "res/textures/smile.png");
+		p_texture_smile->bind(0);
 		if (!p_light_source_shader_program->isCompiled())
 		{
 			return false;
@@ -312,8 +209,21 @@ namespace NoEngine {
 		//-------------------------------------//
 
 		Renderer_OpenGL::enable_depth_testing();
+		double previousTime = glfwGetTime();
+		int frameCount = 0;
 		while (!m_bCloseWindow)
 		{
+			current_frame = glfwGetTime();
+			frameCount++;
+			// If a second has passed.
+			if (current_frame - previousTime >= 1.0)
+			{
+				// Display the frame count here any way you want.
+				std::cout << frameCount << "\n";
+
+				frameCount = 0;
+				previousTime = current_frame;
+			}
 			draw();
 		}
 		m_pWindow = nullptr;
@@ -336,59 +246,58 @@ namespace NoEngine {
 		Renderer_OpenGL::set_clear_color(m_background_color[0], m_background_color[1], m_background_color[2], m_background_color[3]);
 		Renderer_OpenGL::clear();
 
-		p_shader_program->bind();
-
-		//glm::mat4 scale_matrix(scale[0], 0, 0, 0,
-		//	0, scale[1], 0, 0,
-		//	0, 0, scale[2], 0,
-		//	0, 0, 0, 1);
-
-		//float rotate_in_radians = glm::radians(rotate);
-		//glm::mat4 rotate_matrix(cos(rotate_in_radians), sin(rotate_in_radians), 0, 0,
-		//	-sin(rotate_in_radians), cos(rotate_in_radians), 0, 0,
-		//	0, 0, 1, 0,
-		//	0, 0, 0, 1);
-
-		//glm::mat4 translate_matrix(1, 0, 0, 0,
-		//	0, 1, 0, 0,
-		//	0, 0, 1, 0,
-		//	translate[0], translate[1], translate[2], 1);
-
-		//glm::mat4 model_matrix = translate_matrix * rotate_matrix * scale_matrix;
-		//p_shader_program->set_matrix4("model_matrix", model_matrix);
-		///*static int current_frame = 0;
-		//p_shader_program->set_int("current_frame", current_frame++);*/
-
-		p_shader_program->set_vec3("light_color", glm::vec3(light_source_color[0], light_source_color[1], light_source_color[2]));
-		p_shader_program->set_vec3("light_position_eye", glm::vec3(camera.get_view_matrix() * glm::vec4(light_source_position[0], light_source_position[1], light_source_position[2], 1.f)));
-		p_shader_program->set_float("ambient_factor", ambient_factor);
-		p_shader_program->set_float("diffuse_factor", diffuse_factor);
-		p_shader_program->set_float("specular_factor", specular_factor);
-		p_shader_program->set_float("shininess", shininess);
-		//Renderer_OpenGL::draw(*p_cube_vao);
-
-		//cubes
-		for (const glm::vec3& current_position : positions)
+		if (check_shader)
 		{
-			glm::mat4 translate_matrix(1, 0, 0, 0,
-				0, 1, 0, 0,
-				0, 0, 1, 0,
-				current_position[0], current_position[1], current_position[2], 1);
-			//glm::mat4 translate_matrix = glm::translate(glm::mat4(1.f), current_position);
-			const glm::mat4 model_view_matrix = camera.get_view_matrix() * translate_matrix;
-			p_shader_program->set_matrix4("model_view_matrix", model_view_matrix);
-			p_shader_program->set_matrix4("mvp_matrix", camera.get_projection_matrix() * model_view_matrix);
-			p_shader_program->set_matrix3("normal_matrix", glm::transpose(glm::inverse(glm::mat3(model_view_matrix))));
-			Renderer_OpenGL::draw(*p_cube_vao);
+			p_new_shader->bind();
+
+			p_new_shader->set_vec3("light_position_eye", glm::vec3(camera.get_view_matrix() * glm::vec4(light_source_position[0], light_source_position[1], light_source_position[2], 1.f)));
+			p_new_shader->set_vec3("material.ambient", glm::vec3(0.24725f, 0.1995f, 0.0745));
+			p_new_shader->set_vec3("material.diffuse", glm::vec3(0.75164f, 0.60648f, 0.22648f));
+			p_new_shader->set_vec3("material.specular", glm::vec3(0.628281f, 0.555802f, 0.366065f));
+			p_new_shader->set_float("material.shininess", 51.2f);
+			p_new_shader->set_vec3("light_color", glm::vec3(light_source_color[0], light_source_color[1], light_source_color[2]));
+			p_new_shader->set_vec3("light.ambient_factor", glm::vec3(1.0f));
+			p_new_shader->set_vec3("light.diffuse_factor", glm::vec3(1.0f));
+			p_new_shader->set_vec3("light.specular_factor", glm::vec3(1.0f));
+
+			//cubes
+			for (const glm::vec3& current_position : positions)
+			{
+				glm::mat4 translate_matrix = glm::translate(glm::mat4(1.f), current_position);
+				const glm::mat4 model_view_matrix = camera.get_view_matrix() * translate_matrix;
+				p_new_shader->set_matrix4("model_view_matrix", model_view_matrix);
+				p_new_shader->set_matrix4("mvp_matrix", camera.get_projection_matrix() * model_view_matrix);
+				p_new_shader->set_matrix3("normal_matrix", glm::transpose(glm::inverse(glm::mat3(model_view_matrix))));
+				Renderer_OpenGL::draw(*p_cube_vao);
+			}
+		}
+		else
+		{
+			p_shader_program->bind();
+
+			p_shader_program->set_vec3("light_color", glm::vec3(light_source_color[0], light_source_color[1], light_source_color[2]));
+			p_shader_program->set_vec3("light_position_eye", glm::vec3(camera.get_view_matrix() * glm::vec4(light_source_position[0], light_source_position[1], light_source_position[2], 1.f)));
+			p_shader_program->set_float("ambient_factor", ambient_factor);
+			p_shader_program->set_float("diffuse_factor", diffuse_factor);
+			p_shader_program->set_float("specular_factor", specular_factor);
+			p_shader_program->set_float("shininess", shininess);
+
+			//cubes
+			for (const glm::vec3& current_position : positions)
+			{
+				glm::mat4 translate_matrix = glm::translate(glm::mat4(1.f), current_position);
+				const glm::mat4 model_view_matrix = camera.get_view_matrix() * translate_matrix;
+				p_shader_program->set_matrix4("model_view_matrix", model_view_matrix);
+				p_shader_program->set_matrix4("mvp_matrix", camera.get_projection_matrix() * model_view_matrix);
+				p_shader_program->set_matrix3("normal_matrix", glm::transpose(glm::inverse(glm::mat3(model_view_matrix))));
+				Renderer_OpenGL::draw(*p_cube_vao);
+			}
 		}
 
 		//light source
 		{
 			p_light_source_shader_program->bind();
-			glm::mat4 translate_matrix(1, 0, 0, 0,
-				0, 1, 0, 0,
-				0, 0, 1, 0,
-				light_source_position[0], light_source_position[1], light_source_position[2], 1);
+			glm::mat4 translate_matrix = glm::translate(glm::mat4(1.f), glm::vec3(light_source_position[0], light_source_position[1], light_source_position[2]));
 			p_light_source_shader_program->set_matrix4("mvp_matrix", camera.get_projection_matrix() * camera.get_view_matrix() * translate_matrix);
 			p_light_source_shader_program->set_vec3("light_color", glm::vec3(light_source_color[0], light_source_color[1], light_source_color[2]));
 			Renderer_OpenGL::draw(*p_cube_vao);

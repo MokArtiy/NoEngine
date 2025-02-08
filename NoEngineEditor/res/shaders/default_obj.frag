@@ -1,7 +1,6 @@
 #version 460
 
 in vec2 tex_coord_smile;
-in vec2 tex_coord_quads;
 in vec3 frag_normal_eye;
 in vec3 frag_position_eye;
 

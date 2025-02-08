@@ -15,60 +15,40 @@ class NoEngineEditor : public NoEngine::Application
 	float camera_fov = 60.f;
 	float camera_near_plane = 0.1f;
 	float camera_far_plane = 100.f;
+	//float delta_time = 0.0f;
+	double last_frame = 0.0f;
+	float camera_movement_speed = 5.f;
 	bool perspective_camera = true;
 
 	virtual void on_update() override
-	{		
-		glm::vec3 movement_delta{ 0, 0, 0 };
+	{	
+		float delta_time = static_cast<float>(current_frame - last_frame);
+		last_frame = current_frame;
+
 		glm::vec3 rotation_delta{ 0, 0, 0 };
 		if (NoEngine::Input::IsKeyPressed(NoEngine::KeyCode::KEY_W))
 		{
-			movement_delta.x += 0.05f;
+			camera.process_keyboard(NoEngine::Camera::CameraDirectaion::Forward, delta_time);
 		}
 		if (NoEngine::Input::IsKeyPressed(NoEngine::KeyCode::KEY_S))
 		{
-			movement_delta.x -= 0.05f;
+			camera.process_keyboard(NoEngine::Camera::CameraDirectaion::Backward, delta_time);
 		}
 		if (NoEngine::Input::IsKeyPressed(NoEngine::KeyCode::KEY_A))
 		{
-			movement_delta.y -= 0.05f;
+			camera.process_keyboard(NoEngine::Camera::CameraDirectaion::Left, delta_time);
 		}
 		if (NoEngine::Input::IsKeyPressed(NoEngine::KeyCode::KEY_D))
 		{
-			movement_delta.y += 0.05f;
+			camera.process_keyboard(NoEngine::Camera::CameraDirectaion::Right, delta_time);
 		}
 		if (NoEngine::Input::IsKeyPressed(NoEngine::KeyCode::KEY_SPACE))
 		{
-			movement_delta.z += 0.05f;
+			camera.process_keyboard(NoEngine::Camera::CameraDirectaion::Up, delta_time);
 		}
 		if (NoEngine::Input::IsKeyPressed(NoEngine::KeyCode::KEY_LEFT_SHIFT))
 		{
-			movement_delta.z -= 0.05f;
-		}
-
-		if (NoEngine::Input::IsKeyPressed(NoEngine::KeyCode::KEY_UP))
-		{
-			rotation_delta.y -= 0.5f;
-		}
-		if (NoEngine::Input::IsKeyPressed(NoEngine::KeyCode::KEY_DOWN))
-		{
-			rotation_delta.y += 0.5f;
-		}
-		if (NoEngine::Input::IsKeyPressed(NoEngine::KeyCode::KEY_RIGHT))
-		{
-			rotation_delta.z += 0.5f;
-		}
-		if (NoEngine::Input::IsKeyPressed(NoEngine::KeyCode::KEY_LEFT))
-		{
-			rotation_delta.z -= 0.5f;
-		}
-		if (NoEngine::Input::IsKeyPressed(NoEngine::KeyCode::KEY_Q))
-		{
-			rotation_delta.x -= 0.5f;
-		}
-		if (NoEngine::Input::IsKeyPressed(NoEngine::KeyCode::KEY_E))
-		{
-			rotation_delta.x += 0.5f;
+			camera.process_keyboard(NoEngine::Camera::CameraDirectaion::Down, delta_time);
 		}
 
 		if (NoEngine::Input::IsMouseButtonPressed(NoEngine::MouseButton::MOUSE_BUTTON_RIGHT))
@@ -81,14 +61,13 @@ class NoEngineEditor : public NoEngine::Application
 			}
 			else
 			{
-				rotation_delta.z += static_cast<float>(m_initial_mouse_pos_x - current_cursor_position.x) / 5.f;
-				rotation_delta.y -= static_cast<float>(m_initial_mouse_pos_y - current_cursor_position.y) / 5.f;
+				rotation_delta.z += static_cast<float>(m_initial_mouse_pos_x - current_cursor_position.x) / 7.f;
+				rotation_delta.y -= static_cast<float>(m_initial_mouse_pos_y - current_cursor_position.y) / 7.f;
 			}
 			m_initial_mouse_pos_x = current_cursor_position.x;
 			m_initial_mouse_pos_y = current_cursor_position.y;
+			camera.rotation(rotation_delta);
 		}
-
-		camera.add_movement_and_rotation(movement_delta, rotation_delta);
 	}
 
 	void setup_dockspace_menu()
@@ -161,6 +140,7 @@ class NoEngineEditor : public NoEngine::Application
 		camera_fov = camera.get_field_of_view();
 		camera_near_plane = camera.get_near_clip_plane();
 		camera_far_plane = camera.get_far_clip_plane();
+		camera_movement_speed = camera.get_movement_speed();
 
 		ImGui::Begin("Editor");
 		ImGui::SliderFloat3("Light source position", light_source_position, -10.f, 10.f);
@@ -171,6 +151,10 @@ class NoEngineEditor : public NoEngine::Application
 		ImGui::SliderFloat("Specular factor", &specular_factor, 0.f, 1.f);
 		ImGui::SliderFloat("Shininess", &shininess, 1.f, 128.f);
 
+		if (ImGui::SliderFloat("Camera movement speed", &camera_movement_speed, 0.1f, 100.f))
+		{
+			camera.set_movement_speed(camera_movement_speed);
+		}
 		if (ImGui::SliderFloat3("Camera position", camera_position, -10.f, 10.f))
 		{
 			camera.set_position(glm::vec3(camera_position[0], camera_position[1], camera_position[2]));
@@ -195,7 +179,9 @@ class NoEngineEditor : public NoEngine::Application
 		{
 			camera.set_projection_mode(perspective_camera ? NoEngine::Camera::ProjectionMode::Perspective : NoEngine::Camera::ProjectionMode::Orthographic);
 		}
+		ImGui::Checkbox("Test shaders", &check_shader);
 		ImGui::End();
+		
 	}
 
 	int frame = 0;

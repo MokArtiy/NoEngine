@@ -38,7 +38,12 @@ namespace NoEngine {
         }
 
         glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
+        //glfwWindowHint(GLFW_DOUBLEBUFFER, GLFW_FALSE);
+
         m_pWindow = glfwCreateWindow(m_data.width, m_data.height, m_data.title.c_str(), nullptr, nullptr);
+        //m_pWindow = glfwCreateWindow(m_data.width, m_data.height, m_data.title.c_str(), glfwGetPrimaryMonitor(), nullptr);
+        //glfwSetWindowSize(m_pWindow, 2560, 1440);
+        //glfwSetWindowPos(m_pWindow, 0, 0);
         if (!m_pWindow)
         {
             LOG_CRITICAL("Can't create window '{0}' width size {1}x{2}", m_data.title, m_data.width, m_data.height);
@@ -160,7 +165,6 @@ namespace NoEngine {
     {
         glfwSwapBuffers(m_pWindow);
         glfwPollEvents();
-
     }
     glm::vec2 Window::get_current_cursor_position() const
     {
