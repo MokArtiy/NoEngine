@@ -114,6 +114,21 @@ namespace NoEngine
 		glUniform3f(glGetUniformLocation(m_id, name), value.x, value.y, value.z);
 	}
 
+	void ShaderProgram::set_vec3(const char* name, const float x, const float y, const float z) const
+	{
+		glUniform3f(glGetUniformLocation(m_id, name), x, y, z);
+	}
+
+	void ShaderProgram::set_vec3(const char* name, const float value[3]) const
+	{
+		glUniform3f(glGetUniformLocation(m_id, name), value[0], value[1], value[2]);
+	}
+
+	void ShaderProgram::set_bool(const char* name, const bool value) const
+	{
+		glUniform1i(glGetUniformLocation(m_id, name), (int)value);
+	}
+
 	ShaderProgram& ShaderProgram::operator=(ShaderProgram&& shaderProgram) noexcept
 	{
 		glDeleteProgram(m_id);

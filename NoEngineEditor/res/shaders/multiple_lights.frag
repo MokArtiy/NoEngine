@@ -53,6 +53,9 @@ uniform DirLight dirLight;
 uniform PointLight pointLights[NR_POINT_LIGHTS];
 uniform SpotLight spotLight;
 uniform Material material;
+uniform bool check_dirLight;
+uniform bool check_PointLight[NR_POINT_LIGHTS];
+uniform bool check_SpotLight;
 
 // function prototypes
 vec3 CalcDirLight(DirLight light, vec3 frag_normal, vec3 view_dir);
@@ -65,14 +68,24 @@ void main()
     vec3 normal = normalize(frag_normal);
     vec3 view_dir = normalize(view_position - frag_position);
 
+    vec3 result;
     // phase 1: directional lighting
-    vec3 result = CalcDirLight(dirLight, normal, view_dir);
+    if(check_dirLight)
+    {
+        result += CalcDirLight(dirLight, normal, view_dir);
+    }
     // phase 2: point lights
     for(int i = 0; i < NR_POINT_LIGHTS; i++)
-       result += CalcPointLight(pointLights[i], normal, frag_position, view_dir);    
+        if(check_PointLight[i])
+        {
+            result += CalcPointLight(pointLights[i], normal, frag_position, view_dir);    
+        }
  
     // phase 3: spot light
-    result += CalcSpotLight(spotLight, normal, frag_position, view_dir); 
+    if(check_SpotLight)
+    {
+        result += CalcSpotLight(spotLight, normal, frag_position, view_dir); 
+    }
     
     frag_color = vec4(result, 1.0);
 }
