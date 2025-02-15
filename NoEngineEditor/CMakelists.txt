@@ -1,0 +1,29 @@
+cmake_minimum_required(VERSION 3.12)
+
+set(EDITOR_PROJECT_NAME NoEngineEditor)
+
+set(PUBLIC_HEADER 
+	includes/Editor.hpp
+)
+set(PUBLIC_SOURCE
+	src/Editor.cpp
+)
+set(ALL_SOURCES
+	${PUBLIC_HEADER}
+	${PUBLIC_SOURCE}
+	src/main.cpp
+)
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${ALL_SOURCES})
+
+add_executable(${EDITOR_PROJECT_NAME}
+    ${ALL_SOURCES}
+)
+
+target_link_libraries(${EDITOR_PROJECT_NAME} NoEngineCore ImGui glm)
+target_compile_features(${EDITOR_PROJECT_NAME} PUBLIC cxx_std_17)
+
+set_target_properties(${EDITOR_PROJECT_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/)
+
+add_custom_command(TARGET ${EDITOR_PROJECT_NAME} POST_BUILD
+					COMMAND ${CMAKE_COMMAND} -E copy_directory
+					${CMAKE_SOURCE_DIR}/NoEngineEditor/res $<TARGET_FILE_DIR:${EDITOR_PROJECT_NAME}>/res)
