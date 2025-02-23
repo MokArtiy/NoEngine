@@ -24,12 +24,20 @@ namespace NoEngine {
 		void close();
 		virtual void on_update() {}
 		virtual void on_ui_draw() {}
+		virtual void on_objects_draw() {}
 
 		virtual void on_mouse_button_event(const MouseButton button_code, const double x_pos, const double y_pos, const bool pressed) {}
 
 		glm::vec2 get_current_coursor_position() const;
 
 		Camera camera{ glm::vec3(-5, 0, 0) };
+
+		void add_editor_object(std::string object_name = "",
+			const glm::vec3& position = glm::vec3(0.0f),
+			const glm::vec3& rotation = glm::vec3(0.0f),
+			const glm::vec3& scale = glm::vec3(1.0f));
+		void remove_editor_object(std::string object_name = "");
+		void draw_main_scene();
 
 		int frameCount = 0;
 		float light_source_position[3] = { 0.f, 0.f, 1.f };

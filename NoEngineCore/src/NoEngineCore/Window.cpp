@@ -173,4 +173,11 @@ namespace NoEngine {
         glfwGetCursorPos(m_pWindow, &x_pos, &y_pos);
         return { x_pos, y_pos };
     }
+    glm::vec2 Window::get_frame_buffer_size() const
+    {
+        int width;
+        int height;
+        glfwGetFramebufferSize(m_pWindow, &width, &height);
+        return { width, height };
+    }
 }

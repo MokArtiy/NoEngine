@@ -105,7 +105,7 @@ void NoEngineEditor::setup_dockspace_menu()
 
 void NoEngineEditor::setup_main_control_menu()
 {
-	ImGui::Begin("Light Editor");
+	ImGui::Begin("Scene Editor");
 
 	//Directional light
 	ImGui::SetNextItemOpen(true, ImGuiCond_Once);
@@ -124,7 +124,7 @@ void NoEngineEditor::setup_main_control_menu()
 		ImGui::ColorEdit3("Specular##dir", dirLight_specular, ImGuiColorEditFlags_Float);
 	}
 	//Point lights
-	ImGui::SetNextItemOpen(true, ImGuiCond_Once);
+	ImGui::SetNextItemOpen(false, ImGuiCond_Once);
 	if (ImGui::CollapsingHeader("Point Lights"))
 	{
 		std::string text;
@@ -184,6 +184,15 @@ void NoEngineEditor::setup_main_control_menu()
 		ImGui::ColorEdit3("Diffuse##spot", spotLight_diffuse, ImGuiColorEditFlags_Float);
 		ImGui::Text("Specular:");
 		ImGui::ColorEdit3("Specular##spot", spotLight_specular, ImGuiColorEditFlags_Float);
+	}
+	//ImGui::SetCursorPosX((ImGui::GetWindowWidth()) / 2);
+	if (ImGui::Button("+ New object", ImVec2(ImGui::GetWindowWidth() - 17, 20)))
+	{
+		add_editor_object();
+	}
+	if (ImGui::Button("Remove object", ImVec2(ImGui::GetWindowWidth() - 17, 20)))
+	{
+		remove_editor_object("Cube_0");
 	}
 
 	ImGui::End();
@@ -255,7 +264,6 @@ void NoEngineEditor::setup_main_control_menu()
 void NoEngineEditor::on_ui_draw()
 {
 	{
-
 		setup_dockspace_menu();
 		setup_main_control_menu();
 	}

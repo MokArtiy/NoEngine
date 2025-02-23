@@ -12,7 +12,9 @@
 #include "NoEngineCore/Rendering/OpenGL/IndexBuffer.hpp"
 #include "NoEngineCore/Camera.hpp"
 #include "NoEngineCore/Rendering/OpenGL/Renderer_OpenGL.hpp"
+#include "NoEngineCore/Rendering/EditorObject.hpp"
 #include "NoEngineCore/Modules/UIModule.hpp"
+#include "NoEngineCore/Modules/FrameBuffer.hpp"
 
 #include <imgui/imgui.h>
 #include <glm/mat4x4.hpp>
@@ -66,18 +68,15 @@ namespace NoEngine {
 		20, 21, 22, 22, 23, 20  // bottom
 	};
 
+	std::shared_ptr<FrameBuffer> p_frame_buffer;
 	std::shared_ptr<ShaderProgram> p_shader_program;
 	std::shared_ptr<ShaderProgram> p_new_shader;
-
-	std::shared_ptr<ShaderProgram> p_model_shader;
-	
 	std::shared_ptr<ShaderProgram> p_light_source_shader_program;
 	std::unique_ptr<VertexBuffer> p_cube_position_vbo;
 	std::unique_ptr<IndexBuffer> p_cube_index_buffer;
 	std::shared_ptr<Texture2D> p_texture_smile;
 	std::shared_ptr<Texture2D> p_texture_container;
 	std::shared_ptr<Texture2D> p_texture_container_specular;
-	//std::shared_ptr<Texture2D> p_texture_container_emission;
 	std::unique_ptr<VertexArray> p_cube_vao;
 	/*float scale[3] = { 1.f, 1.f, 1.f };
 	float rotate = 0.f;
@@ -127,6 +126,7 @@ namespace NoEngine {
 			{
 				LOG_INFO("[Resized] Changed size to {0}x{1}", event.width, event.height);
 				camera.set_viewport_size(event.width, event.height);
+				p_frame_buffer->create(event.width, event.height);
 				draw();
 			});
 
@@ -192,13 +192,10 @@ namespace NoEngine {
 		p_shader_program = p_resource_manager.load_shader("p_shader_program", "res/shaders/default_obj.vert", "res/shaders/default_obj_PointLight.frag");
 		p_new_shader = p_resource_manager.load_shader("p_new_shader", "res/shaders/default_obj.vert", "res/shaders/multiple_lights.frag");
 		p_light_source_shader_program = p_resource_manager.load_shader("p_light_source_shader_program", "res/shaders/light_source.vert", "res/shaders/light_source.frag");
-		
-		p_model_shader = p_resource_manager.load_shader("p_model_shader", "res/shaders/model_shader.vert", "res/shaders/model_shader.frag");
-
 		p_texture_container = p_resource_manager.load_texture("container_texture", "res/textures/container_iron.png");
-		p_texture_container->bind(0);
+		p_texture_container->bind(1);
 		p_texture_container_specular = p_resource_manager.load_texture("container_specular", "res/textures/container_specular.png");
-		p_texture_container_specular->bind(1);
+		p_texture_container_specular->bind(2);
 
 		if (!p_light_source_shader_program->isCompiled())
 		{
@@ -218,15 +215,16 @@ namespace NoEngine {
 		};
 
 		p_cube_vao = std::make_unique<VertexArray>();
+		p_frame_buffer = std::make_shared<FrameBuffer>();
 		p_cube_position_vbo = std::make_unique<VertexBuffer>(pos_norm_uv, sizeof(pos_norm_uv), buffer_layout_vec3_vec3_vec2);
 		p_cube_index_buffer = std::make_unique<IndexBuffer>(indices, sizeof(indices) / sizeof(GLuint));
 
 		p_cube_vao->add_vertex_buffer(*p_cube_position_vbo);
 		p_cube_vao->set_index_buffer(*p_cube_index_buffer);
+		p_frame_buffer->create(m_pWindow->get_width(), m_pWindow->get_height());
 		//-------------------------------------//
 
 		Renderer_OpenGL::enable_depth_testing();
-		double previousTime = glfwGetTime();
 		while (!m_bCloseWindow)
 		{
 			current_frame = glfwGetTime();
@@ -247,18 +245,51 @@ namespace NoEngine {
 		return m_pWindow->get_current_cursor_position();
 	}
 
+	void Application::add_editor_object(std::string object_name, const glm::vec3& position, const glm::vec3& rotation, const glm::vec3& scale)
+	{
+		EditorScene::add_object(p_new_shader, ObjectType::Cube, object_name, position, rotation, scale);
+	}
+
+	void Application::remove_editor_object(std::string object_name)
+	{
+		EditorScene::remove_object(object_name);
+	}
+
+	void Application::draw_main_scene()
+	{
+		p_frame_buffer->unbind();
+
+		ImGui::Begin("Scene");
+
+		const float window_width = ImGui::GetContentRegionAvail().x;
+		const float window_height = ImGui::GetContentRegionAvail().y;
+
+		camera.set_viewport_size(window_width, window_height);
+
+		ImVec2 pos = ImGui::GetCursorScreenPos();
+
+		GLuint textureID = p_frame_buffer->get_texture_id();
+		ImGui::Image(textureID, ImVec2(window_width, window_height), ImVec2(0, 1), ImVec2(1, 0));
+
+		ImGui::End();
+	}
+
 	void Application::draw()
 	{
 		Renderer_OpenGL::set_clear_color(m_background_color[0], m_background_color[1], m_background_color[2], m_background_color[3]);
 		Renderer_OpenGL::clear();
 
-		p_new_shader->bind();
+		p_frame_buffer->bind();
 
+		p_new_shader->bind();
+		glm::mat4 projection_view_matrix = camera.get_projection_matrix() * camera.get_view_matrix();
+		p_new_shader->set_matrix4("projection_view_matrix", projection_view_matrix);
 		p_new_shader->set_vec3("view_position", camera.get_position());
 		p_new_shader->set_float("material.shininess", 32.0f);
 		p_new_shader->set_int("material.diffuse", 0);
 		p_new_shader->set_int("material.specular", 1);
-		// directional light
+
+		//// directional light
 		p_new_shader->set_bool("check_dirLight", check_dirLight);
 		if (check_dirLight)
 		{
@@ -298,17 +329,15 @@ namespace NoEngine {
 			p_new_shader->set_float("spotLight.cutOff", glm::cos(glm::radians(spotLight_cutOff)));
 			p_new_shader->set_float("spotLight.outerCutOff", glm::cos(glm::radians(spotLight_outerCutOff)));
 		}
-		/*cubes*/
+		//cubes
 		glm::mat4 model_matrix = glm::mat4(1.0f);
-		glm::mat4 projection_view_matrix = camera.get_projection_matrix() * camera.get_view_matrix();
 		p_new_shader->set_matrix4("model_matrix", model_matrix);
-		p_new_shader->set_matrix4("projection_view_matrix", projection_view_matrix);
 		int i = 0;
 		for (const glm::vec3& current_position : positions)
 		{
 			++i;
 			float angle = 0;
-			angle = 20.f * current_frame *i;
+			angle = 20.f * current_frame * i;
 			glm::mat4 model_matrix = glm::translate(glm::mat4(1.f), current_position);
 			model_matrix = glm::translate(model_matrix, glm::vec3(-current_position.x + sqrt(current_position.y * current_position.y + current_position.x * current_position.x) * cos(current_frame * i / 2), (-current_position.y + sqrt(current_position.y * current_position.y + current_position.x * current_position.x) * (sin(current_frame * i / 2))), current_position.z));
 			model_matrix = glm::rotate(model_matrix, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
@@ -316,7 +345,6 @@ namespace NoEngine {
 			p_new_shader->set_matrix3("normal_matrix", glm::transpose(glm::inverse(glm::mat3(model_matrix))));
 
 			Renderer_OpenGL::draw(*p_cube_vao);
-			
 		}
 		//light cubes
 		p_light_source_shader_program->bind();
@@ -333,10 +361,16 @@ namespace NoEngine {
 			}
 
 		}
+		EditorScene::draw_objects();
+
+		p_frame_buffer->unbind();
 
 		UIModule::on_ui_draw_begin();
 		on_ui_draw();
+		draw_main_scene();
+
 		UIModule::on_ui_draw_end();
+		
 
 		m_pWindow->on_update();
 		on_update();

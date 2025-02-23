@@ -35,7 +35,6 @@ namespace NoEngine {
 	void VertexArray::add_vertex_buffer(const VertexBuffer& vertex_buffer)
 	{
 		bind();
-		//vertex_buffer.bind();
 
 		for (const BufferElement& current_element : vertex_buffer.get_layout().get_elemets())
 		{
