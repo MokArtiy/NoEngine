@@ -37,6 +37,12 @@ public:
 		NoEngine::Renderer_OpenGL::draw(*p_vao);
 	}
 
+	bool intersect(const glm::vec3& ray_origin, const glm::vec3& ray_direction, float& distance) const override
+	{
+		glm::vec3 cube_min = glm::vec3(get_model_matrix() * glm::vec4(-1.0f, -1.0f, -1.0f, 1.0f));
+		glm::vec3 cube_max = glm::vec3(get_model_matrix() * glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+	}
+
 private:
 	std::unique_ptr<NoEngine::VertexArray> p_vao;
 	std::unique_ptr<NoEngine::VertexBuffer> p_position_vbo;

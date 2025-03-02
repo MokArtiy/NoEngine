@@ -1,4 +1,5 @@
 #include "EditorObject.hpp"
+#include "NoEngineCore/Physics/PhysicsSystem.hpp"
 
 namespace NoEngine{
 
@@ -69,6 +70,24 @@ namespace NoEngine{
 			for (auto i = m_scene_objects.begin(); i != m_scene_objects.end(); i++)
 			{
 				i->second->draw();
+			}
+		}
+	}
+
+	void EditorScene::pick_object(const glm::vec2& mouse_pos, glm::mat4 view_projection_matrix)
+	{
+		glm::vec3 ray_origin = NoEngine::PhysicsSystem::screen_to_ray_origin(mouse_pos, view_projection_matrix);
+		glm::vec3 ray_direction = NoEngine::PhysicsSystem::get_ray_direction(mouse_pos, view_projection_matrix);
+
+		float closest_distance = std::numeric_limits<float>::max();
+
+		for (const auto& obj : m_scene_objects)
+		{
+			float distance;
+			if (obj.second->intersect(ray_origin, ray_direction, distance) && distance < closest_distance)
+			{
+				closest_distance = distance;
+				LOG_WARN("Pick object!");
 			}
 		}
 	}

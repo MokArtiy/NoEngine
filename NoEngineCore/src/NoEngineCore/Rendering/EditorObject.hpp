@@ -27,10 +27,9 @@ namespace NoEngine {
 			const glm::vec3& rotation = glm::vec3(0.0f),
 			const glm::vec3& scale = glm::vec3(1.0f)
 		);
-
 		static void remove_object(std::string object_name);
-
 		static void draw_objects();
+		static void pick_object(const glm::vec2& mouse_pos, glm::mat4 view_projection_matrix);
 
 	private:
 		static std::unordered_map<std::string, std::shared_ptr<Actor>> m_scene_objects;

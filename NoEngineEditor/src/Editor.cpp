@@ -34,9 +34,9 @@ void NoEngineEditor::on_update()
 		camera.process_keyboard(NoEngine::Camera::CameraDirectaion::Down, delta_time);
 	}
 
-	if (NoEngine::Input::IsMouseButtonPressed(NoEngine::MouseButton::MOUSE_BUTTON_RIGHT))
+	if (NoEngine::Input::IsMouseButtonPressed(NoEngine::MouseButton::MOUSE_BUTTON_RIGHT) && check_cursor_in_scene())
 	{
-		glm::vec2 current_cursor_position = get_current_coursor_position();
+		glm::vec2 current_cursor_position = get_current_cursor_position();
 		if (NoEngine::Input::IsMouseButtonPressed(NoEngine::MouseButton::MOUSE_BUTTON_LEFT))
 		{
 			camera.move_right(static_cast<float>(current_cursor_position.x - m_initial_mouse_pos_x) / 100.f);
@@ -51,6 +51,15 @@ void NoEngineEditor::on_update()
 		m_initial_mouse_pos_y = current_cursor_position.y;
 		camera.rotation(rotation_delta);
 	}
+	if (NoEngine::Input::IsMouseButtonPressed(NoEngine::MouseButton::MOUSE_BUTTON_LEFT) && check_cursor_in_scene())
+	{
+		if (key_pressed && !key_was_pressed)
+		{
+			glm::vec2 mouse_pos = get_current_cursor_position_in_scene();
+			pick_object(mouse_pos);
+		}
+	}
+	key_was_pressed = key_pressed;
 }
 
 void NoEngineEditor::setup_dockspace_menu()

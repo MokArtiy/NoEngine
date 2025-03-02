@@ -14,7 +14,8 @@
 #include "NoEngineCore/Rendering/OpenGL/Renderer_OpenGL.hpp"
 #include "NoEngineCore/Rendering/EditorObject.hpp"
 #include "NoEngineCore/Modules/UIModule.hpp"
-#include "NoEngineCore/Modules/FrameBuffer.hpp"
+#include "NoEngineCore/Rendering/OpenGL/FrameBuffer.hpp"
+#include "NoEngineCore/Physics/PhysicsSystem.hpp"
 
 #include <imgui/imgui.h>
 #include <glm/mat4x4.hpp>
@@ -125,8 +126,8 @@ namespace NoEngine {
 			[&](EventWindowResize& event)
 			{
 				LOG_INFO("[Resized] Changed size to {0}x{1}", event.width, event.height);
-				camera.set_viewport_size(event.width, event.height);
 				p_frame_buffer->create(event.width, event.height);
+				camera.set_viewport_size(event.width, event.height);
 				draw();
 			});
 
@@ -240,9 +241,19 @@ namespace NoEngine {
 		m_bCloseWindow = true;
 	}
 
-	glm::vec2 Application::get_current_coursor_position() const
+	glm::vec2 Application::get_current_cursor_position() const
 	{
 		return m_pWindow->get_current_cursor_position();
+	}
+
+	glm::vec2 Application::get_current_cursor_position_in_scene() const
+	{
+		return m_cursor_pos_in_scene;
+	}
+
+	bool Application::check_cursor_in_scene()
+	{
+		return m_cursor_in_scene;
 	}
 
 	void Application::add_editor_object(std::string object_name, const glm::vec3& position, const glm::vec3& rotation, const glm::vec3& scale)
@@ -266,12 +277,26 @@ namespace NoEngine {
 
 		camera.set_viewport_size(window_width, window_height);
 
-		ImVec2 pos = ImGui::GetCursorScreenPos();
+		if (ImGui::IsWindowHovered()) {
+			m_cursor_in_scene = true;
+		}
+		else {
+			m_cursor_in_scene = false;
+		}
+		NoEngine::PhysicsSystem::set_window_size(glm::vec2(window_width, window_height));
+		ImVec2 mouse_pos = ImGui::GetMousePos();
+		ImVec2 scene_pos = ImGui::GetWindowPos();
+		m_cursor_pos_in_scene = glm::vec2(mouse_pos.x - scene_pos.x, mouse_pos.y - scene_pos.y);
 
 		GLuint textureID = p_frame_buffer->get_texture_id();
 		ImGui::Image(textureID, ImVec2(window_width, window_height), ImVec2(0, 1), ImVec2(1, 0));
 
 		ImGui::End();
+	}
+
+	void Application::pick_object(glm::vec2 mouse_pos)
+	{
+		EditorScene::pick_object(mouse_pos, camera.get_vp_matrix());
 	}
 
 	void Application::draw()
@@ -370,7 +395,6 @@ namespace NoEngine {
 		draw_main_scene();
 
 		UIModule::on_ui_draw_end();
-		
 
 		m_pWindow->on_update();
 		on_update();

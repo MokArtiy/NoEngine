@@ -28,6 +28,7 @@ public:
 
     virtual void update(float deltaTime) {}
     virtual void draw() {}
+    virtual bool intersect(const glm::vec3& ray_origin, const glm::vec3& ray_direction, float& distance) const { return false; }
 
     void set_position(const glm::vec3& position) { m_position = position; }
     const glm::vec3& get_position() const { return m_position; }

@@ -28,7 +28,9 @@ namespace NoEngine {
 
 		virtual void on_mouse_button_event(const MouseButton button_code, const double x_pos, const double y_pos, const bool pressed) {}
 
-		glm::vec2 get_current_coursor_position() const;
+		glm::vec2 get_current_cursor_position() const;
+		glm::vec2 get_current_cursor_position_in_scene() const;
+		bool check_cursor_in_scene();
 
 		Camera camera{ glm::vec3(-5, 0, 0) };
 
@@ -38,6 +40,7 @@ namespace NoEngine {
 			const glm::vec3& scale = glm::vec3(1.0f));
 		void remove_editor_object(std::string object_name = "");
 		void draw_main_scene();
+		void pick_object(glm::vec2 mouse_pos);
 
 		int frameCount = 0;
 		float light_source_position[3] = { 0.f, 0.f, 1.f };
@@ -126,7 +129,9 @@ namespace NoEngine {
 
 		EventDispatcher m_event_dispatcher;
 		bool m_bCloseWindow = false;
+		bool m_cursor_in_scene = false;
 		std::string m_executable_path;
 
+		glm::vec2 m_cursor_pos_in_scene;
 	};
 }
