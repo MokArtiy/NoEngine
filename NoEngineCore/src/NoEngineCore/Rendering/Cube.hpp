@@ -6,11 +6,12 @@ class Cube : public Actor
 {
 public:
 	Cube(std::shared_ptr<NoEngine::ShaderProgram> shader,
+		std::shared_ptr<NoEngine::ShaderProgram> outline_shader,
 		 const glm::vec3& position = glm::vec3(0.0f),
 		 const glm::vec3& rotation = glm::vec3(0.0f),
 		 const glm::vec3& scale    = glm::vec3(1.0f),
 		 const std::string name = "")
-		: Actor(position, rotation, scale, name)
+		: Actor(outline_shader, position, rotation, scale, name)
 	{
 		p_vao = std::make_unique<NoEngine::VertexArray>();
 		p_position_vbo = std::make_unique<NoEngine::VertexBuffer>(pos_norm_uv, sizeof(pos_norm_uv), buffer_layout_vec3_vec3_vec2);
@@ -24,6 +25,7 @@ public:
 	~Cube() 
 	{
 		this->p_shader->unbind();
+		this->p_outline_shader->unbind();
 		this->p_index_buffer->unbind();
 		this->p_vao->unbind();
 	}
@@ -35,12 +37,58 @@ public:
 		p_shader->set_matrix3("normal_matrix", glm::transpose(glm::inverse(glm::mat3(get_model_matrix()))));
 
 		NoEngine::Renderer_OpenGL::draw(*p_vao);
+
+		if (m_selected)
+		{
+			NoEngine::Renderer_OpenGL::set_stencil_func(NoEngine::StencilFunc::Notequal, 1, 0xFF);
+			NoEngine::Renderer_OpenGL::set_stencil_mask(0x00);
+			NoEngine::Renderer_OpenGL::disable_depth_testing();
+
+			p_outline_shader->bind();
+			glm::mat4 model = get_model_matrix();
+			model = glm::scale(model, glm::vec3(1.01f));
+			p_outline_shader->set_matrix4("model_matrix", model);
+			NoEngine::Renderer_OpenGL::draw(*p_vao);
+
+			NoEngine::Renderer_OpenGL::set_stencil_mask(0xFF);
+			NoEngine::Renderer_OpenGL::set_stencil_func(NoEngine::StencilFunc::Always, 0, 0xFF);
+			NoEngine::Renderer_OpenGL::enable_depth_testing();
+		}
 	}
 
 	bool intersect(const glm::vec3& ray_origin, const glm::vec3& ray_direction, float& distance) const override
 	{
 		glm::vec3 cube_min = glm::vec3(get_model_matrix() * glm::vec4(-1.0f, -1.0f, -1.0f, 1.0f));
 		glm::vec3 cube_max = glm::vec3(get_model_matrix() * glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+
+		const float epsilon = 1e-6f;
+		//glm::vec3 invDir = 1.0f / ray_direction;
+
+		glm::vec3 invDir = 1.0f / glm::vec3(
+			fabs(ray_direction.x) < epsilon ? epsilon : ray_direction.x,
+			fabs(ray_direction.y) < epsilon ? epsilon : ray_direction.y,
+			fabs(ray_direction.z) < epsilon ? epsilon : ray_direction.z
+		);
+
+		glm::vec3 t1 = (cube_min - ray_origin) * invDir;
+		glm::vec3 t2 = (cube_max - ray_origin) * invDir;
+
+		glm::vec3 tmin = glm::min(t1, t2);
+		glm::vec3 tmax = glm::max(t1, t2);
+
+		float tminMax = glm::max(glm::max(tmin.x, tmin.y), tmin.z);
+		float tmaxMin = glm::min(glm::min(tmax.x, tmax.y), tmax.z);
+
+		if (tminMax > tmaxMin) {
+			return false;
+		}
+
+		if (tmaxMin < 0) {
+			return false;
+		}
+
+		distance = tminMax;
+		return true;
 	}
 
 private:

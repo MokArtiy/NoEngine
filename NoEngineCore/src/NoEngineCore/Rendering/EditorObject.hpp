@@ -20,6 +20,7 @@ namespace NoEngine {
 	{
 	public:
 		static void add_object(
+			std::shared_ptr<NoEngine::ShaderProgram> outline_shader,
 			std::shared_ptr<NoEngine::ShaderProgram> shader,
 			ObjectType type = ObjectType::Cube,
 			std::string object_name = "",
@@ -29,7 +30,7 @@ namespace NoEngine {
 		);
 		static void remove_object(std::string object_name);
 		static void draw_objects();
-		static void pick_object(const glm::vec2& mouse_pos, glm::mat4 view_projection_matrix);
+		static void pick_object(const glm::vec2& mouse_pos, glm::mat4 view_matrix, glm::mat4 projection, glm::vec3 camera_position);
 
 	private:
 		static std::unordered_map<std::string, std::shared_ptr<Actor>> m_scene_objects;

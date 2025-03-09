@@ -75,8 +75,8 @@ namespace NoEngine {
 
 		float m_far_clip_plane{ 100.f };
 		float m_near_clip_plane{ 0.1f };
-		float m_viewport_width{ 800.f};
-		float m_viewport_height{ 600.f};
+		float m_viewport_width{ 1920.f};
+		float m_viewport_height{ 1080.f};
 		float m_field_of_view{ 60.f };
 		float m_movement_speed{ 5.f };
 

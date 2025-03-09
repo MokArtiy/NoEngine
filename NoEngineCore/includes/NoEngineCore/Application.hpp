@@ -120,7 +120,7 @@ namespace NoEngine {
 		//check markers
 		bool check_dirLight = true;
 		bool check_SpotLight = false;
-		bool check_pointLights[4] = { true, true, true, true };
+		bool check_pointLights[4] = { false, true, true, true };
 
 	private:
 		void draw();

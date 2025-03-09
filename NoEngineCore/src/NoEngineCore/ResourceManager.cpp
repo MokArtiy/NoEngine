@@ -5,6 +5,9 @@
 #include <fstream>
 
 namespace NoEngine {
+	std::string ResourceManager::m_path;
+	std::unordered_map<const char*, std::shared_ptr<NoEngine::ShaderProgram>> ResourceManager::m_shader_programs;
+	std::unordered_map<const char*, std::shared_ptr<NoEngine::Texture2D>> ResourceManager::m_textures;
 
 	ResourceManager::ResourceManager(std::string executablePath)
 	{
@@ -55,7 +58,7 @@ namespace NoEngine {
 		return new_texture;
 	}
 
-	std::string ResourceManager::get_file_string(const char* relative_file_path) const
+	std::string ResourceManager::get_file_string(const char* relative_file_path)
 	{
 		std::ifstream f;
 		f.open(m_path + "/" + relative_file_path, std::ios::in | std::ios::binary);

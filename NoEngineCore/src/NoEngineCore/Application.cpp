@@ -10,6 +10,7 @@
 #include "NoEngineCore/Rendering/OpenGL/VertexBuffer.hpp"
 #include "NoEngineCore/Rendering/OpenGL/VertexArray.hpp"
 #include "NoEngineCore/Rendering/OpenGL/IndexBuffer.hpp"
+#include "NoEngineCore/Rendering/UI-Utils/Grid.hpp"
 #include "NoEngineCore/Camera.hpp"
 #include "NoEngineCore/Rendering/OpenGL/Renderer_OpenGL.hpp"
 #include "NoEngineCore/Rendering/EditorObject.hpp"
@@ -72,6 +73,8 @@ namespace NoEngine {
 	std::shared_ptr<FrameBuffer> p_frame_buffer;
 	std::shared_ptr<ShaderProgram> p_shader_program;
 	std::shared_ptr<ShaderProgram> p_new_shader;
+	std::shared_ptr<ShaderProgram> p_outline_shader;
+	std::shared_ptr<ShaderProgram> p_grid_shader;
 	std::shared_ptr<ShaderProgram> p_light_source_shader_program;
 	std::unique_ptr<VertexBuffer> p_cube_position_vbo;
 	std::unique_ptr<IndexBuffer> p_cube_index_buffer;
@@ -190,12 +193,14 @@ namespace NoEngine {
 
 		//-------------------------------------//
 		ResourceManager p_resource_manager(m_executable_path);
-		p_shader_program = p_resource_manager.load_shader("p_shader_program", "res/shaders/default_obj.vert", "res/shaders/default_obj_PointLight.frag");
-		p_new_shader = p_resource_manager.load_shader("p_new_shader", "res/shaders/default_obj.vert", "res/shaders/multiple_lights.frag");
-		p_light_source_shader_program = p_resource_manager.load_shader("p_light_source_shader_program", "res/shaders/light_source.vert", "res/shaders/light_source.frag");
-		p_texture_container = p_resource_manager.load_texture("container_texture", "res/textures/container_iron.png");
+		p_shader_program = ResourceManager::load_shader("p_shader_program", "res/shaders/default_obj.vert", "res/shaders/default_obj_PointLight.frag");
+		p_new_shader = ResourceManager::load_shader("p_new_shader", "res/shaders/default_obj.vert", "res/shaders/multiple_lights.frag");
+		p_outline_shader = ResourceManager::load_shader("p_outline_shader", "res/shaders/object_outlining.vert", "res/shaders/object_outlining.frag");
+		p_grid_shader = ResourceManager::load_shader("p_grid_shader", "res/shaders/grid.vert", "res/shaders/grid.frag");
+		p_light_source_shader_program = ResourceManager::load_shader("p_light_source_shader_program", "res/shaders/light_source.vert", "res/shaders/light_source.frag");
+		p_texture_container = ResourceManager::load_texture("container_texture", "res/textures/container_iron.png");
 		p_texture_container->bind(1);
-		p_texture_container_specular = p_resource_manager.load_texture("container_specular", "res/textures/container_specular.png");
+		p_texture_container_specular = ResourceManager::load_texture("container_specular", "res/textures/container_specular.png");
 		p_texture_container_specular->bind(2);
 
 		if (!p_light_source_shader_program->isCompiled())
@@ -224,8 +229,9 @@ namespace NoEngine {
 		p_cube_vao->set_index_buffer(*p_cube_index_buffer);
 		p_frame_buffer->create(m_pWindow->get_width(), m_pWindow->get_height());
 		//-------------------------------------//
-
+		Grid grid();
 		Renderer_OpenGL::enable_depth_testing();
+		Renderer_OpenGL::configurate_opengl();
 		while (!m_bCloseWindow)
 		{
 			current_frame = glfwGetTime();
@@ -258,7 +264,7 @@ namespace NoEngine {
 
 	void Application::add_editor_object(std::string object_name, const glm::vec3& position, const glm::vec3& rotation, const glm::vec3& scale)
 	{
-		EditorScene::add_object(p_new_shader, ObjectType::Cube, object_name, position, rotation, scale);
+		EditorScene::add_object(p_outline_shader, p_new_shader, ObjectType::Cube, object_name, position, rotation, scale);
 	}
 
 	void Application::remove_editor_object(std::string object_name)
@@ -296,18 +302,27 @@ namespace NoEngine {
 
 	void Application::pick_object(glm::vec2 mouse_pos)
 	{
-		EditorScene::pick_object(mouse_pos, camera.get_vp_matrix());
+		EditorScene::pick_object(mouse_pos, camera.get_view_matrix(), camera.get_projection_matrix(), camera.get_position());
 	}
 
 	void Application::draw()
 	{
 		Renderer_OpenGL::set_clear_color(m_background_color[0], m_background_color[1], m_background_color[2], m_background_color[3]);
 		Renderer_OpenGL::clear();
-
 		p_frame_buffer->bind();
+		Renderer_OpenGL::clear_stencil_func();
+
+		glm::mat4 projection_view_matrix = camera.get_projection_matrix() * camera.get_view_matrix();
+
+		p_grid_shader->bind();
+		glm::mat4 model = glm::mat4(1.0f);
+		model = glm::translate(model, glm::vec3(0.0f));
+		p_grid_shader->set_matrix4("mvp", projection_view_matrix * model);
+
+		p_outline_shader->bind();
+		p_outline_shader->set_matrix4("vp", projection_view_matrix);
 
 		p_new_shader->bind();
-		glm::mat4 projection_view_matrix = camera.get_projection_matrix() * camera.get_view_matrix();
 		p_new_shader->set_matrix4("projection_view_matrix", projection_view_matrix);
 		p_new_shader->set_vec3("view_position", camera.get_position());
 		p_new_shader->set_float("material.shininess", 32.0f);
@@ -354,6 +369,10 @@ namespace NoEngine {
 			p_new_shader->set_float("spotLight.cutOff", glm::cos(glm::radians(spotLight_cutOff)));
 			p_new_shader->set_float("spotLight.outerCutOff", glm::cos(glm::radians(spotLight_outerCutOff)));
 		}
+
+		//DRAW
+		Renderer_OpenGL::set_stencil_mask(0x00);
+
 		//cubes
 		glm::mat4 model_matrix = glm::mat4(1.0f);
 		p_new_shader->set_matrix4("model_matrix", model_matrix);
@@ -386,6 +405,9 @@ namespace NoEngine {
 			}
 
 		}
+
+		Renderer_OpenGL::set_stencil_func(StencilFunc::Always, 1, 0xFF);
+		Renderer_OpenGL::set_stencil_mask(0xFF);
 		EditorScene::draw_objects();
 
 		p_frame_buffer->unbind();

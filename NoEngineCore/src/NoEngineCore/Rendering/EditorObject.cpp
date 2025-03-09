@@ -6,7 +6,8 @@ namespace NoEngine{
 	std::unordered_map<std::string, std::shared_ptr<Actor>> EditorScene::m_scene_objects;
 	std::map<std::string, std::vector<std::string>> EditorScene::m_scene_objects_names;
 
-	void EditorScene::add_object(std::shared_ptr<NoEngine::ShaderProgram> shader, ObjectType type,
+	void EditorScene::add_object(std::shared_ptr<NoEngine::ShaderProgram> outline_shader,
+		std::shared_ptr<NoEngine::ShaderProgram> shader, ObjectType type,
 		std::string object_name, const glm::vec3& position, const glm::vec3& rotation, const glm::vec3& scale)
 	{
 		if (object_name == "")
@@ -27,7 +28,7 @@ namespace NoEngine{
 		{
 			m_scene_objects_names["Cube"].push_back(object_name);
 		}
-		m_scene_objects.emplace(object_name, std::make_shared<Cube>(shader, position, rotation, scale, object_name));
+		m_scene_objects.emplace(object_name, std::make_shared<Cube>(shader, outline_shader, position, rotation, scale, object_name));
 
 		LOG_INFO("Add object: {0} (X:{1} Y:{2} Z:{3})", object_name, position.x, position.y, position.z);
 	}
@@ -74,20 +75,22 @@ namespace NoEngine{
 		}
 	}
 
-	void EditorScene::pick_object(const glm::vec2& mouse_pos, glm::mat4 view_projection_matrix)
+	void EditorScene::pick_object(const glm::vec2& mouse_pos, glm::mat4 view_matrix, glm::mat4 projection, glm::vec3 camera_position)
 	{
-		glm::vec3 ray_origin = NoEngine::PhysicsSystem::screen_to_ray_origin(mouse_pos, view_projection_matrix);
-		glm::vec3 ray_direction = NoEngine::PhysicsSystem::get_ray_direction(mouse_pos, view_projection_matrix);
-
-		float closest_distance = std::numeric_limits<float>::max();
+		glm::vec3 ray_direction = NoEngine::PhysicsSystem::get_ray_direction(mouse_pos, view_matrix, projection);
 
 		for (const auto& obj : m_scene_objects)
 		{
 			float distance;
-			if (obj.second->intersect(ray_origin, ray_direction, distance) && distance < closest_distance)
+			if (obj.second->intersect(camera_position, ray_direction, distance))
 			{
-				closest_distance = distance;
 				LOG_WARN("Pick object!");
+				obj.second->set_selected(true);
+			}
+			else
+			{
+				if(obj.second->get_selected())
+					obj.second->set_selected(false);
 			}
 		}
 	}

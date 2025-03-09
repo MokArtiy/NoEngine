@@ -25,6 +25,7 @@ set(ENGINE_PRIVATE_INCLUDES
 	src/NoEngineCore/Rendering/OpenGL/VertexBuffer.hpp
 	src/NoEngineCore/Rendering/OpenGL/VertexArray.hpp
 	src/NoEngineCore/Rendering/OpenGL/IndexBuffer.hpp
+	src/NoEngineCore/Rendering/UI-Utils/Grid.hpp
 	src/NoEngineCore/Physics/PhysicsSystem.hpp
 )
 

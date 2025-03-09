@@ -19,11 +19,12 @@
 class Actor 
 {
 public:
-    Actor(const glm::vec3& position = glm::vec3(0.0f), 
+    Actor(std::shared_ptr<NoEngine::ShaderProgram> outline_shader,
+        const glm::vec3& position = glm::vec3(0.0f), 
           const glm::vec3& rotation = glm::vec3(0.0f),
           const glm::vec3& scale    = glm::vec3(1.0f),
           const std::string name = "")
-        : m_position(position), m_rotation(rotation), m_scale(scale), m_name(name) {}
+        : p_outline_shader(outline_shader), m_position(position), m_rotation(rotation), m_scale(scale), m_name(name) { }
     virtual ~Actor() {}
 
     virtual void update(float deltaTime) {}
@@ -41,6 +42,9 @@ public:
 
     void set_name(const std::string& name) { m_name = name; }
     const std::string& get_name() const { return m_name; }
+
+    void set_selected(const bool selected) { m_selected = selected; }
+    const bool get_selected() const { return m_selected; }
 
     glm::mat4 update_model_matrix() const {
         glm::mat4 model = glm::mat4(1.0f);
@@ -61,6 +65,8 @@ protected:
     glm::vec3 m_rotation;
     glm::vec3 m_scale;
     std::string m_name;
+    bool m_selected = true;
 
+    std::shared_ptr<NoEngine::ShaderProgram> p_outline_shader;
     //GLuint m_id;
 };
