@@ -14,6 +14,8 @@
 #include "../NoEngineCore/includes/NoEngineCore/Camera.hpp"
 #include "../NoEngineCore/includes/NoEngineCore/ResourceManager.hpp"
 
+#include <iostream>
+
 namespace NoEngine {
 
 	class Grid
@@ -21,61 +23,133 @@ namespace NoEngine {
 	public:
 		Grid()
 		{
-			generate_vertices();
+			p_axes_vao = std::make_unique<NoEngine::VertexArray>();
+			p_axes_vbo = std::make_unique<NoEngine::VertexBuffer>(axes, sizeof(axes), buffer_layout_vec3_vec3);
+			p_axes_index = std::make_unique<NoEngine::IndexBuffer>(axes_indices, sizeof(axes_indices) / sizeof(GLuint));
+
+			p_axes_vao->add_vertex_buffer(*p_axes_vbo);
+			p_axes_vao->set_index_buffer(*p_axes_index);
+
+			p_axes_vao->unbind();
+
+			generate_grid();
 			p_grid_vao = std::make_unique<NoEngine::VertexArray>();
-			p_grid_vbo = std::make_unique<NoEngine::VertexBuffer>(m_vertices.data(), m_vertices.size() * sizeof(float), buffer_layout_vec3);
+			p_grid_vbo = std::make_unique<NoEngine::VertexBuffer>(m_vertices, sizeof(m_vertices), buffer_layout_vec3_vec3);
+			p_indices_buffer = std::make_unique<NoEngine::IndexBuffer>(m_indices, sizeof(m_indices) / sizeof(GLuint));
 			p_grid_vao->add_vertex_buffer(*p_grid_vbo);
+			p_grid_vao->set_index_buffer(*p_indices_buffer);
+
+			p_grid_vao->unbind();
 		}
 		~Grid()
 		{
 			this->p_grid_shader->unbind();
 			this->p_grid_vao->unbind();
+			this->p_axes_vao->unbind();
 		}
 
 
 		void draw(std::shared_ptr<NoEngine::ShaderProgram> grid_shader)
 		{
 			grid_shader->bind();
-			Renderer_OpenGL::draw(*p_grid_vao);
+			Renderer_OpenGL::draw(*p_axes_vao, NoEngine::DrawMode::Lines);
+			Renderer_OpenGL::draw(*p_grid_vao, NoEngine::DrawMode::Lines);
 		}
 
 	private:
-		std::vector<float> m_vertices;
-		float m_size;
-		float m_step;
+		const int size = 75;
+		const int step = 1;
+		static const int grid_lines = (100 * 2 / 1) + 1;
+		static const int num_vertices = grid_lines * 4;
+		GLfloat m_vertices[num_vertices * 6];
+		static const int numIndices = grid_lines * 4; // 2 индекса на линию, 2 направления (X и Z)
+		GLuint m_indices[numIndices];
 
 		std::unique_ptr<NoEngine::VertexBuffer> p_grid_vbo;
+		std::unique_ptr<NoEngine::IndexBuffer> p_indices_buffer;
 		std::unique_ptr<NoEngine::VertexArray> p_grid_vao;
+
 		std::shared_ptr<NoEngine::ShaderProgram> p_grid_shader;
 
-		NoEngine::BufferLayout buffer_layout_vec3
+		std::unique_ptr<NoEngine::VertexBuffer> p_axes_vbo;
+		std::unique_ptr<NoEngine::VertexArray> p_axes_vao;
+		std::unique_ptr<NoEngine::IndexBuffer> p_axes_index;
+
+		NoEngine::BufferLayout buffer_layout_vec3_vec3
 		{
 			NoEngine::ShaderDataType::Float3,
+			NoEngine::ShaderDataType::Float3
 		};
 
-		void generate_vertices(float size = 10.f, float step = 1.f)
+		GLfloat axes[36] = {
+			// Ось X (красная)
+			-75.0f, 0.0f, 0.0f,		1.0f, 0.0f, 0.0f, // Начало
+			75.0f, 0.0f, 0.0f,		1.0f, 0.0f, 0.0f, // Конец
+
+			// Ось Y (зеленая)
+			0.0f, -75.0f, 0.0f,		0.0f, 1.0f, 0.0f, // Начало
+			0.0f, 75.0f, 0.0f,		0.0f, 1.0f, 0.0f, // Конец
+
+			// Ось Z (синяя)
+			0.0f, 0.0f, -75.0f,		0.0f, 0.0f, 1.0f, // Начало
+			0.0f, 0.0f, 75.0f,		0.0f, 0.0f, 1.0f  // Конец
+		};
+		GLuint axes_indices[6] = {
+			0, 1,
+			2, 3,
+			4, 5
+		};
+
+		void generate_grid()
 		{
-			m_size = size;
-			m_step = step;
+			int index = 0;
+			for (float y = -size; y <= size; y += step) {
+				// Начало линии
+				m_vertices[index++] = -size;     // X
+				m_vertices[index++] = y;       // Y
+				m_vertices[index++] = 0.0f;    // Z
+				m_vertices[index++] = 0.5f;    // R (серый цвет)
+				m_vertices[index++] = 0.5f;    // G
+				m_vertices[index++] = 0.5f;    // B
 
-			for (float z = -size; z <= size; z += step) {
-				m_vertices.push_back(-size);
-				m_vertices.push_back(0.0f);
-				m_vertices.push_back(z);
+				// Конец линии
+				m_vertices[index++] = size;      // X
+				m_vertices[index++] = y;	   // Y
+				m_vertices[index++] = 0.0f;    // Z
+				m_vertices[index++] = 0.5f;    // R
+				m_vertices[index++] = 0.5f;    // G
+				m_vertices[index++] = 0.5f;    // B
+			}
+			// Линии, параллельные оси Z (изменяются по X)
+			for (float x = -size; x <= size; x += step) {
+				// Начало линии
+				m_vertices[index++] = x;        // X
+				m_vertices[index++] = -size;     // Y
+				m_vertices[index++] = 0.0f;		// Z
+				m_vertices[index++] = 0.5f;     // R
+				m_vertices[index++] = 0.5f;     // G
+				m_vertices[index++] = 0.5f;     // B
 
-				m_vertices.push_back(size);
-				m_vertices.push_back(0.0f);
-				m_vertices.push_back(z);
+				// Конец линии
+				m_vertices[index++] = x;        // X
+				m_vertices[index++] = size;       // Y
+				m_vertices[index++] = 0.0f;		// Z
+				m_vertices[index++] = 0.5f;     // R
+				m_vertices[index++] = 0.5f;     // G
+				m_vertices[index++] = 0.5f;     // B
 			}
 
-			for (float x = -size; x <= size; x += step) {
-				m_vertices.push_back(x);
-				m_vertices.push_back(0.0f);
-				m_vertices.push_back(-size);
-
-				m_vertices.push_back(x);
-				m_vertices.push_back(0.0f);
-				m_vertices.push_back(size);
+			int idx = 0;
+			// Индексы для линий, параллельных оси X
+			for (int i = 0; i < grid_lines; ++i) {
+				m_indices[idx++] = i * 2;
+				m_indices[idx++] = i * 2 + 1;
+			}
+			// Индексы для линий, параллельных оси Y
+			int offset = grid_lines * 2;
+			for (int i = 0; i < grid_lines; ++i) {
+				m_indices[idx++] = offset + i * 2;
+				m_indices[idx++] = offset + i * 2 + 1;
 			}
 		}
 	};

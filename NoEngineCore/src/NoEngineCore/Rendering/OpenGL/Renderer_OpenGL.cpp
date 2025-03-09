@@ -108,10 +108,24 @@ namespace NoEngine {
 		return true;
 	}
 
-	void Renderer_OpenGL::draw(const VertexArray& vertex_array)
+	void Renderer_OpenGL::draw(const VertexArray& vertex_array, const DrawMode& mode)
 	{
 		vertex_array.bind();
-		glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(vertex_array.get_indices_count()), GL_UNSIGNED_INT, nullptr);
+		switch (mode)
+		{
+		case NoEngine::DrawMode::Triangles:
+			glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(vertex_array.get_indices_count()), GL_UNSIGNED_INT, nullptr);
+			break;
+		case NoEngine::DrawMode::Lines:
+			glDrawElements(GL_LINES, static_cast<GLsizei>(vertex_array.get_indices_count()), GL_UNSIGNED_INT, nullptr);
+			break;
+		case NoEngine::DrawMode::Points:
+			glDrawElements(GL_POINTS, static_cast<GLsizei>(vertex_array.get_indices_count()), GL_UNSIGNED_INT, nullptr);
+			break;
+		default:
+			glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(vertex_array.get_indices_count()), GL_UNSIGNED_INT, nullptr);
+			break;
+		}
 	}
 
 	void Renderer_OpenGL::set_clear_color(const float r, const float g, const float b, const float a)

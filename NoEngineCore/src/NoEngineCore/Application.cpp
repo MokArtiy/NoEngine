@@ -82,6 +82,7 @@ namespace NoEngine {
 	std::shared_ptr<Texture2D> p_texture_container;
 	std::shared_ptr<Texture2D> p_texture_container_specular;
 	std::unique_ptr<VertexArray> p_cube_vao;
+	std::unique_ptr<Grid> p_grid;
 	/*float scale[3] = { 1.f, 1.f, 1.f };
 	float rotate = 0.f;
 	float translate[3] = { 0.f, 0.f, 0.f };*/
@@ -220,6 +221,7 @@ namespace NoEngine {
 			ShaderDataType::Float2
 		};
 
+		p_grid = std::make_unique<Grid>();
 		p_cube_vao = std::make_unique<VertexArray>();
 		p_frame_buffer = std::make_shared<FrameBuffer>();
 		p_cube_position_vbo = std::make_unique<VertexBuffer>(pos_norm_uv, sizeof(pos_norm_uv), buffer_layout_vec3_vec3_vec2);
@@ -229,7 +231,6 @@ namespace NoEngine {
 		p_cube_vao->set_index_buffer(*p_cube_index_buffer);
 		p_frame_buffer->create(m_pWindow->get_width(), m_pWindow->get_height());
 		//-------------------------------------//
-		Grid grid();
 		Renderer_OpenGL::enable_depth_testing();
 		Renderer_OpenGL::configurate_opengl();
 		while (!m_bCloseWindow)
@@ -373,7 +374,9 @@ namespace NoEngine {
 		//DRAW
 		Renderer_OpenGL::set_stencil_mask(0x00);
 
+		p_grid->draw(p_grid_shader);
 		//cubes
+		p_new_shader->bind();
 		glm::mat4 model_matrix = glm::mat4(1.0f);
 		p_new_shader->set_matrix4("model_matrix", model_matrix);
 		int i = 0;

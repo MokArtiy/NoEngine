@@ -14,6 +14,12 @@ namespace NoEngine {
 		Notequal,
 		Always
 	};
+	enum class DrawMode
+	{
+		Triangles,
+		Lines,
+		Points
+	};
 
 	class VertexArray;
 
@@ -21,7 +27,7 @@ namespace NoEngine {
 	public:
 		static bool init(GLFWwindow* pWindow);
 
-		static void draw(const VertexArray& vertex_array);
+		static void draw(const VertexArray& vertex_array, const DrawMode& mode = DrawMode::Triangles);
 		static void set_clear_color(const float r, const float g, const float b, const float a);
 		static void clear();
 		static void clear_stencil_func();

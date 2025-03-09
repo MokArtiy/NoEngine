@@ -10,12 +10,6 @@
 #include "../NoEngineCore/src/NoEngineCore/Rendering/OpenGL/Texture2D.hpp"
 
 namespace NoEngine {
-	enum class DrawFigure
-	{
-		Line,
-		Triangle
-	};
-
 	class ResourceManager
 	{
 	public:
