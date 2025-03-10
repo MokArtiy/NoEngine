@@ -13,6 +13,7 @@ namespace NoEngine {
 		Texture2D(Texture2D&& texture) noexcept;
 
 		void bind(const unsigned int unit) const;
+		unsigned int get_id() const { return m_id; }
 
 	private:
 		unsigned int m_id = 0;

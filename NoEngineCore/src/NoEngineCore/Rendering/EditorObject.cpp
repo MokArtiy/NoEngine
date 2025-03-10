@@ -84,6 +84,13 @@ namespace NoEngine{
 			float distance;
 			if (obj.second->intersect(camera_position, ray_direction, distance))
 			{
+				for (const auto& objs : m_scene_objects)
+				{
+					if (objs.second->get_selected())
+					{
+						objs.second->set_selected(false);
+					}
+				}
 				LOG_WARN("Pick object!");
 				obj.second->set_selected(true);
 			}
@@ -92,6 +99,68 @@ namespace NoEngine{
 				if(obj.second->get_selected())
 					obj.second->set_selected(false);
 			}
+		}
+	}
+	std::shared_ptr<Actor> EditorScene::get_selected_obj()
+	{
+		for (const auto& obj : m_scene_objects)
+		{
+			if (obj.second->get_selected())
+			{
+				return obj.second;
+			}
+		}
+		return 0;
+	}
+	glm::vec3 EditorScene::get_selected_location()
+	{
+		auto& obj = get_selected_obj();
+		if (obj != 0)
+		{
+			return obj->get_position();
+		}
+		return glm::vec3(0.0f, 0.0f, 0.0f);
+	}
+	void EditorScene::set_selected_location(float x, float y, float z)
+	{
+		auto& obj = get_selected_obj();
+		if (obj != 0)
+		{
+			obj->set_position(glm::vec3(x, y, z));
+		}
+	}
+	glm::vec3 EditorScene::get_selected_rotation()
+	{
+		auto& obj = get_selected_obj();
+		if (obj != 0)
+		{
+			return obj->get_rotation();
+		}
+		return glm::vec3(0.0f, 0.0f, 0.0f);
+	}
+	void EditorScene::set_selected_rotation(float x, float y, float z)
+	{
+		auto& obj = get_selected_obj();
+		if (obj != 0)
+		{
+			obj->set_rotation(glm::vec3(x, y, z));
+		}
+	}
+	glm::vec3 EditorScene::get_selected_scale()
+	{
+		auto& obj = get_selected_obj();
+		if (obj != 0)
+		{
+			return obj->get_scale();
+		}
+		return glm::vec3(1.0f, 1.0f, 1.0f);
+	}
+	void EditorScene::set_selected_scale(float x, float y, float z)
+	{
+		auto& obj = get_selected_obj();
+		if (obj != 0)
+		{
+			obj->set_scale(glm::vec3(x, y, z));
 		}
 	}
 }

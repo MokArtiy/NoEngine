@@ -270,10 +270,102 @@ void NoEngineEditor::setup_main_control_menu()
 	ImGui::End();
 }
 
+void NoEngineEditor::setup_object_menu()
+{
+	location[0] = get_selected_object_location().x;
+	location[1] = get_selected_object_location().y;
+	location[2] = get_selected_object_location().z;
+	rotation[0] = get_selected_object_rotation().x;
+	rotation[1] = get_selected_object_rotation().y;
+	rotation[2] = get_selected_object_rotation().z;
+	scale[0] = get_selected_object_scale().x;
+	scale[1] = get_selected_object_scale().y;
+	scale[2] = get_selected_object_scale().z;
+
+	ImGui::Begin("Scene Details");
+
+	ImGui::SetNextItemOpen(true, ImGuiCond_Once);
+	if (ImGui::CollapsingHeader("Transform"))
+	{
+		ImGui::Text("Location");
+		ImGui::SameLine();
+		ImGui::PushItemWidth(115.0f);
+		for (int i = 0; i < 3; i++)
+		{
+			ImGui::PushID(i + "location");
+			ImGui::PushStyleColor(ImGuiCol_FrameBg, colors[i]);
+			if (ImGui::DragFloat("", &location[i], 0.01f))
+			{
+				set_selected_object_location(location[0], location[1], location[2]);
+			}
+			ImGui::PopStyleColor();
+			ImGui::PopID();
+
+			if (i < 2) {
+				ImGui::SameLine();
+			}
+		}
+		ImGui::PopItemWidth();
+
+		ImGui::Text("Rotation");
+		ImGui::SameLine();
+		ImGui::PushItemWidth(115.0f);
+		for (int i = 0; i < 3; i++)
+		{
+			ImGui::PushID(i + "rotation");
+			ImGui::PushStyleColor(ImGuiCol_FrameBg, colors[i]);
+			if (ImGui::DragFloat("", &rotation[i], 0.1f))
+			{
+				set_selected_object_rotation(rotation[0], rotation[1], rotation[2]);
+			}
+			ImGui::PopStyleColor();
+			ImGui::PopID();
+
+			if (i < 2) {
+				ImGui::SameLine();
+			}
+		}
+		ImGui::PopItemWidth();
+
+		ImGui::Text("Scale   ");
+		ImGui::SameLine();
+		//std::shared_ptr<NoEngine::Texture2D> texture_lock = NoEngine::ResourceManager::load_texture("lock_texture", "res/textures/lock.png");
+		//ImGui::ImageButton(std::to_string(texture_lock->get_id()).c_str(), (intptr_t)texture_lock->get_id(), ImVec2(16, 16));
+		ImGui::PushItemWidth(115.0f);
+		for (int i = 0; i < 3; i++)
+		{
+			ImGui::PushID(i + "scale");
+			ImGui::PushStyleColor(ImGuiCol_FrameBg, colors[i]);
+			if (ImGui::DragFloat("", &scale[i], 0.1f, 0.001f, 100000.f))
+			{
+				set_selected_object_scale(scale[0], scale[1], scale[2]);
+			}
+			ImGui::PopStyleColor();
+			ImGui::PopID();
+
+			if (i < 2) {
+				ImGui::SameLine();
+			}
+		}
+		ImGui::PopItemWidth();
+	}
+
+	ImGui::End();
+}
+
+void NoEngineEditor::draw_text_with_color(ImVec2 pos, const char* text, ImU32 text_color, ImU32 frame_color, ImVec2 padding) {
+	ImDrawList* draw_list = ImGui::GetWindowDrawList();
+	ImVec2 text_size = ImGui::CalcTextSize(text);
+	ImVec2 frame_min = ImVec2(pos.x - padding.x, pos.y - padding.y);
+	ImVec2 frame_max = ImVec2(pos.x + text_size.x + padding.x, pos.y + text_size.y + padding.y);
+	draw_list->AddRect(frame_min, frame_max, frame_color);
+}
+
 void NoEngineEditor::on_ui_draw()
 {
 	{
 		setup_dockspace_menu();
+		setup_object_menu();
 		setup_main_control_menu();
 	}
 }

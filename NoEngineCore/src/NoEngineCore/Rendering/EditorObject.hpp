@@ -31,6 +31,13 @@ namespace NoEngine {
 		static void remove_object(std::string object_name);
 		static void draw_objects();
 		static void pick_object(const glm::vec2& mouse_pos, glm::mat4 view_matrix, glm::mat4 projection, glm::vec3 camera_position);
+		static std::shared_ptr<Actor> get_selected_obj();
+		static glm::vec3 get_selected_location();
+		static void set_selected_location(float x, float y, float z);
+		static glm::vec3 get_selected_rotation();
+		static void set_selected_rotation(float x, float y, float z);
+		static glm::vec3 get_selected_scale();
+		static void set_selected_scale(float x, float y, float z);
 
 	private:
 		static std::unordered_map<std::string, std::shared_ptr<Actor>> m_scene_objects;

@@ -306,6 +306,36 @@ namespace NoEngine {
 		EditorScene::pick_object(mouse_pos, camera.get_view_matrix(), camera.get_projection_matrix(), camera.get_position());
 	}
 
+	glm::vec3 Application::get_selected_object_location()
+	{
+		return EditorScene::get_selected_location();
+	}
+
+	void Application::set_selected_object_location(float x, float y, float z)
+	{
+		EditorScene::set_selected_location(x, y, z);
+	}
+
+	glm::vec3 Application::get_selected_object_rotation()
+	{
+		return EditorScene::get_selected_rotation();
+	}
+
+	void Application::set_selected_object_rotation(float x, float y, float z)
+	{
+		EditorScene::set_selected_rotation(x, y, z);
+	}
+
+	glm::vec3 Application::get_selected_object_scale()
+	{
+		return EditorScene::get_selected_scale();
+	}
+
+	void Application::set_selected_object_scale(float x, float y, float z)
+	{
+		EditorScene::set_selected_scale(x, y, z);
+	}
+
 	void Application::draw()
 	{
 		Renderer_OpenGL::set_clear_color(m_background_color[0], m_background_color[1], m_background_color[2], m_background_color[3]);

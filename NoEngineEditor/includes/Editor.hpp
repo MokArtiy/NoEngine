@@ -5,6 +5,8 @@
 
 #include <imgui.h>
 #include <imgui_internal.h>
+#include <imgui/backends/imgui_impl_opengl3.h>
+#include <imgui/backends/imgui_impl_glfw.h>
 
 class NoEngineEditor : public NoEngine::Application
 {
@@ -21,6 +23,15 @@ class NoEngineEditor : public NoEngine::Application
 	bool perspective_camera = true;
 	bool key_pressed = false;
 	bool key_was_pressed = false;
+	//transform
+	float location[3] = { 0.0f, 0.0f, 0.0f };
+	float rotation[3] = { 0.0f, 0.0f, 0.0f };
+	float scale[3] = { 1.0f, 1.0f, 1.0f };
+	ImVec4 colors[3] = {
+		ImVec4(1.0f, 0.270f, 0.270f, 1.0f), // red
+		ImVec4(0.413f, 1.0f, 0.288f, 1.0f), // green
+		ImVec4(0.373f, 0.446f, 1.0f, 1.0f), // blue
+	};
 
 	virtual void on_update() override;
 	virtual void on_mouse_button_event(const NoEngine::MouseButton button_code, const double x_pos, const double y_pos, const bool pressed) override
@@ -34,5 +45,7 @@ class NoEngineEditor : public NoEngine::Application
 
 	void setup_dockspace_menu();
 	void setup_main_control_menu();
+	void setup_object_menu();
 
+	void draw_text_with_color(ImVec2 pos, const char* text, ImU32 text_color, ImU32 frame_color, ImVec2 padding);
 };

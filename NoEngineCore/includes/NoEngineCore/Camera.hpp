@@ -77,7 +77,7 @@ namespace NoEngine {
 		float m_near_clip_plane{ 0.1f };
 		float m_viewport_width{ 1920.f};
 		float m_viewport_height{ 1080.f};
-		float m_field_of_view{ 60.f };
+		float m_field_of_view{ 75.f };
 		float m_movement_speed{ 5.f };
 
 		static constexpr glm::vec3 s_world_up{ 0.f, 0.f, 1.f };

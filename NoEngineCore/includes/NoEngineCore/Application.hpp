@@ -32,7 +32,7 @@ namespace NoEngine {
 		glm::vec2 get_current_cursor_position_in_scene() const;
 		bool check_cursor_in_scene();
 
-		Camera camera{ glm::vec3(-5, 0, 0) };
+		Camera camera{ glm::vec3(-5, 5, 2), glm::vec3(0.f, 15.f, -45.f) };
 
 		void add_editor_object(std::string object_name = "",
 			const glm::vec3& position = glm::vec3(0.0f),
@@ -41,6 +41,12 @@ namespace NoEngine {
 		void remove_editor_object(std::string object_name = "");
 		void draw_main_scene();
 		void pick_object(glm::vec2 mouse_pos);
+		glm::vec3 get_selected_object_location();
+		void set_selected_object_location(float x, float y, float z);
+		glm::vec3 get_selected_object_rotation();
+		void set_selected_object_rotation(float x, float y, float z);
+		glm::vec3 get_selected_object_scale();
+		void set_selected_object_scale(float x, float y, float z);
 
 		int frameCount = 0;
 		float light_source_position[3] = { 0.f, 0.f, 1.f };
