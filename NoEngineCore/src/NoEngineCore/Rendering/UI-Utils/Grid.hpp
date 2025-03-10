@@ -82,15 +82,15 @@ namespace NoEngine {
 		};
 
 		GLfloat axes[36] = {
-			// Ось X (красная)
+			// Ось X
 			-75.0f, 0.0f, 0.0f,		1.0f, 0.0f, 0.0f, // Начало
 			75.0f, 0.0f, 0.0f,		1.0f, 0.0f, 0.0f, // Конец
 
-			// Ось Y (зеленая)
+			// Ось Y
 			0.0f, -75.0f, 0.0f,		0.0f, 1.0f, 0.0f, // Начало
 			0.0f, 75.0f, 0.0f,		0.0f, 1.0f, 0.0f, // Конец
 
-			// Ось Z (синяя)
+			// Ось Z
 			0.0f, 0.0f, -75.0f,		0.0f, 0.0f, 1.0f, // Начало
 			0.0f, 0.0f, 75.0f,		0.0f, 0.0f, 1.0f  // Конец
 		};
@@ -105,7 +105,7 @@ namespace NoEngine {
 			int index = 0;
 			for (float y = -size; y <= size; y += step) {
 				// Начало линии
-				m_vertices[index++] = -size;     // X
+				m_vertices[index++] = -size;   // X
 				m_vertices[index++] = y;       // Y
 				m_vertices[index++] = 0.0f;    // Z
 				m_vertices[index++] = 0.5f;    // R (серый цвет)
@@ -120,7 +120,7 @@ namespace NoEngine {
 				m_vertices[index++] = 0.5f;    // G
 				m_vertices[index++] = 0.5f;    // B
 			}
-			// Линии, параллельные оси Z (изменяются по X)
+			// Линии, параллельные оси X
 			for (float x = -size; x <= size; x += step) {
 				// Начало линии
 				m_vertices[index++] = x;        // X
@@ -140,12 +140,12 @@ namespace NoEngine {
 			}
 
 			int idx = 0;
-			// Индексы для линий, параллельных оси X
+			// Индексы для X
 			for (int i = 0; i < grid_lines; ++i) {
 				m_indices[idx++] = i * 2;
 				m_indices[idx++] = i * 2 + 1;
 			}
-			// Индексы для линий, параллельных оси Y
+			// Индексы для Y
 			int offset = grid_lines * 2;
 			for (int i = 0; i < grid_lines; ++i) {
 				m_indices[idx++] = offset + i * 2;

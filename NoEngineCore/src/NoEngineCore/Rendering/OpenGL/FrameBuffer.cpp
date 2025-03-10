@@ -31,7 +31,8 @@ namespace NoEngine {
 
 		glGenRenderbuffers(1, &m_depth_id);
 		glBindRenderbuffer(GL_RENDERBUFFER, m_depth_id);
-		glRenderbufferStorageMultisample(GL_RENDERBUFFER, 4, GL_DEPTH24_STENCIL8, m_width, m_height);
+		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, m_width, m_height);
+		//glRenderbufferStorageMultisample(GL_RENDERBUFFER, 4, GL_DEPTH24_STENCIL8, m_width, m_height);
 		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, m_depth_id);
 
 		GLenum buffers[4] = { GL_COLOR_ATTACHMENT0 };
