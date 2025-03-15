@@ -2,6 +2,7 @@
 #include "NoEngineCore/Input.hpp"
 
 #include <iostream>
+#include <cstring>
 
 void NoEngineEditor::on_update()
 {
@@ -321,7 +322,7 @@ void NoEngineEditor::setup_object_menu()
 
 		ImGui::Text("Scale");
 		ImGui::SameLine();
-		if (ImGui::Button(u8"\uf023", ImVec2(24, 24)))
+		if (ImGui::Button(locked ? u8"\uf023" : u8"\uf09c", ImVec2(24, 24)))
 		{
 			locked = !locked;
 		}
@@ -368,8 +369,22 @@ void NoEngineEditor::setup_object_menu()
 
 		if (ImGui::BeginPopupModal("Edit update function", NULL))
 		{
-			ImGui::BeginChild("ScrollArea", ImVec2(0, 470), false, ImGuiWindowFlags_HorizontalScrollbar);
+			ImGui::BeginChild("ScrollArea", ImVec2(0, 400), false, ImGuiWindowFlags_HorizontalScrollbar);
 			ImGui::SeparatorText("CHOOSE EDIT PARAMETR");
+
+			ImGui::PushTextWrapPos(ImGui::GetCursorPos().x + ImGui::GetContentRegionAvail().x);
+			ImGui::Text(
+				u8"Это меню определения функции обновления объектов на сцене. Ниже представлены поля, куда можно "
+				u8"задавать свою логику изменения значений переменных в главном цикле сцены."
+			);
+			ImGui::Text(
+				u8"Для создания функции используются переменные ниже и основные математические методы: +, -, *, /, ^, "
+				u8"sqrt, cos, sin."
+			);
+			ImGui::PopTextWrapPos();
+
+			ImGui::Spacing();
+
 			if (ImGui::BeginCombo("##", edit_parametrs[item_selected_idx]))
 			{
 				for (int i = 0; i < IM_ARRAYSIZE(edit_parametrs); i++)
@@ -387,24 +402,121 @@ void NoEngineEditor::setup_object_menu()
 			}
 			ImGui::Spacing();
 
+			ImGui::Text(u8"TIME - текущее время в сцене (основа любого передвижения в движке)");
+			ImGui::SameLine();
+			if (ImGui::Button("Copy##t")) {
+				ImGui::SetClipboardText("TIME");
+			}
+			ImGui::Spacing();
+
+			float available_width = ImGui::GetContentRegionAvail().x;
+
 			switch (item_selected_idx)
 			{
 			case 0:	//position
-				ImGui::Text("text0");
+				ImGui::Text(u8"POS_X - позиция по x");
 				ImGui::SameLine();
-				if (ImGui::Button("copy text")) {
-					ImGui::SetClipboardText("copy");
+				if (ImGui::Button("Copy##x")) {
+					ImGui::SetClipboardText("POS_X");
 				}
-				ImGui::InputTextMultiline("##source", buffer_position, 1024, ImVec2(675, ImGui::GetTextLineHeight() * 5), ImGuiInputTextFlags_AllowTabInput);
+				ImGui::SetNextItemWidth(available_width);
+				ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.7f, 0.7f, 0.7f, 1.0f));
+				ImGui::InputText("##pos_x", buffer_position_x, 1024);
+				ImGui::PopStyleColor();
+
+				ImGui::Spacing();
+
+				ImGui::Text(u8"POS_Y - позиция по y");
+				ImGui::SameLine();
+				if (ImGui::Button("Copy##y")) {
+					ImGui::SetClipboardText("POS_Y");
+				}
+				ImGui::SetNextItemWidth(available_width);
+				ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.7f, 0.7f, 0.7f, 1.0f));
+				ImGui::InputText("##pos_y", buffer_position_y, 1024);
+				ImGui::PopStyleColor();
+
+				ImGui::Spacing();
+
+				ImGui::Text(u8"POS_Z - позиция по z");
+				ImGui::SameLine();
+				if (ImGui::Button("Copy##z")) {
+					ImGui::SetClipboardText("POS_Z");
+				}
+				ImGui::SetNextItemWidth(available_width);
+				ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.7f, 0.7f, 0.7f, 1.0f));
+				ImGui::InputText("##pos_z", buffer_position_z, 1024);
+				ImGui::PopStyleColor();
 				break;
 			case 1:	//rotation
-				ImGui::Text("text1");
-				ImGui::InputTextMultiline("##source", buffer_rotation, 1024, ImVec2(675, ImGui::GetTextLineHeight() * 5), ImGuiInputTextFlags_AllowTabInput);
+				ImGui::Text(u8"ROT_X - поворот по x");
+				ImGui::SameLine();
+				if (ImGui::Button("Copy##x")) {
+					ImGui::SetClipboardText("ROT_X");
+				}
+				ImGui::SetNextItemWidth(available_width);
+				ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.7f, 0.7f, 0.7f, 1.0f));
+				ImGui::InputText("##rot_x", buffer_rotation_x, 1024);
+				ImGui::PopStyleColor();
+
+				ImGui::Spacing();
+
+				ImGui::Text(u8"ROT_Y - поворот по y");
+				ImGui::SameLine();
+				if (ImGui::Button("Copy##y")) {
+					ImGui::SetClipboardText("POS_X");
+				}
+				ImGui::SetNextItemWidth(available_width);
+				ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.7f, 0.7f, 0.7f, 1.0f));
+				ImGui::InputText("##rot_y", buffer_rotation_y, 1024);
+				ImGui::PopStyleColor();
+
+				ImGui::Spacing();
+
+				ImGui::Text(u8"ROT_Z - поворот по z");
+				ImGui::SameLine();
+				if (ImGui::Button("Copy##z")) {
+					ImGui::SetClipboardText("ROT_Z");
+				}
+				ImGui::SetNextItemWidth(available_width);
+				ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.7f, 0.7f, 0.7f, 1.0f));
+				ImGui::InputText("##rot_z", buffer_rotation_z, 1024);
+				ImGui::PopStyleColor();
 				break;
 			case 2:	//scale
-				ImGui::Text("text2");
-				ImGui::InputTextMultiline("##source", buffer_scale, 1024, ImVec2(675, ImGui::GetTextLineHeight() * 5), ImGuiInputTextFlags_AllowTabInput);
-				break;
+				ImGui::Text(u8"SC_X - скалирование по x");
+				ImGui::SameLine();
+				if (ImGui::Button("Copy##x")) {
+					ImGui::SetClipboardText("SC_X");
+				}
+				ImGui::SetNextItemWidth(available_width);
+				ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.7f, 0.7f, 0.7f, 1.0f));
+				ImGui::InputText("##sc_x", buffer_scale_x, 1024);
+				ImGui::PopStyleColor();
+
+				ImGui::Spacing();
+
+				ImGui::Text(u8"SC_Y - скалирование по y");
+				ImGui::SameLine();
+				if (ImGui::Button("Copy##y")) {
+					ImGui::SetClipboardText("SC_Y");
+				}
+				ImGui::SetNextItemWidth(available_width);
+				ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.7f, 0.7f, 0.7f, 1.0f));
+				ImGui::InputText("##sc_y", buffer_scale_y, 1024);
+				ImGui::PopStyleColor();
+
+				ImGui::Spacing();
+
+				ImGui::Text(u8"SC_Z - скалирование по z");
+				ImGui::SameLine();
+				if (ImGui::Button("Copy##z")) {
+					ImGui::SetClipboardText("SC_Z");
+				}
+				ImGui::SetNextItemWidth(available_width);
+				ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.7f, 0.7f, 0.7f, 1.0f));
+				ImGui::InputText("##sc_z", buffer_scale_z, 1024);
+				ImGui::PopStyleColor();
 			}
 
 			ImGui::Spacing();
@@ -416,6 +528,58 @@ void NoEngineEditor::setup_object_menu()
 			ImGui::Spacing();
 			if (ImGui::Button("Close", ImVec2(50.f, 30.f)))
 				ImGui::CloseCurrentPopup();
+			ImGui::SameLine();
+			if (ImGui::Button("Save", ImVec2(50.f, 30.f)))
+			{
+				function_editor_str[0][0] = buffer_position_x;
+				function_editor_str[0][1] = buffer_position_y;
+				function_editor_str[0][2] = buffer_position_z;
+
+				function_editor_str[1][0] = buffer_rotation_x;
+				function_editor_str[1][1] = buffer_rotation_y;
+				function_editor_str[1][2] = buffer_rotation_z;
+
+				function_editor_str[2][0] = buffer_scale_x;
+				function_editor_str[2][1] = buffer_scale_y;
+				function_editor_str[2][2] = buffer_scale_z;
+
+				ImGui::CloseCurrentPopup();
+			}
+			ImGui::SameLine();
+			if (ImGui::Button("Reset", ImVec2(50.f, 30.f)))
+			{
+				strncpy(buffer_position_x, "POS_X", sizeof(buffer_position_x) - 1);
+				buffer_position_x[sizeof(buffer_position_x) - 1] = '\0';
+				strncpy(buffer_position_y, "POS_Y", sizeof(buffer_position_y) - 1);
+				buffer_position_y[sizeof(buffer_position_y) - 1] = '\0';
+				strncpy(buffer_position_z, "POS_Z", sizeof(buffer_position_z) - 1);
+				buffer_position_z[sizeof(buffer_position_z) - 1] = '\0';
+				strncpy(buffer_rotation_x, "ROT_X", sizeof(buffer_rotation_x) - 1);
+				buffer_rotation_x[sizeof(buffer_rotation_x) - 1] = '\0';
+				strncpy(buffer_rotation_y, "ROT_Y", sizeof(buffer_rotation_y) - 1);
+				buffer_rotation_y[sizeof(buffer_rotation_y) - 1] = '\0';
+				strncpy(buffer_rotation_z, "ROT_Z", sizeof(buffer_rotation_z) - 1);
+				buffer_rotation_z[sizeof(buffer_rotation_z) - 1] = '\0';
+				strncpy(buffer_scale_x, "SC_X", sizeof(buffer_scale_x) - 1);
+				buffer_scale_x[sizeof(buffer_scale_x) - 1] = '\0';
+				strncpy(buffer_scale_y, "SC_Y", sizeof(buffer_scale_y) - 1);
+				buffer_scale_y[sizeof(buffer_scale_y) - 1] = '\0';
+				strncpy(buffer_scale_z, "SC_Z", sizeof(buffer_scale_z) - 1);
+				buffer_scale_z[sizeof(buffer_scale_z) - 1] = '\0';
+
+				function_editor_str[0][0] = buffer_position_x;
+				function_editor_str[0][1] = buffer_position_y;
+				function_editor_str[0][2] = buffer_position_z;
+
+				function_editor_str[1][0] = buffer_rotation_x;
+				function_editor_str[1][1] = buffer_rotation_y;
+				function_editor_str[1][2] = buffer_rotation_z;
+
+				function_editor_str[2][0] = buffer_scale_x;
+				function_editor_str[2][1] = buffer_scale_y;
+				function_editor_str[2][2] = buffer_scale_z;
+			}
+				
 
 			ImGui::EndPopup();
 		}
@@ -502,6 +666,18 @@ void NoEngineEditor::on_ui_draw_in_scene()
 			ImGui::CloseCurrentPopup();
 
 		ImGui::EndPopup();
+	}
+
+	//run-stop
+	ImGui::SetCursorPos(ImVec2((button_scene_pos.x - 38 * 2) * 0.5, button_scene_pos.y + 45));
+	if (ImGui::Button(pause ? u8"\uf04b" : u8"\uf04c", ImVec2(50, 50)))
+	{
+		pause =! pause;
+	}
+	ImGui::SetCursorPos(ImVec2((button_scene_pos.x + 38) * 0.5, button_scene_pos.y + 45));
+	if (ImGui::Button(u8"\uf04d", ImVec2(50, 50)))
+	{
+
 	}
 
 	ImGui::PopStyleColor(3);

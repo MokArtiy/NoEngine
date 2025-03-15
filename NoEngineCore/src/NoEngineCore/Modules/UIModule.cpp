@@ -27,7 +27,7 @@ namespace NoEngine {
 			style.Colors[ImGuiCol_WindowBg].w = 1.0f;
 		}
 
-		ImFont* font = io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\seguisb.ttf", 20.0f);
+		ImFont* font = io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\seguisb.ttf", 20.0f, NULL, io.Fonts->GetGlyphRangesCyrillic());
 		if (!font) {
 			font = io.Fonts->AddFontDefault();
 		}

@@ -77,6 +77,9 @@ target_link_libraries(${ENGINE_PROJECT_NAME} PRIVATE glad)
 add_subdirectory(../external/stb_image ${CMAKE_CURRENT_BINARY_DIR}/stb_image)
 target_link_libraries(${ENGINE_PROJECT_NAME} PRIVATE stb_image)
 
+add_subdirectory(../external/exprtk ${CMAKE_CURRENT_BINARY_DIR}/exprtk)
+target_link_libraries(${ENGINE_PROJECT_NAME} PRIVATE exprtk)
+
 add_subdirectory(../external/glm ${CMAKE_CURRENT_BINARY_DIR}/glm)
 target_link_libraries(${ENGINE_PROJECT_NAME} PRIVATE glm)
 
@@ -106,3 +109,5 @@ target_include_directories(ImGui PUBLIC ../external/imgui)
 target_link_libraries(ImGui PRIVATE glad glfw)
 
 target_link_libraries(${ENGINE_PROJECT_NAME} PRIVATE ImGui)
+
+target_compile_options(${ENGINE_PROJECT_NAME} PRIVATE /bigobj)

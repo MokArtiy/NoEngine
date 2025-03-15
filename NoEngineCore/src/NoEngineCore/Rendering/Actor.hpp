@@ -5,6 +5,8 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <memory>
 
+#include <exprtk/include/exprtk.hpp>
+
 #include "OpenGL/VertexArray.hpp"
 #include "OpenGL/VertexBuffer.hpp"
 #include "OpenGL/IndexBuffer.hpp"
@@ -27,7 +29,7 @@ public:
         : p_outline_shader(outline_shader), m_position(position), m_rotation(rotation), m_scale(scale), m_name(name) { }
     virtual ~Actor() {}
 
-    virtual void update(float deltaTime) {}
+    virtual void update(float deltaTime, std::string function[3][3]) {}
     virtual void draw(std::string param = "default") {}
     virtual bool intersect(const glm::vec3& ray_origin, const glm::vec3& ray_direction, float& distance) const { return false; }
 
@@ -45,6 +47,46 @@ public:
 
     void set_selected(const bool selected) { m_selected = selected; }
     const bool get_selected() const { return m_selected; }
+
+    double parser_string(std::string function_string, float deltatime)
+    {
+        typedef exprtk::symbol_table<double> symbol_table_t;
+        typedef exprtk::expression<double> expression_t;
+        typedef exprtk::parser<double> parser_t;
+
+        double POS_X = static_cast<double>(get_position().x);
+        double POS_Y = static_cast<double>(get_position().y);
+        double POS_Z = static_cast<double>(get_position().z);
+        double ROT_X = static_cast<double>(get_rotation().x);
+        double ROT_Y = static_cast<double>(get_rotation().y);
+        double ROT_Z = static_cast<double>(get_rotation().z);
+        double SC_X = static_cast<double>(get_scale().x);
+        double SC_Y = static_cast<double>(get_scale().y);
+        double SC_Z = static_cast<double>(get_scale().z);
+        double TIME = static_cast<double>(deltatime);
+
+        symbol_table_t symbol_table;
+        symbol_table.add_variable("POS_X", POS_X);
+        symbol_table.add_variable("POS_Y", POS_Y);
+        symbol_table.add_variable("POS_Z", POS_Z);
+        symbol_table.add_variable("ROT_X", ROT_X);
+        symbol_table.add_variable("ROT_Y", ROT_Y);
+        symbol_table.add_variable("ROT_Z", ROT_Z);
+        symbol_table.add_variable("SC_X", SC_X);
+        symbol_table.add_variable("SC_Y", SC_Y);
+        symbol_table.add_variable("SC_Z", SC_Z);
+        symbol_table.add_variable("TIME", TIME);
+
+        expression_t expr;
+        expr.register_symbol_table(symbol_table);
+
+        parser_t parser;
+        if (!parser.compile(function_string, expr)) {
+            LOG_ERROR("Error compile Update-Function: {0}", function_string);
+        }
+
+        return expr.value();
+    }
 
     glm::mat4 update_model_matrix() const {
         glm::mat4 model = glm::mat4(1.0f);

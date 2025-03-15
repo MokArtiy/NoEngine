@@ -67,6 +67,7 @@ namespace NoEngine {
 		bool check_shader = false;
 
 		glm::vec2 button_scene_pos = glm::vec2(0.f, 0.f);
+		std::string function_editor_str[3][3];
 
 		//dirLight
 		float dirLight_direction[3] = { -0.3f, -0.2f, -1.0f };

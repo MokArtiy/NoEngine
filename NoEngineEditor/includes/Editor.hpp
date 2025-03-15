@@ -43,10 +43,17 @@ class NoEngineEditor : public NoEngine::Application
 	std::shared_ptr<NoEngine::Texture2D> texture_add;
 
 	//update function
+	bool pause = true;
 	const char* edit_parametrs[3] = { "Position", "Rotation", "Scale" };
-	char buffer_position[1024];
-	char buffer_rotation[1024];
-	char buffer_scale[1024];
+	char buffer_position_x[1024] = { "POS_X" };
+	char buffer_position_y[1024] = { "POS_Y" };
+	char buffer_position_z[1024] = { "POS_Z" };
+	char buffer_rotation_x[1024] = { "ROT_X" };
+	char buffer_rotation_y[1024] = { "ROT_Y" };
+	char buffer_rotation_z[1024] = { "ROT_Z" };
+	char buffer_scale_x[1024] = { "SC_X" };
+	char buffer_scale_y[1024] = { "SC_Y" };
+	char buffer_scale_z[1024] = { "SC_Z" };
 	int item_selected_idx = 0;
 	bool text_copied = false;
 

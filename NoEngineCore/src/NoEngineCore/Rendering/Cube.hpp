@@ -48,6 +48,27 @@ public:
 		}
 	}
 
+	void update(float deltaTime, std::string function[3][3]) override
+	{
+		if (function[0][0] != "" && function[0][1] != "" && function[0][2] != ""
+			&& function[1][0] != "" && function[1][1] != "" && function[1][2] != ""
+			&& function[2][0] != "" && function[2][1] != "" && function[2][2] != "")
+		{
+			set_position(glm::vec3(
+				parser_string(function[0][0], deltaTime),
+				parser_string(function[0][1], deltaTime),
+				parser_string(function[0][2], deltaTime)));
+			set_rotation(glm::vec3(
+				parser_string(function[1][0], deltaTime),
+				parser_string(function[1][1], deltaTime),
+				parser_string(function[1][2], deltaTime)));
+			set_scale(glm::vec3(
+				parser_string(function[2][0], deltaTime),
+				parser_string(function[2][1], deltaTime),
+				parser_string(function[2][2], deltaTime)));
+		}
+	}
+
 	bool intersect(const glm::vec3& ray_origin, const glm::vec3& ray_direction, float& distance) const override
 	{
 		glm::vec3 cube_min = glm::vec3(get_model_matrix() * glm::vec4(-1.0f, -1.0f, -1.0f, 1.0f));
