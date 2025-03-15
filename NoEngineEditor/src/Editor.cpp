@@ -1,4 +1,4 @@
-#include "../includes/Editor.hpp"
+﻿#include "../includes/Editor.hpp"
 #include "NoEngineCore/Input.hpp"
 
 #include <iostream>
@@ -194,15 +194,6 @@ void NoEngineEditor::setup_main_control_menu()
 		ImGui::Text("Specular:");
 		ImGui::ColorEdit3("Specular##spot", spotLight_specular, ImGuiColorEditFlags_Float);
 	}
-	//ImGui::SetCursorPosX((ImGui::GetWindowWidth()) / 2);
-	if (ImGui::Button("+ New object", ImVec2(ImGui::GetWindowWidth() - 17, 20)))
-	{
-		add_editor_object();
-	}
-	if (ImGui::Button("Remove object", ImVec2(ImGui::GetWindowWidth() - 17, 20)))
-	{
-		remove_editor_object("Cube_0");
-	}
 
 	ImGui::End();
 
@@ -265,6 +256,7 @@ void NoEngineEditor::setup_main_control_menu()
 		{
 			camera.set_projection_mode(perspective_camera ? NoEngine::Camera::ProjectionMode::Perspective : NoEngine::Camera::ProjectionMode::Orthographic);
 		}
+		ImGui::Checkbox("Draw grid", &check_grid);
 	}
 
 	ImGui::End();
@@ -287,7 +279,7 @@ void NoEngineEditor::setup_object_menu()
 	ImGui::SetNextItemOpen(true, ImGuiCond_Once);
 	if (ImGui::CollapsingHeader("Transform"))
 	{
-		ImGui::Text("Location");
+		ImGui::Text("Position   ");
 		ImGui::SameLine();
 		ImGui::PushItemWidth(115.0f);
 		for (int i = 0; i < 3; i++)
@@ -307,7 +299,7 @@ void NoEngineEditor::setup_object_menu()
 		}
 		ImGui::PopItemWidth();
 
-		ImGui::Text("Rotation");
+		ImGui::Text("Rotation  ");
 		ImGui::SameLine();
 		ImGui::PushItemWidth(115.0f);
 		for (int i = 0; i < 3; i++)
@@ -327,17 +319,27 @@ void NoEngineEditor::setup_object_menu()
 		}
 		ImGui::PopItemWidth();
 
-		ImGui::Text("Scale   ");
+		ImGui::Text("Scale");
 		ImGui::SameLine();
-		//std::shared_ptr<NoEngine::Texture2D> texture_lock = NoEngine::ResourceManager::load_texture("lock_texture", "res/textures/lock.png");
-		//ImGui::ImageButton(std::to_string(texture_lock->get_id()).c_str(), (intptr_t)texture_lock->get_id(), ImVec2(16, 16));
+		if (ImGui::Button(u8"\uf023", ImVec2(24, 24)))
+		{
+			locked = !locked;
+		}
+		ImGui::SameLine();
 		ImGui::PushItemWidth(115.0f);
 		for (int i = 0; i < 3; i++)
 		{
 			ImGui::PushID(i + "scale");
 			ImGui::PushStyleColor(ImGuiCol_FrameBg, colors[i]);
-			if (ImGui::DragFloat("", &scale[i], 0.1f, 0.001f, 100000.f))
+			if (ImGui::DragFloat("", &scale[i], 0.01f, 0.001f, 100000.f))
 			{
+				if (locked)
+				{
+					for (int j = 0; j < 3; j++)
+					{
+						scale[j] = scale[i];
+					}
+				}
 				set_selected_object_scale(scale[0], scale[1], scale[2]);
 			}
 			ImGui::PopStyleColor();
@@ -348,6 +350,75 @@ void NoEngineEditor::setup_object_menu()
 			}
 		}
 		ImGui::PopItemWidth();
+
+		ImGui::Spacing();
+
+		if (ImGui::Button(u8"\uf044 EDIT UPDATE FUNCTION", ImVec2(ImGui::GetWindowWidth() / 2 - 12, 50.f)))
+		{
+			ImGui::OpenPopup("Edit update function");
+		}
+		ImGui::SameLine();
+		if (ImGui::Button(u8"\uf1f8 REMOVE OBJECT", ImVec2(ImGui::GetWindowWidth() / 2 - 12, 50.f)))
+		{
+			remove_editor_object();
+		}
+
+		ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+		ImGui::SetNextWindowPos(center, ImGuiCond_Always, ImVec2(0.5f, 0.5f));
+
+		if (ImGui::BeginPopupModal("Edit update function", NULL))
+		{
+			ImGui::BeginChild("ScrollArea", ImVec2(0, 470), false, ImGuiWindowFlags_HorizontalScrollbar);
+			ImGui::SeparatorText("CHOOSE EDIT PARAMETR");
+			if (ImGui::BeginCombo("##", edit_parametrs[item_selected_idx]))
+			{
+				for (int i = 0; i < IM_ARRAYSIZE(edit_parametrs); i++)
+				{
+					const bool is_selected = (item_selected_idx == 1);
+					if (ImGui::Selectable(edit_parametrs[i], is_selected))
+					{
+						item_selected_idx = i;
+					}
+					if (is_selected) {
+						ImGui::SetItemDefaultFocus();
+					}
+				}
+				ImGui::EndCombo();
+			}
+			ImGui::Spacing();
+
+			switch (item_selected_idx)
+			{
+			case 0:	//position
+				ImGui::Text("text0");
+				ImGui::SameLine();
+				if (ImGui::Button("copy text")) {
+					ImGui::SetClipboardText("copy");
+				}
+				ImGui::InputTextMultiline("##source", buffer_position, 1024, ImVec2(675, ImGui::GetTextLineHeight() * 5), ImGuiInputTextFlags_AllowTabInput);
+				break;
+			case 1:	//rotation
+				ImGui::Text("text1");
+				ImGui::InputTextMultiline("##source", buffer_rotation, 1024, ImVec2(675, ImGui::GetTextLineHeight() * 5), ImGuiInputTextFlags_AllowTabInput);
+				break;
+			case 2:	//scale
+				ImGui::Text("text2");
+				ImGui::InputTextMultiline("##source", buffer_scale, 1024, ImVec2(675, ImGui::GetTextLineHeight() * 5), ImGuiInputTextFlags_AllowTabInput);
+				break;
+			}
+
+			ImGui::Spacing();
+
+			ImGui::EndChild();
+
+			ImGui::Separator();
+			ImGui::Spacing();
+			ImGui::Spacing();
+			if (ImGui::Button("Close", ImVec2(50.f, 30.f)))
+				ImGui::CloseCurrentPopup();
+
+			ImGui::EndPopup();
+		}
 	}
 
 	ImGui::End();
@@ -368,4 +439,79 @@ void NoEngineEditor::on_ui_draw()
 		setup_object_menu();
 		setup_main_control_menu();
 	}
+}
+
+void NoEngineEditor::on_ui_draw_in_scene()
+{
+	ImGui::SetCursorPos(ImVec2(button_scene_pos.x - 52, button_scene_pos.y + 45));
+
+	ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.27f, 0.27f, 0.27f, 1.f));
+	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.38, 0.38, 0.38, 1.f));
+	ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.2f, 0.2f, 0.2f, 1.f));
+	ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 5.f);
+
+	if (ImGui::ImageButton(std::to_string(texture_add->get_id()).c_str(), (intptr_t)texture_add->get_id(), ImVec2(45, 45)))
+	{
+		ImGui::OpenPopup("Select scene object");
+	}
+
+	ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+	ImGui::SetNextWindowPos(center, ImGuiCond_Always, ImVec2(0.5f, 0.5f));
+
+	if (ImGui::BeginPopupModal("Select scene object", NULL))
+	{
+		ImGui::BeginChild("ScrollArea", ImVec2(0, 200), false, ImGuiWindowFlags_HorizontalScrollbar);
+		ImGui::SeparatorText("Shape");
+
+		if (ImGui::ImageButton(std::to_string(texture_plane->get_id()).c_str(), (intptr_t)texture_plane->get_id(), ImVec2(100.f, 100.f)))
+		{
+			add_editor_object(NE_PLANE);
+			ImGui::CloseCurrentPopup();
+		}
+		ImGui::SameLine();
+		if (ImGui::ImageButton(std::to_string(texture_cube->get_id()).c_str(), (intptr_t)texture_cube->get_id(), ImVec2(100.f, 100.f)))
+		{
+			add_editor_object(NE_CUBE);
+			ImGui::CloseCurrentPopup();
+		}
+		ImGui::SameLine();
+		if (ImGui::ImageButton(std::to_string(texture_sphere->get_id()).c_str(), (intptr_t)texture_sphere->get_id(), ImVec2(100.f, 100.f)))
+		{
+			add_editor_object(NE_SPHERE);
+			ImGui::CloseCurrentPopup();
+		}
+
+		ImGui::Spacing();
+		ImGui::SeparatorText("Light");
+		for (int i = 0; i < light_count; i++)
+		{
+			if (ImGui::Button(lights[i], ImVec2(100.f, 100.f)))
+			{
+				ImGui::CloseCurrentPopup();
+			}
+
+			if (i < 5) {
+				ImGui::SameLine();
+			}
+		}
+		ImGui::EndChild();
+		ImGui::Separator();
+		ImGui::Spacing();
+		ImGui::Spacing();
+		if (ImGui::Button("Close", ImVec2(50.f, 30.f)))
+			ImGui::CloseCurrentPopup();
+
+		ImGui::EndPopup();
+	}
+
+	ImGui::PopStyleColor(3);
+	ImGui::PopStyleVar();
+}
+
+void NoEngineEditor::on_editor_init()
+{
+	texture_add = NoEngine::ResourceManager::load_texture("add_obj_texture", "res/textures/ui/add obj.png", false);
+	texture_plane = NoEngine::ResourceManager::load_texture("texture_plane", "res/textures/ui/plane.png", false);
+	texture_cube = NoEngine::ResourceManager::load_texture("texture_cube", "res/textures/ui/cube.png", false);
+	texture_sphere = NoEngine::ResourceManager::load_texture("texture_sphere", "res/textures/ui/sphere.png", false);
 }

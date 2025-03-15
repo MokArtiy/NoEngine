@@ -36,7 +36,7 @@ namespace NoEngine {
 		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, m_depth_id);
 
 		GLenum buffers[4] = { GL_COLOR_ATTACHMENT0 };
-		glDrawBuffers(m_texture_id, buffers);
+		glDrawBuffers(1, buffers);
 
 		unbind();
 		glBindTexture(GL_TEXTURE_2D, 0);

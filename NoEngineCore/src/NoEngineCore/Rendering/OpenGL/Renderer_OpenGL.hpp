@@ -30,10 +30,12 @@ namespace NoEngine {
 		static void draw(const VertexArray& vertex_array, const DrawMode& mode = DrawMode::Triangles);
 		static void set_clear_color(const float r, const float g, const float b, const float a);
 		static void clear();
-		static void clear_stencil_func();
+		static void clear_stencil();
 		static void set_viewport(const unsigned int width, const unsigned int height, const unsigned int left_offset = 0, const unsigned int bottom_offset = 0);
 		static void enable_depth_testing();
 		static void disable_depth_testing();
+		static void disable_stencil_testing();
+		static void enable_stencil_testing();
 		static void configurate_opengl();
 		static void set_stencil_mask(unsigned int mask);
 		static void set_stencil_func(StencilFunc func, int ref, unsigned int mask);

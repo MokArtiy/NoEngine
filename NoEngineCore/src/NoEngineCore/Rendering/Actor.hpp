@@ -28,7 +28,7 @@ public:
     virtual ~Actor() {}
 
     virtual void update(float deltaTime) {}
-    virtual void draw() {}
+    virtual void draw(std::string param = "default") {}
     virtual bool intersect(const glm::vec3& ray_origin, const glm::vec3& ray_direction, float& distance) const { return false; }
 
     void set_position(const glm::vec3& position) { m_position = position; }

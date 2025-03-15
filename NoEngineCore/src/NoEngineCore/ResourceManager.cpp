@@ -41,12 +41,19 @@ namespace NoEngine {
 		return nullptr;
 	}
 
-	std::shared_ptr<NoEngine::Texture2D> ResourceManager::load_texture(const char* texture_name, const char* texture_path)
+	std::shared_ptr<NoEngine::Texture2D> ResourceManager::load_texture(const char* texture_name, const char* texture_path, bool set_flip)
 	{
 		int width = 0;
 		int height = 0;
 		int channels = 0;
-		stbi_set_flip_vertically_on_load(true);
+		if (set_flip)
+		{
+			stbi_set_flip_vertically_on_load(true);
+		}
+		else
+		{
+			stbi_set_flip_vertically_on_load(false);
+		}
 		unsigned char* data = stbi_load(std::string(m_path + "/" + texture_path).c_str(), &width, &height, &channels, 0);
 		if (!data)
 		{

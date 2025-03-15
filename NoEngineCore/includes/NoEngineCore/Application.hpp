@@ -7,6 +7,10 @@
 #include <memory>
 #include <string>
 
+#define NE_PLANE 0x000001
+#define NE_CUBE 0x000002
+#define NE_SPHERE 0x000003
+
 namespace NoEngine {
 
 	class Application
@@ -24,7 +28,9 @@ namespace NoEngine {
 		void close();
 		virtual void on_update() {}
 		virtual void on_ui_draw() {}
+		virtual void on_ui_draw_in_scene() {}
 		virtual void on_objects_draw() {}
+		virtual void on_editor_init() {}
 
 		virtual void on_mouse_button_event(const MouseButton button_code, const double x_pos, const double y_pos, const bool pressed) {}
 
@@ -34,11 +40,12 @@ namespace NoEngine {
 
 		Camera camera{ glm::vec3(-5, 5, 2), glm::vec3(0.f, 15.f, -45.f) };
 
-		void add_editor_object(std::string object_name = "",
+		void add_editor_object(int object_type,
+			std::string object_name = "",
 			const glm::vec3& position = glm::vec3(0.0f),
 			const glm::vec3& rotation = glm::vec3(0.0f),
 			const glm::vec3& scale = glm::vec3(1.0f));
-		void remove_editor_object(std::string object_name = "");
+		void remove_editor_object();
 		void draw_main_scene();
 		void pick_object(glm::vec2 mouse_pos);
 		glm::vec3 get_selected_object_location();
@@ -58,6 +65,8 @@ namespace NoEngine {
 		float shininess = 64.f;
 		double current_frame = 0.0f;
 		bool check_shader = false;
+
+		glm::vec2 button_scene_pos = glm::vec2(0.f, 0.f);
 
 		//dirLight
 		float dirLight_direction[3] = { -0.3f, -0.2f, -1.0f };
@@ -126,7 +135,8 @@ namespace NoEngine {
 		//check markers
 		bool check_dirLight = true;
 		bool check_SpotLight = false;
-		bool check_pointLights[4] = { false, true, true, true };
+		bool check_pointLights[4] = { false, false, false, true };
+		bool check_grid = true;
 
 	private:
 		void draw();

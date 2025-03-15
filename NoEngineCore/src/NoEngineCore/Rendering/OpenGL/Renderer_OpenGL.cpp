@@ -138,7 +138,7 @@ namespace NoEngine {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
 
-	void Renderer_OpenGL::clear_stencil_func()
+	void Renderer_OpenGL::clear_stencil()
 	{
 		glClear(GL_STENCIL_BUFFER_BIT);
 	}
@@ -156,6 +156,16 @@ namespace NoEngine {
 	void Renderer_OpenGL::disable_depth_testing()
 	{
 		glDisable(GL_DEPTH_TEST);
+	}
+
+	void Renderer_OpenGL::disable_stencil_testing()
+	{
+		glDisable(GL_STENCIL_TEST);
+	}
+
+	void Renderer_OpenGL::enable_stencil_testing()
+	{
+		glEnable(GL_STENCIL_TEST);
 	}
 
 	void Renderer_OpenGL::configurate_opengl()

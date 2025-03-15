@@ -116,9 +116,9 @@ namespace NoEngine {
 	int Application::start(unsigned int window_width, unsigned int window_height, const char* title, std::string executable_path)
 	{
 		m_executable_path = executable_path;
+		ResourceManager p_resource_manager(m_executable_path);
 		m_pWindow = std::make_unique<Window>(title, window_width, window_height);
 		camera.set_viewport_size(static_cast<float>(window_width), static_cast<float>(window_height));
-
 
 		m_event_dispatcher.add_event_listener<EventMouseMoved>(
 			[](EventMouseMoved& event)
@@ -192,8 +192,8 @@ namespace NoEngine {
 			}
 		);
 
+		on_editor_init();
 		//-------------------------------------//
-		ResourceManager p_resource_manager(m_executable_path);
 		p_shader_program = ResourceManager::load_shader("p_shader_program", "res/shaders/default_obj.vert", "res/shaders/default_obj_PointLight.frag");
 		p_new_shader = ResourceManager::load_shader("p_new_shader", "res/shaders/default_obj.vert", "res/shaders/multiple_lights.frag");
 		p_outline_shader = ResourceManager::load_shader("p_outline_shader", "res/shaders/object_outlining.vert", "res/shaders/object_outlining.frag");
@@ -232,7 +232,6 @@ namespace NoEngine {
 		p_frame_buffer->create(m_pWindow->get_width(), m_pWindow->get_height());
 		//-------------------------------------//
 		Renderer_OpenGL::enable_depth_testing();
-		Renderer_OpenGL::configurate_opengl();
 		while (!m_bCloseWindow)
 		{
 			current_frame = glfwGetTime();
@@ -263,14 +262,25 @@ namespace NoEngine {
 		return m_cursor_in_scene;
 	}
 
-	void Application::add_editor_object(std::string object_name, const glm::vec3& position, const glm::vec3& rotation, const glm::vec3& scale)
+	void Application::add_editor_object(int object_type, std::string object_name, const glm::vec3& position, const glm::vec3& rotation, const glm::vec3& scale)
 	{
-		EditorScene::add_object(p_outline_shader, p_new_shader, ObjectType::Cube, object_name, position, rotation, scale);
+		switch (object_type)
+		{
+		case NE_PLANE:
+			EditorScene::add_object(p_outline_shader, p_new_shader, ObjectType::Plane, object_name, position, rotation, scale);
+			break;
+		case NE_CUBE:
+			EditorScene::add_object(p_outline_shader, p_new_shader, ObjectType::Cube, object_name, position, rotation, scale);
+			break;
+		case NE_SPHERE:
+			EditorScene::add_object(p_outline_shader, p_new_shader, ObjectType::Sphere, object_name, position, rotation, scale);
+			break;
+		}
 	}
 
-	void Application::remove_editor_object(std::string object_name)
+	void Application::remove_editor_object()
 	{
-		EditorScene::remove_object(object_name);
+		EditorScene::remove_object();
 	}
 
 	void Application::draw_main_scene()
@@ -293,10 +303,16 @@ namespace NoEngine {
 		NoEngine::PhysicsSystem::set_window_size(glm::vec2(window_width, window_height));
 		ImVec2 mouse_pos = ImGui::GetMousePos();
 		ImVec2 scene_pos = ImGui::GetWindowPos();
+		ImVec2 scene_size = ImGui::GetWindowSize();
 		m_cursor_pos_in_scene = glm::vec2(mouse_pos.x - scene_pos.x, mouse_pos.y - scene_pos.y);
 
 		GLuint textureID = p_frame_buffer->get_texture_id();
 		ImGui::Image(textureID, ImVec2(window_width, window_height), ImVec2(0, 1), ImVec2(1, 0));
+
+		ImVec2 content_avail = ImGui::GetContentRegionAvail();
+
+		button_scene_pos = glm::vec2(content_avail.x, content_avail.y);
+		on_ui_draw_in_scene();
 
 		ImGui::End();
 	}
@@ -341,7 +357,6 @@ namespace NoEngine {
 		Renderer_OpenGL::set_clear_color(m_background_color[0], m_background_color[1], m_background_color[2], m_background_color[3]);
 		Renderer_OpenGL::clear();
 		p_frame_buffer->bind();
-		Renderer_OpenGL::clear_stencil_func();
 
 		glm::mat4 projection_view_matrix = camera.get_projection_matrix() * camera.get_view_matrix();
 
@@ -404,9 +419,12 @@ namespace NoEngine {
 		//DRAW
 		Renderer_OpenGL::set_stencil_mask(0x00);
 
-		p_grid->draw(p_grid_shader);
+		if (check_grid)
+		{
+			p_grid->draw(p_grid_shader);
+		}
 		//cubes
-		p_new_shader->bind();
+		/*p_new_shader->bind();
 		glm::mat4 model_matrix = glm::mat4(1.0f);
 		p_new_shader->set_matrix4("model_matrix", model_matrix);
 		int i = 0;
@@ -422,7 +440,7 @@ namespace NoEngine {
 			p_new_shader->set_matrix3("normal_matrix", glm::transpose(glm::inverse(glm::mat3(model_matrix))));
 
 			Renderer_OpenGL::draw(*p_cube_vao);
-		}
+		}*/
 		//light cubes
 		p_light_source_shader_program->bind();
 		p_light_source_shader_program->set_matrix4("projection_view_matrix", projection_view_matrix);
@@ -439,8 +457,7 @@ namespace NoEngine {
 
 		}
 
-		Renderer_OpenGL::set_stencil_func(StencilFunc::Always, 1, 0xFF);
-		Renderer_OpenGL::set_stencil_mask(0xFF);
+		
 		EditorScene::draw_objects();
 
 		p_frame_buffer->unbind();

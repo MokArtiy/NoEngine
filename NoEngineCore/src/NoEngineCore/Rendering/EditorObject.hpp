@@ -12,8 +12,9 @@ namespace NoEngine {
 
 	enum class ObjectType
 	{
+		Plane,
 		Cube,
-		Piramide
+		Sphere
 	};
 
 	class EditorScene
@@ -28,7 +29,7 @@ namespace NoEngine {
 			const glm::vec3& rotation = glm::vec3(0.0f),
 			const glm::vec3& scale = glm::vec3(1.0f)
 		);
-		static void remove_object(std::string object_name);
+		static void remove_object();
 		static void draw_objects();
 		static void pick_object(const glm::vec2& mouse_pos, glm::mat4 view_matrix, glm::mat4 projection, glm::vec3 camera_position);
 		static std::shared_ptr<Actor> get_selected_obj();

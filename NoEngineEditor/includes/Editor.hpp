@@ -32,6 +32,23 @@ class NoEngineEditor : public NoEngine::Application
 		ImVec4(0.413f, 1.0f, 0.288f, 1.0f), // green
 		ImVec4(0.373f, 0.446f, 1.0f, 1.0f), // blue
 	};
+	bool locked = true;
+	std::string shapes[3] = {"plane", "cube", "sphere"};
+	const int shape_count = IM_ARRAYSIZE(shapes);
+	const char* lights[3] = { "Directional", "Point ", "Spotlight" };
+	const int light_count = IM_ARRAYSIZE(shapes);
+	std::shared_ptr<NoEngine::Texture2D> texture_plane;
+	std::shared_ptr<NoEngine::Texture2D> texture_cube;
+	std::shared_ptr<NoEngine::Texture2D> texture_sphere;
+	std::shared_ptr<NoEngine::Texture2D> texture_add;
+
+	//update function
+	const char* edit_parametrs[3] = { "Position", "Rotation", "Scale" };
+	char buffer_position[1024];
+	char buffer_rotation[1024];
+	char buffer_scale[1024];
+	int item_selected_idx = 0;
+	bool text_copied = false;
 
 	virtual void on_update() override;
 	virtual void on_mouse_button_event(const NoEngine::MouseButton button_code, const double x_pos, const double y_pos, const bool pressed) override
@@ -42,6 +59,8 @@ class NoEngineEditor : public NoEngine::Application
 		key_pressed = pressed;
 	}
 	virtual void on_ui_draw() override;
+	virtual void on_ui_draw_in_scene() override;
+	virtual void on_editor_init() override;
 
 	void setup_dockspace_menu();
 	void setup_main_control_menu();

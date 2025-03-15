@@ -25,34 +25,26 @@ public:
 	~Cube() 
 	{
 		this->p_shader->unbind();
-		this->p_outline_shader->unbind();
-		this->p_index_buffer->unbind();
 		this->p_vao->unbind();
 	}
 
-	void draw() override
+	void draw(std::string param) override
 	{
-		p_shader->bind();
-		p_shader->set_matrix4("model_matrix", get_model_matrix());
-		p_shader->set_matrix3("normal_matrix", glm::transpose(glm::inverse(glm::mat3(get_model_matrix()))));
-
-		NoEngine::Renderer_OpenGL::draw(*p_vao);
-
-		if (m_selected)
+		if (param == "stencil")
 		{
-			NoEngine::Renderer_OpenGL::set_stencil_func(NoEngine::StencilFunc::Notequal, 1, 0xFF);
-			NoEngine::Renderer_OpenGL::set_stencil_mask(0x00);
-			NoEngine::Renderer_OpenGL::disable_depth_testing();
-
 			p_outline_shader->bind();
 			glm::mat4 model = get_model_matrix();
 			model = glm::scale(model, glm::vec3(1.01f));
 			p_outline_shader->set_matrix4("model_matrix", model);
 			NoEngine::Renderer_OpenGL::draw(*p_vao);
+		}
+		else
+		{
+			p_shader->bind();
+			p_shader->set_matrix4("model_matrix", get_model_matrix());
+			p_shader->set_matrix3("normal_matrix", glm::transpose(glm::inverse(glm::mat3(get_model_matrix()))));
 
-			NoEngine::Renderer_OpenGL::set_stencil_mask(0xFF);
-			NoEngine::Renderer_OpenGL::set_stencil_func(NoEngine::StencilFunc::Always, 0, 0xFF);
-			NoEngine::Renderer_OpenGL::enable_depth_testing();
+			NoEngine::Renderer_OpenGL::draw(*p_vao);
 		}
 	}
 

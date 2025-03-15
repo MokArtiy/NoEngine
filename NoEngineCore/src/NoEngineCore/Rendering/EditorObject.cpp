@@ -10,67 +10,117 @@ namespace NoEngine{
 		std::shared_ptr<NoEngine::ShaderProgram> shader, ObjectType type,
 		std::string object_name, const glm::vec3& position, const glm::vec3& rotation, const glm::vec3& scale)
 	{
+		std::string shape_name= "";
+
+		switch (type)
+		{
+		case NoEngine::ObjectType::Plane:
+			shape_name = "Plane";
+			break;
+		case NoEngine::ObjectType::Cube:
+			shape_name = "Cube";
+			break;
+		case NoEngine::ObjectType::Sphere:
+			shape_name = "Sphere";
+			break;
+		default:
+			break;
+		}
+
 		if (object_name == "")
 		{
 			std::string count;
-			if (m_scene_objects_names.count("Cube") != 0)
-				count = std::to_string(m_scene_objects_names.find("Cube")->second.size());
+			if (m_scene_objects_names.count(shape_name) != 0)
+				count = std::to_string(m_scene_objects_names.find(shape_name)->second.size());
 			else
 				count = "0";
-			object_name = "Cube_" + count;
+			object_name = shape_name + "_" + count;
 		}
 
-		if (m_scene_objects_names.count("Cube") == 0)
+		for (const auto& objs : m_scene_objects)
 		{
-			m_scene_objects_names.emplace("Cube", std::vector<std::string>{object_name});
+			if (objs.second->get_selected())
+			{
+				objs.second->set_selected(false);
+			}
+		}
+
+		if (m_scene_objects_names.count(shape_name) == 0)
+		{
+			m_scene_objects_names.emplace(shape_name, std::vector<std::string>{object_name});
 		}
 		else
 		{
-			m_scene_objects_names["Cube"].push_back(object_name);
+			m_scene_objects_names[shape_name].push_back(object_name);
 		}
-		m_scene_objects.emplace(object_name, std::make_shared<Cube>(shader, outline_shader, position, rotation, scale, object_name));
+
+		switch (type)
+		{
+		case NoEngine::ObjectType::Plane:
+			
+			break;
+		case NoEngine::ObjectType::Cube:
+			m_scene_objects.emplace(object_name, std::make_shared<Cube>(shader, outline_shader, position, rotation, scale, object_name));
+			break;
+		case NoEngine::ObjectType::Sphere:
+			
+			break;
+		default:
+			break;
+		}
 
 		LOG_INFO("Add object: {0} (X:{1} Y:{2} Z:{3})", object_name, position.x, position.y, position.z);
 	}
 
-	void EditorScene::remove_object(std::string object_name)
+	void EditorScene::remove_object()
 	{
-		if (m_scene_objects.size() != 0)
+		for (auto it = begin(m_scene_objects); it != end(m_scene_objects);)
 		{
-			if (m_scene_objects.count(object_name) != 0)
+			if (it->second->get_selected())
 			{
-				auto& object = m_scene_objects.find(object_name);
-				LOG_INFO("Remove object: {0} (X:{1} Y:{2} Z:{3})", object->second->get_name(), object->second->get_position().x, object->second->get_position().y, object->second->get_position().z);
-				for (auto pair = m_scene_objects_names.begin(); pair != m_scene_objects_names.end(); pair++)
+				for (auto pair : m_scene_objects_names)
 				{
-					for (int i = 0; i < pair->second.size(); i++)
-					{
-						if (pair->second[i] == object_name)
-						{
-							pair->second.erase(pair->second.begin() + i);
-							break;
-						}
-					}
+					auto& names = pair.second; 
+					names.erase(std::remove(names.begin(), names.end(), it->second->get_name()), names.end());
 				}
-				m_scene_objects.erase(object);
+				LOG_INFO("Remove object: {0} (X:{1} Y:{2} Z:{3})", it->second->get_name(), it->second->get_position().x, it->second->get_position().y, it->second->get_position().z);
+				it = m_scene_objects.erase(it);
 			}
 			else {
-				LOG_CRITICAL("It is impossible to delete an object by the specified name: {0}", object_name);
+				++it;
 			}
 		}
-		else {
-			LOG_CRITICAL("There's not a single object on the scene right now!", object_name);
-		}
-		
 	}
 
 	void EditorScene::draw_objects()
 	{
 		if (m_scene_objects.size() != 0)
 		{
-			for (auto i = m_scene_objects.begin(); i != m_scene_objects.end(); i++)
+			for (auto i : m_scene_objects)
 			{
-				i->second->draw();
+				NoEngine::Renderer_OpenGL::configurate_opengl();
+				Renderer_OpenGL::set_stencil_func(StencilFunc::Always, 1, 0xFF);
+				Renderer_OpenGL::set_stencil_mask(0xFF);
+				NoEngine::Renderer_OpenGL::clear_stencil();
+
+				i.second->draw();
+				
+				if (i.second->get_selected())
+				{
+					
+					NoEngine::Renderer_OpenGL::set_stencil_func(NoEngine::StencilFunc::Notequal, 1, 0xFF);
+					NoEngine::Renderer_OpenGL::set_stencil_mask(0x00);
+					NoEngine::Renderer_OpenGL::disable_depth_testing();
+
+					i.second->draw("stencil");
+
+					NoEngine::Renderer_OpenGL::set_stencil_mask(0xFF);
+					NoEngine::Renderer_OpenGL::set_stencil_func(NoEngine::StencilFunc::Always, 0, 0xFF);
+					NoEngine::Renderer_OpenGL::enable_depth_testing();
+					NoEngine::Renderer_OpenGL::disable_stencil_testing();
+
+					NoEngine::Renderer_OpenGL::clear_stencil();
+				}
 			}
 		}
 	}
