@@ -114,7 +114,7 @@ namespace NoEngine {
 		vertexBuffer.m_id = 0;
 	}
 
-	/*void VertexBuffer::bind() const
+	void VertexBuffer::bind() const
 	{
 		glBindBuffer(GL_ARRAY_BUFFER, m_id);
 	}
@@ -122,7 +122,7 @@ namespace NoEngine {
 	void VertexBuffer::unbind()
 	{
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
-	}*/
+	}
 
 	BufferElement::BufferElement(const ShaderDataType type)
 		: type(type)

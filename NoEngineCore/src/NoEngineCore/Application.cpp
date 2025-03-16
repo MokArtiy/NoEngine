@@ -271,13 +271,13 @@ namespace NoEngine {
 		switch (object_type)
 		{
 		case NE_PLANE:
-			EditorScene::add_object(p_outline_shader, p_new_shader, ObjectType::Plane, object_name, position, rotation, scale);
+			EditorScene::add_object(camera.get_view_matrix(), camera.get_projection_matrix(), camera.get_position(), p_outline_shader, p_new_shader, ObjectType::Plane, object_name, position, rotation, scale);
 			break;
 		case NE_CUBE:
-			EditorScene::add_object(p_outline_shader, p_new_shader, ObjectType::Cube, object_name, position, rotation, scale);
+			EditorScene::add_object(camera.get_view_matrix(), camera.get_projection_matrix(), camera.get_position(), p_outline_shader, p_new_shader, ObjectType::Cube, object_name, position, rotation, scale);
 			break;
 		case NE_SPHERE:
-			EditorScene::add_object(p_outline_shader, p_new_shader, ObjectType::Sphere, object_name, position, rotation, scale);
+			EditorScene::add_object(camera.get_view_matrix(), camera.get_projection_matrix(), camera.get_position(), p_outline_shader, p_new_shader, ObjectType::Sphere, object_name, position, rotation, scale);
 			break;
 		}
 	}
@@ -413,23 +413,8 @@ namespace NoEngine {
 		p_outline_shader->set_matrix4("vp", projection_view_matrix);
 
 		p_new_shader->bind();
-		p_new_shader->set_matrix4("projection_view_matrix", projection_view_matrix);
-		p_new_shader->set_vec3("view_position", camera.get_position());
-		p_new_shader->set_float("material.shininess", 32.0f);
-		p_new_shader->set_int("material.diffuse", 0);
-		p_new_shader->set_int("material.specular", 1);
-
-		//// directional light
-		p_new_shader->set_bool("check_dirLight", check_dirLight);
-		if (check_dirLight)
-		{
-			p_new_shader->set_vec3("dirLight.direction", dirLight_direction);
-			p_new_shader->set_vec3("dirLight.ambient", dirLight_ambient);
-			p_new_shader->set_vec3("dirLight.diffuse", dirLight_diffuse);
-			p_new_shader->set_vec3("dirLight.specular", dirLight_specular);
-		}
 		/* point lights */
-		for (int i = 0; i < 4; ++i)
+		/*for (int i = 0; i < 4; ++i)
 		{
 			std::string point_number = std::to_string(i);
 			p_new_shader->set_bool(("check_PointLight[" + point_number + "]").c_str(), check_pointLights[i]);
@@ -443,7 +428,7 @@ namespace NoEngine {
 				p_new_shader->set_float(("pointLights[" + point_number + "].linear").c_str(), pointLights_float[i][1]);
 				p_new_shader->set_float(("pointLights[" + point_number + "].quadratic").c_str(), pointLights_float[i][2]);
 			}
-		}
+		}*/
 		// spotLight
 		p_new_shader->set_bool("check_SpotLight", check_SpotLight);
 		if (check_SpotLight)
@@ -460,45 +445,26 @@ namespace NoEngine {
 			p_new_shader->set_float("spotLight.outerCutOff", glm::cos(glm::radians(spotLight_outerCutOff)));
 		}
 
+		std::array<std::array<float, 3>, 4> dirlight = {
+			dirLight_direction[0], dirLight_direction[1], dirLight_direction[2],
+			dirLight_ambient[0], dirLight_ambient[1], dirLight_ambient[2],
+			dirLight_diffuse[0], dirLight_diffuse[1], dirLight_diffuse[2],
+			dirLight_specular[0], dirLight_specular[1], dirLight_specular[2]
+		};
+
+		EditorScene::update_variables_shaders(
+			camera.get_view_matrix(),
+			camera.get_projection_matrix(),
+			camera.get_position(),
+			check_dirLight,
+			dirlight
+		);
 		//DRAW
 		Renderer_OpenGL::set_stencil_mask(0x00);
 
 		if (check_grid)
 		{
 			p_grid->draw(p_grid_shader);
-		}
-		//cubes
-		/*p_new_shader->bind();
-		glm::mat4 model_matrix = glm::mat4(1.0f);
-		p_new_shader->set_matrix4("model_matrix", model_matrix);
-		int i = 0;
-		for (const glm::vec3& current_position : positions)
-		{
-			++i;
-			float angle = 0;
-			angle = 20.f * current_frame * i;
-			glm::mat4 model_matrix = glm::translate(glm::mat4(1.f), current_position);
-			model_matrix = glm::translate(model_matrix, glm::vec3(-current_position.x + sqrt(current_position.y * current_position.y + current_position.x * current_position.x) * cos(current_frame * i / 2), (-current_position.y + sqrt(current_position.y * current_position.y + current_position.x * current_position.x) * (sin(current_frame * i / 2))), current_position.z));
-			model_matrix = glm::rotate(model_matrix, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
-			p_new_shader->set_matrix4("model_matrix", model_matrix);
-			p_new_shader->set_matrix3("normal_matrix", glm::transpose(glm::inverse(glm::mat3(model_matrix))));
-
-			Renderer_OpenGL::draw(*p_cube_vao);
-		}*/
-		//light cubes
-		p_light_source_shader_program->bind();
-		p_light_source_shader_program->set_matrix4("projection_view_matrix", projection_view_matrix);
-		for (int i = 0; i < 4; ++i)
-		{
-			if (check_pointLights[i])
-			{
-				glm::mat4 model_matrix = glm::translate(glm::mat4(1.f), glm::vec3(pointLights_vec3[i][0][0], pointLights_vec3[i][0][1], pointLights_vec3[i][0][2]));
-				model_matrix = glm::scale(model_matrix, glm::vec3(0.2f));
-				p_light_source_shader_program->set_matrix4("model_matrix", model_matrix);
-				p_light_source_shader_program->set_vec3("light_color", pointLights_colors[i]);
-				Renderer_OpenGL::draw(*p_cube_vao);
-			}
-
 		}
 
 		switch (current_state_scene)

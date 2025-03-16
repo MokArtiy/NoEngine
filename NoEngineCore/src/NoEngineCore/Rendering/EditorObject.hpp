@@ -2,6 +2,7 @@
 
 #include "Actor.hpp"
 #include "Cube.hpp"
+#include "Sphere.hpp"
 
 #include <unordered_map>
 #include <map>
@@ -27,6 +28,9 @@ namespace NoEngine {
 	{
 	public:
 		static void add_object(
+			glm::mat4 view_matrix, 
+			glm::mat4 projection_matrix,
+			glm::vec3 camera_position,
 			std::shared_ptr<NoEngine::ShaderProgram> outline_shader,
 			std::shared_ptr<NoEngine::ShaderProgram> shader,
 			ObjectType type = ObjectType::Cube,
@@ -46,6 +50,13 @@ namespace NoEngine {
 		static void set_selected_rotation(float x, float y, float z);
 		static glm::vec3 get_selected_scale();
 		static void set_selected_scale(float x, float y, float z);
+		static void update_variables_shaders(
+			glm::mat4 view_matrix, 
+			glm::mat4 projection_matrix,
+			glm::vec3 camera_position, 
+			bool check_dirlight,
+			std::array<std::array<float, 3>, 4> dirlight_variables
+		);
 
 	private:
 		static std::unordered_map<std::string, std::shared_ptr<Actor>> m_scene_objects;

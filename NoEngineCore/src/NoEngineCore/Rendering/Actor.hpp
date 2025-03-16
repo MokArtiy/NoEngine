@@ -1,10 +1,13 @@
 #pragma once
 
+#define M_PI 3.14159265358979323846
+
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <memory>
 #include <array>
+#include <cmath>
 
 #include <exprtk/include/exprtk.hpp>
 
@@ -19,24 +22,82 @@
 
 #include <iostream>
 
-class Actor 
+class Actor
 {
 public:
-    Actor(std::shared_ptr<NoEngine::ShaderProgram> outline_shader,
-        const glm::vec3& position = glm::vec3(0.0f), 
-          const glm::vec3& rotation = glm::vec3(0.0f),
-          const glm::vec3& scale    = glm::vec3(1.0f),
-          const std::string name = "")
-        : p_outline_shader(outline_shader), m_position(position), m_rotation(rotation), m_scale(scale), m_name(name),
-        m_default_position(position), m_default_rotation(rotation), m_default_scale(scale)
-    { }
+    Actor(glm::mat4 view_matrix, glm::mat4 projection_matrix, glm::vec3 camera_position,
+        std::shared_ptr<NoEngine::ShaderProgram> shader,
+        std::shared_ptr<NoEngine::ShaderProgram> outline_shader,
+        const glm::vec3& position = glm::vec3(0.0f),
+        const glm::vec3& rotation = glm::vec3(0.0f),
+        const glm::vec3& scale = glm::vec3(1.0f),
+        const std::string name = "")
+        : m_view_matrix(view_matrix), m_projection_matrix(projection_matrix), m_camera_position(camera_position), p_shader(shader),
+        p_outline_shader(outline_shader), m_position(position), m_rotation(rotation),
+        m_scale(scale), m_name(name), m_default_position(position), m_default_rotation(rotation), m_default_scale(scale)
+    {
+    }
     virtual ~Actor() {}
 
     virtual void update(float deltaTime, std::array<std::array<std::string, 3>, 3> function) {}
     virtual void draw(std::string param = "default") {}
     virtual bool intersect(const glm::vec3& ray_origin, const glm::vec3& ray_direction, float& distance) const { return false; }
 
-    void set_position(const glm::vec3& position) 
+    void update_function(float deltaTime, std::array<std::array<std::string, 3>, 3> function)
+    {
+        if (function[0][0] != "" || function[0][1] != "" || function[0][2] != ""
+            || function[1][0] != "" || function[1][1] != "" || function[1][2] != ""
+            || function[2][0] != "" || function[2][1] != "" || function[2][2] != "")
+        {
+            float pos_x, pos_y, pos_z;
+            if (function[0][0] == "")
+                pos_x = get_default_position().x;
+            else
+                pos_x = parser_string(function[0][0], deltaTime);
+            if (function[0][1] == "")
+                pos_y = get_default_position().y;
+            else
+                pos_y = parser_string(function[0][1], deltaTime);
+            if (function[0][2] == "")
+                pos_z = get_default_position().z;
+            else
+                pos_z = parser_string(function[0][2], deltaTime);
+            set_position(glm::vec3(pos_x, pos_y, pos_z));
+
+            float rot_x, rot_y, rot_z;
+            if (function[1][0] == "")
+                rot_x = get_default_rotation().x;
+            else
+                rot_x = parser_string(function[1][0], deltaTime);
+            if (function[1][1] == "")
+                rot_y = get_default_rotation().y;
+            else
+                rot_y = parser_string(function[1][1], deltaTime);
+            if (function[1][2] == "")
+                rot_z = get_default_rotation().z;
+            else
+                rot_z = parser_string(function[1][2], deltaTime);
+            set_rotation(glm::vec3(rot_x, rot_y, rot_z));
+
+            float sc_x, sc_y, sc_z;
+            if (function[2][0] == "")
+                sc_x = get_default_scale().x;
+            else
+                sc_x = parser_string(function[2][0], deltaTime);
+            if (function[2][1] == "")
+                sc_y = get_default_scale().y;
+            else
+                sc_y = parser_string(function[2][1], deltaTime);
+            if (function[2][2] == "")
+                sc_z = get_default_scale().z;
+            else
+                sc_z = parser_string(function[2][2], deltaTime);
+
+            set_scale(glm::vec3(sc_x, sc_y, sc_z));
+        }
+    }
+
+    void set_position(const glm::vec3& position)
     {
         m_position = position;
     }
@@ -60,8 +121,29 @@ public:
     void set_name(const std::string& name) { m_name = name; }
     const std::string& get_name() const { return m_name; }
 
-    void set_new_function(const std::string new_function[3][3]) 
-    { 
+    std::shared_ptr<NoEngine::ShaderProgram> get_shader() { return p_shader; }
+    void set_shader(std::shared_ptr<NoEngine::ShaderProgram> shader) { p_shader = shader; }
+
+    void set_material_shader()
+    {
+        if (m_use_texture)
+        {
+            p_shader->bind();
+            p_shader->set_int("material.diffuse", 0);
+            p_shader->set_int("material.specular", 1);
+        }
+        else
+        {
+            p_shader->bind();
+            p_shader->set_vec3("material.ambient_color", glm::vec3(0.7, 0.7, 0.7));
+            p_shader->set_vec3("material.diffuse_color", glm::vec3(1.0f, 1.0f, 1.0f));
+            p_shader->set_vec3("material.specular_color", glm::vec3(0.7, 0.7, 0.7));
+            p_shader->set_float("material.shininess", 32.f);
+        }
+    }
+
+    void set_new_function(const std::string new_function[3][3])
+    {
         m_update_function[0][0] = new_function[0][0];
         m_update_function[0][1] = new_function[0][1];
         m_update_function[0][2] = new_function[0][2];
@@ -150,11 +232,16 @@ protected:
     std::array<std::array<std::string, 3>, 3> m_update_function = { "", "", "", "", "", "", "", "", "" };
     bool m_selected = true;
     bool m_new_update_func = false;
+    bool m_use_texture = false;
 
     glm::vec3 m_default_position;
     glm::vec3 m_default_rotation;
     glm::vec3 m_default_scale;
 
     std::shared_ptr<NoEngine::ShaderProgram> p_outline_shader;
-    //GLuint m_id;
+    std::shared_ptr<NoEngine::ShaderProgram> p_shader;
+
+    glm::mat4 m_view_matrix;
+    glm::mat4 m_projection_matrix;
+    glm::vec3 m_camera_position;
 };

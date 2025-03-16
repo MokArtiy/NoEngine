@@ -70,8 +70,8 @@ namespace NoEngine {
 
 		unsigned int get_handle() const { return m_id; }
 
-		/*void bind() const;
-		static void unbind();*/
+		void bind() const;
+		static void unbind();
 
 		const BufferLayout& get_layout() const { return m_buffer_layout; }
 

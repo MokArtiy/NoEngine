@@ -53,7 +53,9 @@ namespace NoEngine {
 		{
 			grid_shader->bind();
 			Renderer_OpenGL::draw(*p_axes_vao, NoEngine::DrawMode::Lines);
+			p_axes_vao->unbind();
 			Renderer_OpenGL::draw(*p_grid_vao, NoEngine::DrawMode::Lines);
+			p_grid_vao->unbind();
 		}
 
 	private:

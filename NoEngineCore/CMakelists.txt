@@ -17,6 +17,7 @@ set(ENGINE_PRIVATE_INCLUDES
 	src/NoEngineCore/Modules/UIModule.hpp
 	src/NoEngineCore/Rendering/Actor.hpp
 	src/NoEngineCore/Rendering/Cube.hpp
+	src/NoEngineCore/Rendering/Sphere.hpp
 	src/NoEngineCore/Rendering/EditorObject.hpp
 	src/NoEngineCore/Rendering/OpenGL/FrameBuffer.hpp
 	src/NoEngineCore/Rendering/OpenGL/Renderer_OpenGL.hpp

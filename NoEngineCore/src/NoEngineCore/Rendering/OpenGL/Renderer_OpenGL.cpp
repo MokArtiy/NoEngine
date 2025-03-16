@@ -6,6 +6,8 @@
 #include "VertexArray.hpp"
 #include "NoEngineCore/Log.hpp"
 
+#include <iostream>
+
 namespace NoEngine {
 
 	GLFWwindow* Renderer_OpenGL::m_pWindow;

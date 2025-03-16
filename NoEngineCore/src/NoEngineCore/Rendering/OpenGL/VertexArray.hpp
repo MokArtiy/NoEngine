@@ -20,6 +20,7 @@ namespace NoEngine {
 		void bind() const;
 		static void unbind();
 		size_t get_indices_count() const { return m_indices_count; }
+		unsigned int get_id() const { return m_id; }
 
 	private:
 		unsigned int m_id = 0;

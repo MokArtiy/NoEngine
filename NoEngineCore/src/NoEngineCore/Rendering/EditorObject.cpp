@@ -7,7 +7,8 @@ namespace NoEngine{
 	std::map<std::string, std::vector<std::string>> EditorScene::m_scene_objects_names;
 	bool EditorScene::m_saving_scene = false;
 
-	void EditorScene::add_object(std::shared_ptr<NoEngine::ShaderProgram> outline_shader,
+	void EditorScene::add_object(glm::mat4 view_matrix, glm::mat4 projection_matrix, glm::vec3 camera_position,
+		std::shared_ptr<NoEngine::ShaderProgram> outline_shader,
 		std::shared_ptr<NoEngine::ShaderProgram> shader, ObjectType type,
 		std::string object_name, const glm::vec3& position, const glm::vec3& rotation, const glm::vec3& scale)
 	{
@@ -61,10 +62,10 @@ namespace NoEngine{
 			
 			break;
 		case NoEngine::ObjectType::Cube:
-			m_scene_objects.emplace(object_name, std::make_shared<Cube>(shader, outline_shader, position, rotation, scale, object_name));
+			m_scene_objects.emplace(object_name, std::make_shared<Cube>(view_matrix, projection_matrix, camera_position, shader, outline_shader, position, rotation, scale, object_name));
 			break;
 		case NoEngine::ObjectType::Sphere:
-			
+			m_scene_objects.emplace(object_name, std::make_shared<Sphere>(view_matrix, projection_matrix, camera_position, shader, outline_shader, position, rotation, scale, object_name));
 			break;
 		default:
 			break;
@@ -148,7 +149,7 @@ namespace NoEngine{
 			{
 				if (obj.second->get_check_update_func())
 				{
-					obj.second->update(deltaTime, obj.second->get_update_func());
+					obj.second->update_function(deltaTime, obj.second->get_update_func());
 				}
 			}
 			break;
@@ -157,7 +158,7 @@ namespace NoEngine{
 			{
 				if (obj.second->get_check_update_func())
 				{
-					obj.second->update(0, obj.second->get_update_func());
+					obj.second->update_function(0, obj.second->get_update_func());
 				}
 			}
 			break;
@@ -278,5 +279,33 @@ namespace NoEngine{
 		{
 			obj->set_scale(glm::vec3(x, y, z));
 		}
+	}
+
+	void EditorScene::update_variables_shaders(
+		glm::mat4 view_matrix, 
+		glm::mat4 projection_matrix,
+		glm::vec3 camera_position, 
+		bool check_dirlight, 
+		std::array<std::array<float, 3>, 4> dirlight_variables)
+	{
+		for (auto& obj : m_scene_objects)
+		{
+			auto shader = obj.second->get_shader();
+
+			shader->bind();
+			shader->set_matrix4("projection_view_matrix", projection_matrix * view_matrix);
+			shader->set_vec3("view_position", camera_position);
+
+			shader->set_bool("check_dirLight", check_dirlight);
+			if (check_dirlight)
+			{
+				shader->set_vec3("dirLight.direction", glm::vec3(dirlight_variables[0][0], dirlight_variables[0][1], dirlight_variables[0][2]));
+				shader->set_vec3("dirLight.ambient", glm::vec3(dirlight_variables[1][0], dirlight_variables[1][1], dirlight_variables[1][2]));
+				shader->set_vec3("dirLight.diffuse", glm::vec3(dirlight_variables[2][0], dirlight_variables[2][1], dirlight_variables[2][2]));
+				shader->set_vec3("dirLight.specular", glm::vec3(dirlight_variables[3][0], dirlight_variables[3][1], dirlight_variables[3][2]));
+			}
+
+			obj.second->set_shader(shader);
+		}	
 	}
 }
