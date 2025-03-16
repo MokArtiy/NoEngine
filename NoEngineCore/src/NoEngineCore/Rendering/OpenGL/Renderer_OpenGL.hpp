@@ -36,6 +36,8 @@ namespace NoEngine {
 		static void disable_depth_testing();
 		static void disable_stencil_testing();
 		static void enable_stencil_testing();
+		static void enable_input();
+		static void disable_input();
 		static void configurate_opengl();
 		static void set_stencil_mask(unsigned int mask);
 		static void set_stencil_func(StencilFunc func, int ref, unsigned int mask);
@@ -43,5 +45,8 @@ namespace NoEngine {
 		static const char* get_vendor_str();
 		static const char* get_rendere_str();
 		static const char* get_version_str();
+	
+	private:
+		static GLFWwindow* m_pWindow;
 	};
 }

@@ -8,6 +8,8 @@
 
 namespace NoEngine {
 
+	GLFWwindow* Renderer_OpenGL::m_pWindow;
+
 	const char* gl_source_to_string(const GLenum source)
 	{
 		switch (source)
@@ -41,6 +43,8 @@ namespace NoEngine {
 
 	bool Renderer_OpenGL::init(GLFWwindow* pWindow)
 	{
+		m_pWindow = pWindow;
+
 		glfwMakeContextCurrent(pWindow);
 		//glfwSwapInterval(1);
 
@@ -166,6 +170,16 @@ namespace NoEngine {
 	void Renderer_OpenGL::enable_stencil_testing()
 	{
 		glEnable(GL_STENCIL_TEST);
+	}
+
+	void Renderer_OpenGL::enable_input()
+	{
+		glfwSetInputMode(m_pWindow, GLFW_STICKY_KEYS, GLFW_TRUE);
+	}
+
+	void Renderer_OpenGL::disable_input()
+	{
+		glfwSetInputMode(m_pWindow, GLFW_STICKY_KEYS, GLFW_FALSE);
 	}
 
 	void Renderer_OpenGL::configurate_opengl()

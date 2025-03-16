@@ -4,6 +4,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <memory>
+#include <array>
 
 #include <exprtk/include/exprtk.hpp>
 
@@ -26,30 +27,67 @@ public:
           const glm::vec3& rotation = glm::vec3(0.0f),
           const glm::vec3& scale    = glm::vec3(1.0f),
           const std::string name = "")
-        : p_outline_shader(outline_shader), m_position(position), m_rotation(rotation), m_scale(scale), m_name(name) { }
+        : p_outline_shader(outline_shader), m_position(position), m_rotation(rotation), m_scale(scale), m_name(name),
+        m_default_position(position), m_default_rotation(rotation), m_default_scale(scale)
+    { }
     virtual ~Actor() {}
 
-    virtual void update(float deltaTime, std::string function[3][3]) {}
+    virtual void update(float deltaTime, std::array<std::array<std::string, 3>, 3> function) {}
     virtual void draw(std::string param = "default") {}
     virtual bool intersect(const glm::vec3& ray_origin, const glm::vec3& ray_direction, float& distance) const { return false; }
 
-    void set_position(const glm::vec3& position) { m_position = position; }
+    void set_position(const glm::vec3& position) 
+    {
+        m_position = position;
+    }
     const glm::vec3& get_position() const { return m_position; }
+
+    void set_default_position(const glm::vec3& default_position) { m_default_position = default_position; }
+    const glm::vec3& get_default_position() const { return m_default_position; }
 
     void set_rotation(const glm::vec3& rotation) { m_rotation = rotation; }
     const glm::vec3& get_rotation() const { return m_rotation; }
 
+    void set_default_rotation(const glm::vec3& default_rotation) { m_default_rotation = default_rotation; }
+    const glm::vec3& get_default_rotation() const { return m_default_rotation; }
+
     void set_scale(const glm::vec3& scale) { m_scale = scale; }
     const glm::vec3& get_scale() const { return m_scale; }
+
+    void set_default_scale(const glm::vec3& default_scale) { m_default_scale = default_scale; }
+    const glm::vec3& get_default_scale() const { return m_default_scale; }
 
     void set_name(const std::string& name) { m_name = name; }
     const std::string& get_name() const { return m_name; }
 
+    void set_new_function(const std::string new_function[3][3]) 
+    { 
+        m_update_function[0][0] = new_function[0][0];
+        m_update_function[0][1] = new_function[0][1];
+        m_update_function[0][2] = new_function[0][2];
+
+        m_update_function[1][0] = new_function[1][0];
+        m_update_function[1][1] = new_function[1][1];
+        m_update_function[1][2] = new_function[1][2];
+
+        m_update_function[2][0] = new_function[2][0];
+        m_update_function[2][1] = new_function[2][1];
+        m_update_function[2][2] = new_function[2][2];
+    }
+    const std::array<std::array<std::string, 3>, 3> get_update_func() const { return m_update_function; }
+
     void set_selected(const bool selected) { m_selected = selected; }
     const bool get_selected() const { return m_selected; }
 
+    void set_check_update_func(const bool check_update_func) { m_new_update_func = check_update_func; }
+    const bool get_check_update_func() const { return m_new_update_func; }
+
     double parser_string(std::string function_string, float deltatime)
     {
+        if (function_string == "") {
+            return 0;
+        }
+
         typedef exprtk::symbol_table<double> symbol_table_t;
         typedef exprtk::expression<double> expression_t;
         typedef exprtk::parser<double> parser_t;
@@ -85,6 +123,8 @@ public:
             LOG_ERROR("Error compile Update-Function: {0}", function_string);
         }
 
+        /*std::cout << expr.value() << "\n";*/
+
         return expr.value();
     }
 
@@ -107,7 +147,13 @@ protected:
     glm::vec3 m_rotation;
     glm::vec3 m_scale;
     std::string m_name;
+    std::array<std::array<std::string, 3>, 3> m_update_function = { "", "", "", "", "", "", "", "", "" };
     bool m_selected = true;
+    bool m_new_update_func = false;
+
+    glm::vec3 m_default_position;
+    glm::vec3 m_default_rotation;
+    glm::vec3 m_default_scale;
 
     std::shared_ptr<NoEngine::ShaderProgram> p_outline_shader;
     //GLuint m_id;

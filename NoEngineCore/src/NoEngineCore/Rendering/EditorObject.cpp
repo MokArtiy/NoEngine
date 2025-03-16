@@ -5,6 +5,7 @@ namespace NoEngine{
 
 	std::unordered_map<std::string, std::shared_ptr<Actor>> EditorScene::m_scene_objects;
 	std::map<std::string, std::vector<std::string>> EditorScene::m_scene_objects_names;
+	bool EditorScene::m_saving_scene = false;
 
 	void EditorScene::add_object(std::shared_ptr<NoEngine::ShaderProgram> outline_shader,
 		std::shared_ptr<NoEngine::ShaderProgram> shader, ObjectType type,
@@ -122,6 +123,71 @@ namespace NoEngine{
 					NoEngine::Renderer_OpenGL::clear_stencil();
 				}
 			}
+		}
+	}
+
+	void EditorScene::update_objets(float deltaTime, EngineState state)
+	{
+		switch (state)
+		{
+		case NoEngine::EngineState::Run:
+			if (!m_saving_scene)
+			{
+				for (const auto& obj : m_scene_objects)
+				{
+					if (obj.second->get_check_update_func())
+					{
+						obj.second->set_default_position(obj.second->get_position());
+						obj.second->set_default_rotation(obj.second->get_rotation());
+						obj.second->set_default_scale(obj.second->get_scale());
+					}
+				}
+				m_saving_scene = true;
+			}
+			for (const auto& obj : m_scene_objects)
+			{
+				if (obj.second->get_check_update_func())
+				{
+					obj.second->update(deltaTime, obj.second->get_update_func());
+				}
+			}
+			break;
+		case NoEngine::EngineState::Pause:
+			for (const auto& obj : m_scene_objects)
+			{
+				if (obj.second->get_check_update_func())
+				{
+					obj.second->update(0, obj.second->get_update_func());
+				}
+			}
+			break;
+		case NoEngine::EngineState::Stop:
+			if (m_saving_scene)
+			{
+				for (const auto& obj : m_scene_objects)
+				{
+					if (obj.second->get_check_update_func())
+					{
+						obj.second->set_position(obj.second->get_default_position());
+						obj.second->set_rotation(obj.second->get_default_rotation());
+						obj.second->set_scale(obj.second->get_default_scale());
+					}
+				}
+				m_saving_scene = false;
+			}
+			else 
+			{
+				for (const auto& obj : m_scene_objects)
+				{
+					if (obj.second->get_check_update_func())
+					{
+						obj.second->set_default_position(obj.second->get_position());
+						obj.second->set_default_rotation(obj.second->get_rotation());
+						obj.second->set_default_scale(obj.second->get_scale());
+					}
+				}
+			}
+			break;
 		}
 	}
 

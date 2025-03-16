@@ -6,10 +6,15 @@
 
 #include <memory>
 #include <string>
+#include <array>
 
 #define NE_PLANE 0x000001
 #define NE_CUBE 0x000002
 #define NE_SPHERE 0x000003
+
+#define NE_RUN 0x000004
+#define NE_PAUSE 0x000005
+#define NE_STOP 0x000006
 
 namespace NoEngine {
 
@@ -55,6 +60,15 @@ namespace NoEngine {
 		glm::vec3 get_selected_object_scale();
 		void set_selected_object_scale(float x, float y, float z);
 
+		//update_func_obj
+		bool check_selected_obj();
+		std::array<std::array<std::string, 3>, 3> get_function_in_selected_obj();
+		void save_new_func();
+		void reset_new_func();
+		void set_update_scene(int state) { current_state_scene = state; }
+		const int get_current_state_scene() { return current_state_scene; }
+		int current_state_scene = NE_STOP;
+
 		int frameCount = 0;
 		float light_source_position[3] = { 0.f, 0.f, 1.f };
 		float m_background_color[4] = { 0.11f, 0.12f, 0.132f, 0.0f };
@@ -63,7 +77,8 @@ namespace NoEngine {
 		float diffuse_factor = 0.5f;
 		float specular_factor = 1.0f;
 		float shininess = 64.f;
-		double current_frame = 0.0f;
+		double current_frame = 0.0;
+		double delta_time = 0.0;
 		bool check_shader = false;
 
 		glm::vec2 button_scene_pos = glm::vec2(0.f, 0.f);

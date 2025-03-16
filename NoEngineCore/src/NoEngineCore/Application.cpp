@@ -231,10 +231,14 @@ namespace NoEngine {
 		p_cube_vao->set_index_buffer(*p_cube_index_buffer);
 		p_frame_buffer->create(m_pWindow->get_width(), m_pWindow->get_height());
 		//-------------------------------------//
+		double last_time = glfwGetTime();
 		Renderer_OpenGL::enable_depth_testing();
 		while (!m_bCloseWindow)
 		{
 			current_frame = glfwGetTime();
+			delta_time = current_frame - last_time;
+			last_time = current_frame;
+
 			draw();
 		}
 		m_pWindow = nullptr;
@@ -352,6 +356,46 @@ namespace NoEngine {
 		EditorScene::set_selected_scale(x, y, z);
 	}
 
+	bool Application::check_selected_obj()
+	{
+		auto& obj = EditorScene::get_selected_obj();
+		if (obj != 0)
+			return true;
+		return false;
+	}
+
+	std::array<std::array<std::string, 3>, 3> Application::get_function_in_selected_obj()
+	{
+		auto& obj = EditorScene::get_selected_obj();
+		if (obj != 0)
+			return obj->get_update_func();
+	}
+
+	void Application::save_new_func()
+	{
+		if (function_editor_str[0][0] != "" || function_editor_str[0][1] != "" || function_editor_str[0][2] != ""
+			|| function_editor_str[1][0] != "" || function_editor_str[1][1] != "" || function_editor_str[1][2] != ""
+			|| function_editor_str[2][0] != "" || function_editor_str[2][1] != "" || function_editor_str[2][2] != "")
+		{
+			auto& obj = NoEngine::EditorScene::get_selected_obj();
+			if (obj != 0)
+			{
+				obj->set_new_function(function_editor_str);
+				obj->set_check_update_func(true);
+			}
+		}
+	}
+
+	void Application::reset_new_func()
+	{
+		auto& obj = NoEngine::EditorScene::get_selected_obj();
+		if (obj != 0)
+		{
+			obj->set_new_function(function_editor_str);
+			obj->set_check_update_func(false);
+		}
+	}
+
 	void Application::draw()
 	{
 		Renderer_OpenGL::set_clear_color(m_background_color[0], m_background_color[1], m_background_color[2], m_background_color[3]);
@@ -457,7 +501,21 @@ namespace NoEngine {
 
 		}
 
-		
+		switch (current_state_scene)
+		{
+		case NE_STOP:
+			EditorScene::update_objets(current_frame, NoEngine::EngineState::Stop);
+			break;
+		case NE_RUN:
+			EditorScene::update_objets(current_frame, NoEngine::EngineState::Run);
+			break;
+		case NE_PAUSE:
+			EditorScene::update_objets(current_frame, NoEngine::EngineState::Pause);
+			break;
+		default:
+			EditorScene::update_objets(current_frame, NoEngine::EngineState::Stop);
+			break;
+		}
 		EditorScene::draw_objects();
 
 		p_frame_buffer->unbind();

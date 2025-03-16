@@ -48,24 +48,57 @@ public:
 		}
 	}
 
-	void update(float deltaTime, std::string function[3][3]) override
+	void update(float deltaTime, std::array<std::array<std::string, 3>, 3> function) override
 	{
-		if (function[0][0] != "" && function[0][1] != "" && function[0][2] != ""
-			&& function[1][0] != "" && function[1][1] != "" && function[1][2] != ""
-			&& function[2][0] != "" && function[2][1] != "" && function[2][2] != "")
+		if (function[0][0] != "" || function[0][1] != "" || function[0][2] != ""
+			|| function[1][0] != "" || function[1][1] != "" || function[1][2] != ""
+			|| function[2][0] != "" || function[2][1] != "" || function[2][2] != "")
 		{
-			set_position(glm::vec3(
-				parser_string(function[0][0], deltaTime),
-				parser_string(function[0][1], deltaTime),
-				parser_string(function[0][2], deltaTime)));
-			set_rotation(glm::vec3(
-				parser_string(function[1][0], deltaTime),
-				parser_string(function[1][1], deltaTime),
-				parser_string(function[1][2], deltaTime)));
-			set_scale(glm::vec3(
-				parser_string(function[2][0], deltaTime),
-				parser_string(function[2][1], deltaTime),
-				parser_string(function[2][2], deltaTime)));
+			float pos_x, pos_y, pos_z;
+			if (function[0][0] == "")
+				pos_x = get_default_position().x;
+			else
+				pos_x = parser_string(function[0][0], deltaTime);
+			if (function[0][1] == "")
+				pos_y = get_default_position().y;
+			else
+				pos_y = parser_string(function[0][1], deltaTime);
+			if (function[0][2] == "")
+				pos_z = get_default_position().z;
+			else
+				pos_z = parser_string(function[0][2], deltaTime);
+			set_position(glm::vec3(pos_x, pos_y, pos_z));
+
+			float rot_x, rot_y, rot_z;
+			if (function[1][0] == "")
+				rot_x = get_default_rotation().x;
+			else
+				rot_x = parser_string(function[1][0], deltaTime);
+			if (function[1][1] == "")
+				rot_y = get_default_rotation().y;
+			else
+				rot_y = parser_string(function[1][1], deltaTime);
+			if (function[1][2] == "")
+				rot_z = get_default_rotation().z;
+			else
+				rot_z = parser_string(function[1][2], deltaTime);
+			set_rotation(glm::vec3(rot_x, rot_y, rot_z));
+
+			float sc_x, sc_y, sc_z;
+			if (function[2][0] == "")
+				sc_x = get_default_scale().x;
+			else
+				sc_x = parser_string(function[2][0], deltaTime);
+			if (function[2][1] == "") 
+				sc_y = get_default_scale().y;
+			else
+				sc_y = parser_string(function[2][1], deltaTime);
+			if (function[2][2] == "") 
+				sc_z = get_default_scale().z;
+			else
+				sc_z = parser_string(function[2][2], deltaTime);
+
+			set_scale(glm::vec3(sc_x, sc_y, sc_z));
 		}
 	}
 

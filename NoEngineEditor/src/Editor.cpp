@@ -8,31 +8,39 @@ void NoEngineEditor::on_update()
 {
 	float delta_time = static_cast<float>(current_frame - last_frame);
 	last_frame = current_frame;
-
 	glm::vec3 rotation_delta{ 0, 0, 0 };
-	if (NoEngine::Input::IsKeyPressed(NoEngine::KeyCode::KEY_W))
+
+	ImGuiIO& io = ImGui::GetIO();
+
+	if (!io.WantCaptureKeyboard)
 	{
-		camera.process_keyboard(NoEngine::Camera::CameraDirectaion::Forward, delta_time);
+		if (NoEngine::Input::IsKeyPressed(NoEngine::KeyCode::KEY_W))
+		{
+			camera.process_keyboard(NoEngine::Camera::CameraDirectaion::Forward, delta_time);
+		}
+		if (NoEngine::Input::IsKeyPressed(NoEngine::KeyCode::KEY_S))
+		{
+			camera.process_keyboard(NoEngine::Camera::CameraDirectaion::Backward, delta_time);
+		}
+		if (NoEngine::Input::IsKeyPressed(NoEngine::KeyCode::KEY_A))
+		{
+			camera.process_keyboard(NoEngine::Camera::CameraDirectaion::Left, delta_time);
+		}
+		if (NoEngine::Input::IsKeyPressed(NoEngine::KeyCode::KEY_D))
+		{
+			camera.process_keyboard(NoEngine::Camera::CameraDirectaion::Right, delta_time);
+		}
+		if (NoEngine::Input::IsKeyPressed(NoEngine::KeyCode::KEY_SPACE))
+		{
+			camera.process_keyboard(NoEngine::Camera::CameraDirectaion::Up, delta_time);
+		}
+		if (NoEngine::Input::IsKeyPressed(NoEngine::KeyCode::KEY_LEFT_SHIFT))
+		{
+			camera.process_keyboard(NoEngine::Camera::CameraDirectaion::Down, delta_time);
+		}
 	}
-	if (NoEngine::Input::IsKeyPressed(NoEngine::KeyCode::KEY_S))
-	{
-		camera.process_keyboard(NoEngine::Camera::CameraDirectaion::Backward, delta_time);
-	}
-	if (NoEngine::Input::IsKeyPressed(NoEngine::KeyCode::KEY_A))
-	{
-		camera.process_keyboard(NoEngine::Camera::CameraDirectaion::Left, delta_time);
-	}
-	if (NoEngine::Input::IsKeyPressed(NoEngine::KeyCode::KEY_D))
-	{
-		camera.process_keyboard(NoEngine::Camera::CameraDirectaion::Right, delta_time);
-	}
-	if (NoEngine::Input::IsKeyPressed(NoEngine::KeyCode::KEY_SPACE))
-	{
-		camera.process_keyboard(NoEngine::Camera::CameraDirectaion::Up, delta_time);
-	}
-	if (NoEngine::Input::IsKeyPressed(NoEngine::KeyCode::KEY_LEFT_SHIFT))
-	{
-		camera.process_keyboard(NoEngine::Camera::CameraDirectaion::Down, delta_time);
+	else {
+
 	}
 
 	if (NoEngine::Input::IsMouseButtonPressed(NoEngine::MouseButton::MOUSE_BUTTON_RIGHT) && check_cursor_in_scene())
@@ -277,9 +285,15 @@ void NoEngineEditor::setup_object_menu()
 
 	ImGui::Begin("Scene Details");
 
+	check_selected = check_selected_obj();
+	if (!check_selected) {
+		ImGui::BeginDisabled(true);
+	}
+
 	ImGui::SetNextItemOpen(true, ImGuiCond_Once);
 	if (ImGui::CollapsingHeader("Transform"))
 	{
+
 		ImGui::Text("Position   ");
 		ImGui::SameLine();
 		ImGui::PushItemWidth(115.0f);
@@ -356,12 +370,35 @@ void NoEngineEditor::setup_object_menu()
 
 		if (ImGui::Button(u8"\uf044 EDIT UPDATE FUNCTION", ImVec2(ImGui::GetWindowWidth() / 2 - 12, 50.f)))
 		{
+			std::array<std::array<std::string, 3>, 3> function_obj = get_function_in_selected_obj();
+			strncpy(buffer_position_x, function_obj[0][0].c_str(), sizeof(buffer_position_x) - 1);
+			buffer_position_x[sizeof(buffer_position_x) - 1] = '\0';
+			strncpy(buffer_position_y, function_obj[0][1].c_str(), sizeof(buffer_position_y) - 1);
+			buffer_position_y[sizeof(buffer_position_y) - 1] = '\0';
+			strncpy(buffer_position_z, function_obj[0][2].c_str(), sizeof(buffer_position_z) - 1);
+			buffer_position_z[sizeof(buffer_position_z) - 1] = '\0';
+			strncpy(buffer_rotation_x, function_obj[1][0].c_str(), sizeof(buffer_rotation_x) - 1);
+			buffer_rotation_x[sizeof(buffer_rotation_x) - 1] = '\0';
+			strncpy(buffer_rotation_y, function_obj[1][1].c_str(), sizeof(buffer_rotation_y) - 1);
+			buffer_rotation_y[sizeof(buffer_rotation_y) - 1] = '\0';
+			strncpy(buffer_rotation_z, function_obj[1][2].c_str(), sizeof(buffer_rotation_z) - 1);
+			buffer_rotation_z[sizeof(buffer_rotation_z) - 1] = '\0';
+			strncpy(buffer_scale_x, function_obj[2][0].c_str(), sizeof(buffer_scale_x) - 1);
+			buffer_scale_x[sizeof(buffer_scale_x) - 1] = '\0';
+			strncpy(buffer_scale_y, function_obj[2][1].c_str(), sizeof(buffer_scale_y) - 1);
+			buffer_scale_y[sizeof(buffer_scale_y) - 1] = '\0';
+			strncpy(buffer_scale_z, function_obj[2][2].c_str(), sizeof(buffer_scale_z) - 1);
+			buffer_scale_z[sizeof(buffer_scale_z) - 1] = '\0';
+
 			ImGui::OpenPopup("Edit update function");
 		}
+
 		ImGui::SameLine();
+
 		if (ImGui::Button(u8"\uf1f8 REMOVE OBJECT", ImVec2(ImGui::GetWindowWidth() / 2 - 12, 50.f)))
 		{
 			remove_editor_object();
+			check_selected = true;
 		}
 
 		ImVec2 center = ImGui::GetMainViewport()->GetCenter();
@@ -543,28 +580,30 @@ void NoEngineEditor::setup_object_menu()
 				function_editor_str[2][1] = buffer_scale_y;
 				function_editor_str[2][2] = buffer_scale_z;
 
+				save_new_func();
+
 				ImGui::CloseCurrentPopup();
 			}
 			ImGui::SameLine();
 			if (ImGui::Button("Reset", ImVec2(50.f, 30.f)))
 			{
-				strncpy(buffer_position_x, "POS_X", sizeof(buffer_position_x) - 1);
+				strncpy(buffer_position_x, "", sizeof(buffer_position_x) - 1);
 				buffer_position_x[sizeof(buffer_position_x) - 1] = '\0';
-				strncpy(buffer_position_y, "POS_Y", sizeof(buffer_position_y) - 1);
+				strncpy(buffer_position_y, "", sizeof(buffer_position_y) - 1);
 				buffer_position_y[sizeof(buffer_position_y) - 1] = '\0';
-				strncpy(buffer_position_z, "POS_Z", sizeof(buffer_position_z) - 1);
+				strncpy(buffer_position_z, "", sizeof(buffer_position_z) - 1);
 				buffer_position_z[sizeof(buffer_position_z) - 1] = '\0';
-				strncpy(buffer_rotation_x, "ROT_X", sizeof(buffer_rotation_x) - 1);
+				strncpy(buffer_rotation_x, "", sizeof(buffer_rotation_x) - 1);
 				buffer_rotation_x[sizeof(buffer_rotation_x) - 1] = '\0';
-				strncpy(buffer_rotation_y, "ROT_Y", sizeof(buffer_rotation_y) - 1);
+				strncpy(buffer_rotation_y, "", sizeof(buffer_rotation_y) - 1);
 				buffer_rotation_y[sizeof(buffer_rotation_y) - 1] = '\0';
-				strncpy(buffer_rotation_z, "ROT_Z", sizeof(buffer_rotation_z) - 1);
+				strncpy(buffer_rotation_z, "", sizeof(buffer_rotation_z) - 1);
 				buffer_rotation_z[sizeof(buffer_rotation_z) - 1] = '\0';
-				strncpy(buffer_scale_x, "SC_X", sizeof(buffer_scale_x) - 1);
+				strncpy(buffer_scale_x, "", sizeof(buffer_scale_x) - 1);
 				buffer_scale_x[sizeof(buffer_scale_x) - 1] = '\0';
-				strncpy(buffer_scale_y, "SC_Y", sizeof(buffer_scale_y) - 1);
+				strncpy(buffer_scale_y, "", sizeof(buffer_scale_y) - 1);
 				buffer_scale_y[sizeof(buffer_scale_y) - 1] = '\0';
-				strncpy(buffer_scale_z, "SC_Z", sizeof(buffer_scale_z) - 1);
+				strncpy(buffer_scale_z, "", sizeof(buffer_scale_z) - 1);
 				buffer_scale_z[sizeof(buffer_scale_z) - 1] = '\0';
 
 				function_editor_str[0][0] = buffer_position_x;
@@ -578,11 +617,15 @@ void NoEngineEditor::setup_object_menu()
 				function_editor_str[2][0] = buffer_scale_x;
 				function_editor_str[2][1] = buffer_scale_y;
 				function_editor_str[2][2] = buffer_scale_z;
-			}
-				
 
+				reset_new_func();
+			}
 			ImGui::EndPopup();
 		}
+	}
+
+	if (!check_selected) {
+		ImGui::EndDisabled();
 	}
 
 	ImGui::End();
@@ -668,16 +711,47 @@ void NoEngineEditor::on_ui_draw_in_scene()
 		ImGui::EndPopup();
 	}
 
-	//run-stop
+	//run-pause
 	ImGui::SetCursorPos(ImVec2((button_scene_pos.x - 38 * 2) * 0.5, button_scene_pos.y + 45));
-	if (ImGui::Button(pause ? u8"\uf04b" : u8"\uf04c", ImVec2(50, 50)))
+	std::string icon;
+	if (!run && !pause)
+		icon = u8"\uf04b";
+	else if (!run && pause)
+		icon = u8"\uf04b";
+	else if (run && !pause)
+		icon = u8"\uf04c";
+
+	if (ImGui::Button(icon.c_str(), ImVec2(50, 50)))
 	{
-		pause =! pause;
+		if (!run && !pause) {
+			current_state_scene = NE_RUN;
+			run = true;
+			stop = false;
+		}
+		else if (run && !pause) {
+			current_state_scene = NE_PAUSE;
+			run = false;
+			pause = true;
+			stop = false;
+		}
+		else if (!run && pause) {
+			current_state_scene = NE_RUN;
+			run = true;
+			pause = false;
+			stop = false;
+		}
 	}
+	//stop
 	ImGui::SetCursorPos(ImVec2((button_scene_pos.x + 38) * 0.5, button_scene_pos.y + 45));
 	if (ImGui::Button(u8"\uf04d", ImVec2(50, 50)))
 	{
-
+		if (!stop)
+		{
+			current_state_scene = NE_STOP;
+			stop = true;
+			run = false;
+			pause = false;
+		}
 	}
 
 	ImGui::PopStyleColor(3);

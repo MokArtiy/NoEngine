@@ -16,6 +16,12 @@ namespace NoEngine {
 		Cube,
 		Sphere
 	};
+	enum class EngineState
+	{
+		Run,
+		Pause,
+		Stop
+	};
 
 	class EditorScene
 	{
@@ -31,6 +37,7 @@ namespace NoEngine {
 		);
 		static void remove_object();
 		static void draw_objects();
+		static void update_objets(float deltaTime, EngineState state);
 		static void pick_object(const glm::vec2& mouse_pos, glm::mat4 view_matrix, glm::mat4 projection, glm::vec3 camera_position);
 		static std::shared_ptr<Actor> get_selected_obj();
 		static glm::vec3 get_selected_location();
@@ -43,5 +50,6 @@ namespace NoEngine {
 	private:
 		static std::unordered_map<std::string, std::shared_ptr<Actor>> m_scene_objects;
 		static std::map<std::string, std::vector<std::string>> m_scene_objects_names;
+		static bool m_saving_scene;
 	};
 }
