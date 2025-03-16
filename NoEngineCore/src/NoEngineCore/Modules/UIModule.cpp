@@ -60,6 +60,9 @@ namespace NoEngine {
 
 		style.FrameRounding = 3.f;
 
+		ImGui::LoadIniSettingsFromDisk((ResourceManager::get_path() + "res/config/imgui.ini").c_str());
+		io.IniFilename = nullptr;
+
 		ImGui_ImplOpenGL3_Init();
 		ImGui_ImplGlfw_InitForOpenGL(pWindow, true);
 	}
