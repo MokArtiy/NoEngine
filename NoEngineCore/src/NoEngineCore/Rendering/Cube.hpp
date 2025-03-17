@@ -5,14 +5,13 @@
 class Cube : public Actor
 {
 public:
-	Cube(glm::mat4 view_matrix, glm::mat4 projection_matrix, glm::vec3 camera_position,
-		std::shared_ptr<NoEngine::ShaderProgram> shader,
+	Cube(std::shared_ptr<NoEngine::ShaderProgram> shader,
 		std::shared_ptr<NoEngine::ShaderProgram> outline_shader,
 		 const glm::vec3& position = glm::vec3(0.0f),
 		 const glm::vec3& rotation = glm::vec3(0.0f),
 		 const glm::vec3& scale    = glm::vec3(1.0f),
 		 const std::string name = "")
-		: Actor(view_matrix, projection_matrix, camera_position, shader, outline_shader, position, rotation, scale, name)
+		: Actor(shader, outline_shader, position, rotation, scale, name)
 	{
 		p_vao = std::make_unique<NoEngine::VertexArray>();
 		p_position_vbo = std::make_unique<NoEngine::VertexBuffer>(pos_norm_uv, sizeof(pos_norm_uv), buffer_layout_vec3_vec3_vec2);

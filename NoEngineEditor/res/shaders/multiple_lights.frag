@@ -46,19 +46,21 @@ struct SpotLight {
     vec3 specular;       
 };
 
-#define NR_POINT_LIGHTS 4
+
 
 in vec3 frag_position;
 in vec3 frag_normal;
 in vec2 tex_coord;
 
+#define NR_POINT_LIGHTS 100
+
+uniform int POINT_COUNT;
 uniform vec3 view_position;
 uniform DirLight dirLight;
 uniform PointLight pointLights[NR_POINT_LIGHTS];
 uniform SpotLight spotLight;
 uniform Material material;
 uniform bool check_dirLight;
-uniform bool check_PointLight[NR_POINT_LIGHTS];
 uniform bool check_SpotLight;
 uniform bool use_texture;
 
@@ -80,11 +82,10 @@ void main()
         result += CalcDirLight(dirLight, normal, view_dir);
     }
     // phase 2: point lights
-    for(int i = 0; i < NR_POINT_LIGHTS; i++)
-        if(check_PointLight[i])
-        {
-            result += CalcPointLight(pointLights[i], normal, frag_position, view_dir);    
-        }
+    for(int i = 0; i < POINT_COUNT; i++)
+    {
+        result += CalcPointLight(pointLights[i], normal, frag_position, view_dir);
+    }
  
     // phase 3: spot light
     if(check_SpotLight)

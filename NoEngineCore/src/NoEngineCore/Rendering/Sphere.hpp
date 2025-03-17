@@ -5,8 +5,7 @@
 class Sphere : public Actor
 {
 public:
-	Sphere(glm::mat4 view_matrix, glm::mat4 projection_matrix, glm::vec3 camera_position,
-        std::shared_ptr<NoEngine::ShaderProgram> shader,
+	Sphere(std::shared_ptr<NoEngine::ShaderProgram> shader,
 		std::shared_ptr<NoEngine::ShaderProgram> outline_shader,
 		const glm::vec3& position = glm::vec3(0.0f),
 		const glm::vec3& rotation = glm::vec3(0.0f),
@@ -15,14 +14,13 @@ public:
         const float radius = 1.0f,
         const int sectors = 36,
         const int stacks = 18)
-		: Actor(view_matrix, projection_matrix, camera_position, shader, outline_shader, position, rotation, scale, name)
+		: Actor(shader, outline_shader, position, rotation, scale, name)
 	{
         m_radius = radius;
         m_sectors = sectors;
         m_stacks = stacks;
 
         generate_sphere();
-        p_shader = NoEngine::ResourceManager::load_shader("sphere_shader", "res/shaders/default_sphere.vert", "res/shaders/multiple_lights.frag");
 
         p_vao = std::make_unique<NoEngine::VertexArray>();
         p_position_vbo = std::make_unique<NoEngine::VertexBuffer>(m_vertices.data(), m_vertices.size() * sizeof(float), buffer_layout_vec3_vec3_vec2);
@@ -83,7 +81,6 @@ private:
     std::unique_ptr<NoEngine::VertexArray> p_vao;
     std::unique_ptr<NoEngine::VertexBuffer> p_position_vbo;
     std::unique_ptr<NoEngine::IndexBuffer> p_index_buffer;
-    std::shared_ptr<NoEngine::ShaderProgram> p_shader;
 
     glm::vec3 m_local_center = glm::vec3(0.0f, 0.0f, 0.0f);
     float m_radius;

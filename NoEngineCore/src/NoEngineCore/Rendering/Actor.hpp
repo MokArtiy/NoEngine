@@ -25,15 +25,13 @@
 class Actor
 {
 public:
-    Actor(glm::mat4 view_matrix, glm::mat4 projection_matrix, glm::vec3 camera_position,
-        std::shared_ptr<NoEngine::ShaderProgram> shader,
+    Actor(std::shared_ptr<NoEngine::ShaderProgram> shader,
         std::shared_ptr<NoEngine::ShaderProgram> outline_shader,
         const glm::vec3& position = glm::vec3(0.0f),
         const glm::vec3& rotation = glm::vec3(0.0f),
         const glm::vec3& scale = glm::vec3(1.0f),
         const std::string name = "")
-        : m_view_matrix(view_matrix), m_projection_matrix(projection_matrix), m_camera_position(camera_position), p_shader(shader),
-        p_outline_shader(outline_shader), m_position(position), m_rotation(rotation),
+        : p_shader(shader), p_outline_shader(outline_shader), m_position(position), m_rotation(rotation),
         m_scale(scale), m_name(name), m_default_position(position), m_default_rotation(rotation), m_default_scale(scale)
     {
     }
@@ -123,6 +121,13 @@ public:
 
     std::shared_ptr<NoEngine::ShaderProgram> get_shader() { return p_shader; }
     void set_shader(std::shared_ptr<NoEngine::ShaderProgram> shader) { p_shader = shader; }
+
+    void set_ambient(glm::vec3 ambient) { m_ambient = ambient; }
+    glm::vec3 get_ambient() const { return m_ambient; }
+    void set_diffuse(glm::vec3 diffuse) { m_diffuse = diffuse; }
+    glm::vec3 get_diffuse() const { return m_diffuse; }
+    void set_specular(glm::vec3 specular) { m_specular = specular; }
+    glm::vec3 get_specular() const { return m_specular; }
 
     void set_material_shader()
     {
@@ -238,10 +243,10 @@ protected:
     glm::vec3 m_default_rotation;
     glm::vec3 m_default_scale;
 
+	glm::vec3 m_ambient;
+	glm::vec3 m_diffuse;
+	glm::vec3 m_specular;
+
     std::shared_ptr<NoEngine::ShaderProgram> p_outline_shader;
     std::shared_ptr<NoEngine::ShaderProgram> p_shader;
-
-    glm::mat4 m_view_matrix;
-    glm::mat4 m_projection_matrix;
-    glm::vec3 m_camera_position;
 };

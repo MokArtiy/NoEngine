@@ -18,6 +18,8 @@ set(ENGINE_PRIVATE_INCLUDES
 	src/NoEngineCore/Rendering/Actor.hpp
 	src/NoEngineCore/Rendering/Cube.hpp
 	src/NoEngineCore/Rendering/Sphere.hpp
+	src/NoEngineCore/Rendering/Plane.hpp
+	src/NoEngineCore/Rendering/PointLight.hpp
 	src/NoEngineCore/Rendering/EditorObject.hpp
 	src/NoEngineCore/Rendering/OpenGL/FrameBuffer.hpp
 	src/NoEngineCore/Rendering/OpenGL/Renderer_OpenGL.hpp

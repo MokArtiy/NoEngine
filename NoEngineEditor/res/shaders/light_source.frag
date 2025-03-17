@@ -1,8 +1,17 @@
 #version 460
+
 out vec4 frag_color;
 
-uniform vec3 light_color;
+uniform bool stencil;
 
 void main() {
-    frag_color = vec4(light_color, 1.f);
+    if(stencil)
+    {
+        frag_color = vec4(0.94, 0.62, 0.2, 1.0);
+    }
+    else
+    {
+        frag_color = vec4(0.0, 0.0, 0.0, 1.0);
+    }
+    
 }

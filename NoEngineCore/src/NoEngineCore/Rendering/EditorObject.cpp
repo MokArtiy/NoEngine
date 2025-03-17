@@ -4,10 +4,11 @@
 namespace NoEngine{
 
 	std::unordered_map<std::string, std::shared_ptr<Actor>> EditorScene::m_scene_objects;
+	std::unordered_map<std::string, std::shared_ptr<PointLight>> EditorScene::m_scene_lights;
 	std::map<std::string, std::vector<std::string>> EditorScene::m_scene_objects_names;
 	bool EditorScene::m_saving_scene = false;
 
-	void EditorScene::add_object(glm::mat4 view_matrix, glm::mat4 projection_matrix, glm::vec3 camera_position,
+	void EditorScene::add_object(
 		std::shared_ptr<NoEngine::ShaderProgram> outline_shader,
 		std::shared_ptr<NoEngine::ShaderProgram> shader, ObjectType type,
 		std::string object_name, const glm::vec3& position, const glm::vec3& rotation, const glm::vec3& scale)
@@ -24,6 +25,9 @@ namespace NoEngine{
 			break;
 		case NoEngine::ObjectType::Sphere:
 			shape_name = "Sphere";
+			break;
+		case NoEngine::ObjectType::PointLight:
+			shape_name = "PointLight";
 			break;
 		default:
 			break;
@@ -47,6 +51,14 @@ namespace NoEngine{
 			}
 		}
 
+		for (const auto& objs : m_scene_lights)
+		{
+			if (objs.second->get_selected())
+			{
+				objs.second->set_selected(false);
+			}
+		}
+
 		if (m_scene_objects_names.count(shape_name) == 0)
 		{
 			m_scene_objects_names.emplace(shape_name, std::vector<std::string>{object_name});
@@ -59,14 +71,16 @@ namespace NoEngine{
 		switch (type)
 		{
 		case NoEngine::ObjectType::Plane:
-			
+			m_scene_objects.emplace(object_name, std::make_shared<Plane>(shader, outline_shader, position, rotation, scale, object_name));
 			break;
 		case NoEngine::ObjectType::Cube:
-			m_scene_objects.emplace(object_name, std::make_shared<Cube>(view_matrix, projection_matrix, camera_position, shader, outline_shader, position, rotation, scale, object_name));
+			m_scene_objects.emplace(object_name, std::make_shared<Cube>(shader, outline_shader, position, rotation, scale, object_name));
 			break;
 		case NoEngine::ObjectType::Sphere:
-			m_scene_objects.emplace(object_name, std::make_shared<Sphere>(view_matrix, projection_matrix, camera_position, shader, outline_shader, position, rotation, scale, object_name));
+			m_scene_objects.emplace(object_name, std::make_shared<Sphere>(shader, outline_shader, position, rotation, scale, object_name));
 			break;
+		case NoEngine::ObjectType::PointLight:
+			m_scene_lights.emplace(object_name, std::make_shared<PointLight>(shader, outline_shader, position, rotation, scale, object_name));
 		default:
 			break;
 		}
@@ -87,6 +101,23 @@ namespace NoEngine{
 				}
 				LOG_INFO("Remove object: {0} (X:{1} Y:{2} Z:{3})", it->second->get_name(), it->second->get_position().x, it->second->get_position().y, it->second->get_position().z);
 				it = m_scene_objects.erase(it);
+			}
+			else {
+				++it;
+			}
+		}
+
+		for (auto it = begin(m_scene_lights); it != end(m_scene_lights);)
+		{
+			if (it->second->get_selected())
+			{
+				for (auto pair : m_scene_objects_names)
+				{
+					auto& names = pair.second;
+					names.erase(std::remove(names.begin(), names.end(), it->second->get_name()), names.end());
+				}
+				LOG_INFO("Remove light: {0} (X:{1} Y:{2} Z:{3})", it->second->get_name(), it->second->get_position().x, it->second->get_position().y, it->second->get_position().z);
+				it = m_scene_lights.erase(it);
 			}
 			else {
 				++it;
@@ -125,6 +156,20 @@ namespace NoEngine{
 				}
 			}
 		}
+
+		if (m_scene_lights.size() != 0)
+		{
+			for (auto i : m_scene_lights)
+			{
+				if (i.second->get_selected())
+				{
+					i.second->draw("stencil");
+				}
+				else {
+					i.second->draw();
+				}
+			}
+		}
 	}
 
 	void EditorScene::update_objets(float deltaTime, EngineState state)
@@ -143,6 +188,15 @@ namespace NoEngine{
 						obj.second->set_default_scale(obj.second->get_scale());
 					}
 				}
+				for (const auto& obj : m_scene_lights)
+				{
+					if (obj.second->get_check_update_func())
+					{
+						obj.second->set_default_position(obj.second->get_position());
+						obj.second->set_default_rotation(obj.second->get_rotation());
+						obj.second->set_default_scale(obj.second->get_scale());
+					}
+				}
 				m_saving_scene = true;
 			}
 			for (const auto& obj : m_scene_objects)
@@ -152,9 +206,23 @@ namespace NoEngine{
 					obj.second->update_function(deltaTime, obj.second->get_update_func());
 				}
 			}
+			for (const auto& obj : m_scene_lights)
+			{
+				if (obj.second->get_check_update_func())
+				{
+					obj.second->update_function(deltaTime, obj.second->get_update_func());
+				}
+			}
 			break;
 		case NoEngine::EngineState::Pause:
 			for (const auto& obj : m_scene_objects)
+			{
+				if (obj.second->get_check_update_func())
+				{
+					obj.second->update_function(0, obj.second->get_update_func());
+				}
+			}
+			for (const auto& obj : m_scene_lights)
 			{
 				if (obj.second->get_check_update_func())
 				{
@@ -174,11 +242,29 @@ namespace NoEngine{
 						obj.second->set_scale(obj.second->get_default_scale());
 					}
 				}
+				for (const auto& obj : m_scene_lights)
+				{
+					if (obj.second->get_check_update_func())
+					{
+						obj.second->set_position(obj.second->get_default_position());
+						obj.second->set_rotation(obj.second->get_default_rotation());
+						obj.second->set_scale(obj.second->get_default_scale());
+					}
+				}
 				m_saving_scene = false;
 			}
 			else 
 			{
 				for (const auto& obj : m_scene_objects)
+				{
+					if (obj.second->get_check_update_func())
+					{
+						obj.second->set_default_position(obj.second->get_position());
+						obj.second->set_default_rotation(obj.second->get_rotation());
+						obj.second->set_default_scale(obj.second->get_scale());
+					}
+				}
+				for (const auto& obj : m_scene_lights)
 				{
 					if (obj.second->get_check_update_func())
 					{
@@ -217,10 +303,39 @@ namespace NoEngine{
 					obj.second->set_selected(false);
 			}
 		}
+
+		for (const auto& obj : m_scene_lights)
+		{
+			float distance;
+			if (obj.second->intersect(camera_position, ray_direction, distance))
+			{
+				for (const auto& objs : m_scene_lights)
+				{
+					if (objs.second->get_selected())
+					{
+						objs.second->set_selected(false);
+					}
+				}
+				LOG_WARN("Pick object!");
+				obj.second->set_selected(true);
+			}
+			else
+			{
+				if (obj.second->get_selected())
+					obj.second->set_selected(false);
+			}
+		}
 	}
 	std::shared_ptr<Actor> EditorScene::get_selected_obj()
 	{
 		for (const auto& obj : m_scene_objects)
+		{
+			if (obj.second->get_selected())
+			{
+				return obj.second;
+			}
+		}
+		for (const auto& obj : m_scene_lights)
 		{
 			if (obj.second->get_selected())
 			{
@@ -279,33 +394,5 @@ namespace NoEngine{
 		{
 			obj->set_scale(glm::vec3(x, y, z));
 		}
-	}
-
-	void EditorScene::update_variables_shaders(
-		glm::mat4 view_matrix, 
-		glm::mat4 projection_matrix,
-		glm::vec3 camera_position, 
-		bool check_dirlight, 
-		std::array<std::array<float, 3>, 4> dirlight_variables)
-	{
-		for (auto& obj : m_scene_objects)
-		{
-			auto shader = obj.second->get_shader();
-
-			shader->bind();
-			shader->set_matrix4("projection_view_matrix", projection_matrix * view_matrix);
-			shader->set_vec3("view_position", camera_position);
-
-			shader->set_bool("check_dirLight", check_dirlight);
-			if (check_dirlight)
-			{
-				shader->set_vec3("dirLight.direction", glm::vec3(dirlight_variables[0][0], dirlight_variables[0][1], dirlight_variables[0][2]));
-				shader->set_vec3("dirLight.ambient", glm::vec3(dirlight_variables[1][0], dirlight_variables[1][1], dirlight_variables[1][2]));
-				shader->set_vec3("dirLight.diffuse", glm::vec3(dirlight_variables[2][0], dirlight_variables[2][1], dirlight_variables[2][2]));
-				shader->set_vec3("dirLight.specular", glm::vec3(dirlight_variables[3][0], dirlight_variables[3][1], dirlight_variables[3][2]));
-			}
-
-			obj.second->set_shader(shader);
-		}	
 	}
 }

@@ -11,10 +11,11 @@
 #define NE_PLANE 0x000001
 #define NE_CUBE 0x000002
 #define NE_SPHERE 0x000003
+#define NE_POINT_LIGHT 0x000004
 
-#define NE_RUN 0x000004
-#define NE_PAUSE 0x000005
-#define NE_STOP 0x000006
+#define NE_RUN 0x000005
+#define NE_PAUSE 0x000006
+#define NE_STOP 0x000007
 
 namespace NoEngine {
 

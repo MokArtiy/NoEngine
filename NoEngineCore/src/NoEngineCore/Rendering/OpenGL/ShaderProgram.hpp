@@ -4,10 +4,18 @@
 
 namespace NoEngine {
 
+	enum class TypeShader
+	{
+		Object,
+		PointLight,
+		Grid,
+		Outline
+	};
+
 	class ShaderProgram
 	{
 	public:
-		ShaderProgram(const char* vertex_shader_src, const char* fragment_shader_src);
+		ShaderProgram(const char* vertex_shader_src, const char* fragment_shader_src, TypeShader type = TypeShader::Object);
 		ShaderProgram(ShaderProgram&&) noexcept;
 		ShaderProgram& operator=(ShaderProgram&&) noexcept;
 		~ShaderProgram();
@@ -29,8 +37,11 @@ namespace NoEngine {
 		void set_vec3(const char* name, const float value[3]) const;
 		void set_bool(const char* name, const bool value) const;
 
+		TypeShader get_type() const { return m_type; }
+
 	private:
 		bool m_isCompiled = false;
 		unsigned int m_id = 0;
+		TypeShader m_type;
 	};
 }

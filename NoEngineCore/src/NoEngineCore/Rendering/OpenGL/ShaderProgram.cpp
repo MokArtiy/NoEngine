@@ -27,8 +27,10 @@ namespace NoEngine
 		return true;
 	}
 
-	ShaderProgram::ShaderProgram(const char* vertex_shader_src, const char* fragment_shader_src)
+	ShaderProgram::ShaderProgram(const char* vertex_shader_src, const char* fragment_shader_src, TypeShader type)
 	{
+		m_type = type;
+
 		GLuint vertex_shader_id = 0;
 		if (!create_shader(vertex_shader_src, GL_VERTEX_SHADER, vertex_shader_id))
 		{

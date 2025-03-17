@@ -26,56 +26,13 @@
 #include <iostream>
 
 namespace NoEngine {
-
-	GLfloat pos_norm_uv[] = {
-		//    position             normal            UV                  index
-		// FRONT
-		-1.0f, -1.f, -1.f,    -1.f,  0.f,  0.f,     0.f, 0.f,              // 0
-		-1.0f,  1.f, -1.f,    -1.f,  0.f,  0.f,     1.f, 0.f,              // 1
-		-1.0f,  1.f,  1.f,    -1.f,  0.f,  0.f,     1.f, 1.f,              // 2
-		-1.0f, -1.f,  1.f,    -1.f,  0.f,  0.f,     0.f, 1.f,              // 3
-		// BACK                                  
-		 1.0f, -1.f, -1.f,     1.f,  0.f,  0.f,     1.f, 0.f,              // 4
-		 1.0f,  1.f, -1.f,     1.f,  0.f,  0.f,     0.f, 0.f,              // 5
-		 1.0f,  1.f,  1.f,     1.f,  0.f,  0.f,     0.f, 1.f,              // 6
-		 1.0f, -1.f,  1.f,     1.f,  0.f,  0.f,     1.f, 1.f,              // 7
-		 // RIGHT
-		 -1.0f,  1.f, -1.f,     0.f,  1.f,  0.f,     0.f, 0.f,              // 8
-		  1.0f,  1.f, -1.f,     0.f,  1.f,  0.f,     1.f, 0.f,              // 9
-		  1.0f,  1.f,  1.f,     0.f,  1.f,  0.f,     1.f, 1.f,              // 10
-		 -1.0f,  1.f,  1.f,     0.f,  1.f,  0.f,     0.f, 1.f,              // 11
-		 // LEFT
-		 -1.0f, -1.f, -1.f,     0.f, -1.f,  0.f,     1.f, 0.f,              // 12
-		  1.0f, -1.f, -1.f,     0.f, -1.f,  0.f,     0.f, 0.f,              // 13
-		  1.0f, -1.f,  1.f,     0.f, -1.f,  0.f,     0.f, 1.f,              // 14
-		 -1.0f, -1.f,  1.f,     0.f, -1.f,  0.f,     1.f, 1.f,              // 15
-		 // TOP
-		 -1.0f, -1.f,  1.f,     0.f,  0.f,  1.f,     0.f, 0.f,              // 16
-		 -1.0f,  1.f,  1.f,     0.f,  0.f,  1.f,     1.f, 0.f,              // 17
-		  1.0f,  1.f,  1.f,     0.f,  0.f,  1.f,     1.f, 1.f,              // 18
-		  1.0f, -1.f,  1.f,     0.f,  0.f,  1.f,     0.f, 1.f,              // 19
-		  // BOTTOM
-		  -1.0f, -1.f, -1.f,    0.f,  0.f, -1.f,     0.f, 1.f,              // 20
-		  -1.0f,  1.f, -1.f,    0.f,  0.f, -1.f,     1.f, 1.f,              // 21
-		   1.0f,  1.f, -1.f,    0.f,  0.f, -1.f,     1.f, 0.f,              // 22
-		   1.0f, -1.f, -1.f,    0.f,  0.f, -1.f,     0.f, 0.f,              // 23
-	};
-
-	GLuint indices[] = {
-		0,   1,  2,  2,  3,  0, // front
-		4,   5,  6,  6,  7,  4, // back
-		8,   9, 10, 10, 11,  8, // right
-		12, 13, 14, 14, 15, 12, // left
-		16, 17, 18, 18, 19, 16, // top
-		20, 21, 22, 22, 23, 20  // bottom
-	};
-
 	std::shared_ptr<FrameBuffer> p_frame_buffer;
-	std::shared_ptr<ShaderProgram> p_shader_program;
+
 	std::shared_ptr<ShaderProgram> p_new_shader;
 	std::shared_ptr<ShaderProgram> p_outline_shader;
 	std::shared_ptr<ShaderProgram> p_grid_shader;
-	std::shared_ptr<ShaderProgram> p_light_source_shader_program;
+	std::shared_ptr<ShaderProgram> p_light_point_shader;
+
 	std::unique_ptr<VertexBuffer> p_cube_position_vbo;
 	std::unique_ptr<IndexBuffer> p_cube_index_buffer;
 	std::shared_ptr<Texture2D> p_texture_smile;
@@ -194,20 +151,15 @@ namespace NoEngine {
 
 		on_editor_init();
 		//-------------------------------------//
-		p_shader_program = ResourceManager::load_shader("p_shader_program", "res/shaders/default_obj.vert", "res/shaders/default_obj_PointLight.frag");
-		p_new_shader = ResourceManager::load_shader("p_new_shader", "res/shaders/default_obj.vert", "res/shaders/multiple_lights.frag");
-		p_outline_shader = ResourceManager::load_shader("p_outline_shader", "res/shaders/object_outlining.vert", "res/shaders/object_outlining.frag");
-		p_grid_shader = ResourceManager::load_shader("p_grid_shader", "res/shaders/grid.vert", "res/shaders/grid.frag");
-		p_light_source_shader_program = ResourceManager::load_shader("p_light_source_shader_program", "res/shaders/light_source.vert", "res/shaders/light_source.frag");
+		p_new_shader = ResourceManager::load_shader(NoEngine::TypeShader::Object, "p_new_shader", "res/shaders/default_obj.vert", "res/shaders/multiple_lights.frag");
+		p_outline_shader = ResourceManager::load_shader(NoEngine::TypeShader::Outline, "p_outline_shader", "res/shaders/object_outlining.vert", "res/shaders/object_outlining.frag");
+		p_grid_shader = ResourceManager::load_shader(NoEngine::TypeShader::Grid, "p_grid_shader", "res/shaders/grid.vert", "res/shaders/grid.frag");
+		p_light_point_shader = ResourceManager::load_shader(NoEngine::TypeShader::PointLight, "p_light_point_shader", "res/shaders/light_source.vert", "res/shaders/light_source.frag");
+		
 		p_texture_container = ResourceManager::load_texture("container_texture", "res/textures/container_iron.png");
 		p_texture_container->bind(1);
 		p_texture_container_specular = ResourceManager::load_texture("container_specular", "res/textures/container_specular.png");
 		p_texture_container_specular->bind(2);
-
-		if (!p_light_source_shader_program->isCompiled())
-		{
-			return false;
-		}
 
 		BufferLayout buffer_layout_1vec3
 		{
@@ -222,13 +174,8 @@ namespace NoEngine {
 		};
 
 		p_grid = std::make_unique<Grid>();
-		p_cube_vao = std::make_unique<VertexArray>();
 		p_frame_buffer = std::make_shared<FrameBuffer>();
-		p_cube_position_vbo = std::make_unique<VertexBuffer>(pos_norm_uv, sizeof(pos_norm_uv), buffer_layout_vec3_vec3_vec2);
-		p_cube_index_buffer = std::make_unique<IndexBuffer>(indices, sizeof(indices) / sizeof(GLuint));
 
-		p_cube_vao->add_vertex_buffer(*p_cube_position_vbo);
-		p_cube_vao->set_index_buffer(*p_cube_index_buffer);
 		p_frame_buffer->create(m_pWindow->get_width(), m_pWindow->get_height());
 		//-------------------------------------//
 		double last_time = glfwGetTime();
@@ -271,13 +218,16 @@ namespace NoEngine {
 		switch (object_type)
 		{
 		case NE_PLANE:
-			EditorScene::add_object(camera.get_view_matrix(), camera.get_projection_matrix(), camera.get_position(), p_outline_shader, p_new_shader, ObjectType::Plane, object_name, position, rotation, scale);
+			EditorScene::add_object(p_outline_shader, p_new_shader, ObjectType::Plane, object_name, position, rotation, scale);
 			break;
 		case NE_CUBE:
-			EditorScene::add_object(camera.get_view_matrix(), camera.get_projection_matrix(), camera.get_position(), p_outline_shader, p_new_shader, ObjectType::Cube, object_name, position, rotation, scale);
+			EditorScene::add_object(p_outline_shader, p_new_shader, ObjectType::Cube, object_name, position, rotation, scale);
 			break;
 		case NE_SPHERE:
-			EditorScene::add_object(camera.get_view_matrix(), camera.get_projection_matrix(), camera.get_position(), p_outline_shader, p_new_shader, ObjectType::Sphere, object_name, position, rotation, scale);
+			EditorScene::add_object(p_outline_shader, p_new_shader, ObjectType::Sphere, object_name, position, rotation, scale);
+			break;
+		case NE_POINT_LIGHT:
+			EditorScene::add_object(p_outline_shader, p_new_shader, ObjectType::PointLight, object_name, position, rotation, scale);
 			break;
 		}
 	}
@@ -396,6 +346,7 @@ namespace NoEngine {
 		}
 	}
 
+	//DRAW
 	void Application::draw()
 	{
 		Renderer_OpenGL::set_clear_color(m_background_color[0], m_background_color[1], m_background_color[2], m_background_color[3]);
@@ -404,31 +355,22 @@ namespace NoEngine {
 
 		glm::mat4 projection_view_matrix = camera.get_projection_matrix() * camera.get_view_matrix();
 
-		p_grid_shader->bind();
-		glm::mat4 model = glm::mat4(1.0f);
-		model = glm::translate(model, glm::vec3(0.0f));
-		p_grid_shader->set_matrix4("mvp", projection_view_matrix * model);
+		std::array<std::array<float, 3>, 4> dirlight = {
+			dirLight_direction[0], dirLight_direction[1], dirLight_direction[2],
+			dirLight_ambient[0], dirLight_ambient[1], dirLight_ambient[2],
+			dirLight_diffuse[0], dirLight_diffuse[1], dirLight_diffuse[2],
+			dirLight_specular[0], dirLight_specular[1], dirLight_specular[2]
+		};
 
-		p_outline_shader->bind();
-		p_outline_shader->set_matrix4("vp", projection_view_matrix);
+		ResourceManager::update_variables_shaders(
+			camera.get_view_matrix(),
+			camera.get_projection_matrix(),
+			camera.get_position(),
+			check_dirLight,
+			dirlight
+		);
 
 		p_new_shader->bind();
-		/* point lights */
-		/*for (int i = 0; i < 4; ++i)
-		{
-			std::string point_number = std::to_string(i);
-			p_new_shader->set_bool(("check_PointLight[" + point_number + "]").c_str(), check_pointLights[i]);
-			if (check_pointLights[i])
-			{
-				p_new_shader->set_vec3(("pointLights[" + point_number + "].position").c_str(), pointLights_vec3[i][0]);
-				p_new_shader->set_vec3(("pointLights[" + point_number + "].ambient").c_str(), pointLights_vec3[i][1]);
-				p_new_shader->set_vec3(("pointLights[" + point_number + "].diffuse").c_str(), pointLights_vec3[i][2]);
-				p_new_shader->set_vec3(("pointLights[" + point_number + "].specular").c_str(), pointLights_vec3[i][3]);
-				p_new_shader->set_float(("pointLights[" + point_number + "].constant").c_str(), pointLights_float[i][0]);
-				p_new_shader->set_float(("pointLights[" + point_number + "].linear").c_str(), pointLights_float[i][1]);
-				p_new_shader->set_float(("pointLights[" + point_number + "].quadratic").c_str(), pointLights_float[i][2]);
-			}
-		}*/
 		// spotLight
 		p_new_shader->set_bool("check_SpotLight", check_SpotLight);
 		if (check_SpotLight)
@@ -445,20 +387,6 @@ namespace NoEngine {
 			p_new_shader->set_float("spotLight.outerCutOff", glm::cos(glm::radians(spotLight_outerCutOff)));
 		}
 
-		std::array<std::array<float, 3>, 4> dirlight = {
-			dirLight_direction[0], dirLight_direction[1], dirLight_direction[2],
-			dirLight_ambient[0], dirLight_ambient[1], dirLight_ambient[2],
-			dirLight_diffuse[0], dirLight_diffuse[1], dirLight_diffuse[2],
-			dirLight_specular[0], dirLight_specular[1], dirLight_specular[2]
-		};
-
-		EditorScene::update_variables_shaders(
-			camera.get_view_matrix(),
-			camera.get_projection_matrix(),
-			camera.get_position(),
-			check_dirLight,
-			dirlight
-		);
 		//DRAW
 		Renderer_OpenGL::set_stencil_mask(0x00);
 
@@ -470,16 +398,16 @@ namespace NoEngine {
 		switch (current_state_scene)
 		{
 		case NE_STOP:
-			EditorScene::update_objets(current_frame, NoEngine::EngineState::Stop);
+			EditorScene::update_objets(delta_time, NoEngine::EngineState::Stop);
 			break;
 		case NE_RUN:
-			EditorScene::update_objets(current_frame, NoEngine::EngineState::Run);
+			EditorScene::update_objets(delta_time, NoEngine::EngineState::Run);
 			break;
 		case NE_PAUSE:
-			EditorScene::update_objets(current_frame, NoEngine::EngineState::Pause);
+			EditorScene::update_objets(delta_time, NoEngine::EngineState::Pause);
 			break;
 		default:
-			EditorScene::update_objets(current_frame, NoEngine::EngineState::Stop);
+			EditorScene::update_objets(delta_time, NoEngine::EngineState::Stop);
 			break;
 		}
 		EditorScene::draw_objects();

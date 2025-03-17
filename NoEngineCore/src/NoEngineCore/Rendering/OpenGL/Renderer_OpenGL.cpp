@@ -126,7 +126,7 @@ namespace NoEngine {
 			glDrawElements(GL_LINES, static_cast<GLsizei>(vertex_array.get_indices_count()), GL_UNSIGNED_INT, nullptr);
 			break;
 		case NoEngine::DrawMode::Points:
-			glDrawElements(GL_POINTS, static_cast<GLsizei>(vertex_array.get_indices_count()), GL_UNSIGNED_INT, nullptr);
+			glDrawArrays(GL_POINTS, 0, 1);
 			break;
 		default:
 			glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(vertex_array.get_indices_count()), GL_UNSIGNED_INT, nullptr);

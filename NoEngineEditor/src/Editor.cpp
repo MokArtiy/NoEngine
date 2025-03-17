@@ -690,17 +690,13 @@ void NoEngineEditor::on_ui_draw_in_scene()
 
 		ImGui::Spacing();
 		ImGui::SeparatorText("Light");
-		for (int i = 0; i < light_count; i++)
-		{
-			if (ImGui::Button(lights[i], ImVec2(100.f, 100.f)))
-			{
-				ImGui::CloseCurrentPopup();
-			}
 
-			if (i < 5) {
-				ImGui::SameLine();
-			}
+		if (ImGui::Button("Point\nlight", ImVec2(100.f, 100.f)))
+		{
+			add_editor_object(NE_POINT_LIGHT);
+			ImGui::CloseCurrentPopup();
 		}
+
 		ImGui::EndChild();
 		ImGui::Separator();
 		ImGui::Spacing();
