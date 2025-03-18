@@ -227,7 +227,7 @@ namespace NoEngine {
 			EditorScene::add_object(p_outline_shader, p_new_shader, ObjectType::Sphere, object_name, position, rotation, scale);
 			break;
 		case NE_POINT_LIGHT:
-			EditorScene::add_object(p_outline_shader, p_new_shader, ObjectType::PointLight, object_name, position, rotation, scale);
+			EditorScene::add_object(p_outline_shader, p_light_point_shader, ObjectType::PointLight, object_name, position, rotation, scale);
 			break;
 		}
 	}
@@ -276,6 +276,11 @@ namespace NoEngine {
 		EditorScene::pick_object(mouse_pos, camera.get_view_matrix(), camera.get_projection_matrix(), camera.get_position());
 	}
 
+	void Application::set_check_lights(bool check)
+	{
+		EditorScene::set_draw_light(check);
+	}
+
 	glm::vec3 Application::get_selected_object_location()
 	{
 		return EditorScene::get_selected_location();
@@ -306,12 +311,109 @@ namespace NoEngine {
 		EditorScene::set_selected_scale(x, y, z);
 	}
 
+	//material
+
+	float Application::get_selected_object_constant()
+	{
+		return EditorScene::get_selected_constant();
+	}
+
+	void Application::set_selected_object_constant(float constant)
+	{
+		EditorScene::set_selected_constant(constant);
+	}
+
+	float Application::get_selected_object_linear()
+	{
+		return EditorScene::get_selected_linear();
+	}
+
+	void Application::set_selected_object_linear(float linear)
+	{
+		EditorScene::set_selected_linear(linear);
+	}
+
+	float Application::get_selected_object_quadratic()
+	{
+		return EditorScene::get_selected_quadratic();
+	}
+
+	void Application::set_selected_object_quadratic(float quadratic)
+	{
+		EditorScene::set_selected_quadratic(quadratic);
+	}
+
+	glm::vec3 Application::get_selected_object_color()
+	{
+		return EditorScene::get_selected_color();
+	}
+
+	void Application::set_selected_object_color(float r, float g, float b)
+	{
+		EditorScene::set_selected_color(r, g, b);
+		EditorScene::set_selected_ambient(r * 0.1, g * 0.1, b * 0.1);
+		EditorScene::set_selected_diffuse(r, g, b);
+		EditorScene::set_selected_specular(r, g, b);
+	}
+
+	glm::vec3 Application::get_selected_object_ambient()
+	{
+		return EditorScene::get_selected_ambient();
+	}
+
+	void Application::set_selected_object_ambient(float r, float g, float b)
+	{
+		EditorScene::set_selected_ambient(r, g, b);
+	}
+
+	glm::vec3 Application::get_selected_object_diffuse()
+	{
+		return EditorScene::get_selected_diffuse();
+	}
+
+	void Application::set_selected_object_diffuse(float r, float g, float b)
+	{
+		EditorScene::set_selected_diffuse(r, g, b);
+	}
+
+	glm::vec3 Application::get_selected_object_specular()
+	{
+		return EditorScene::get_selected_specular();
+	}
+
+	void Application::set_selected_object_specular(float r, float g, float b)
+	{
+		EditorScene::set_selected_specular(r, g, b);
+	}
+
+	float Application::get_selected_object_shininess()
+	{
+		return EditorScene::get_selected_shininess();
+	}
+
+	void Application::set_selected_object_shininess(float shininess)
+	{
+		EditorScene::set_selected_shininess(shininess);
+	}
+
+
 	bool Application::check_selected_obj()
 	{
 		auto& obj = EditorScene::get_selected_obj();
 		if (obj != 0)
 			return true;
 		return false;
+	}
+
+	int Application::get_type_selected_obj()
+	{
+		auto& obj = EditorScene::get_selected_obj();
+		
+		if (obj != 0) {
+			return obj->get_obj_type();
+		}
+
+		return -1;
 	}
 
 	std::array<std::array<std::string, 3>, 3> Application::get_function_in_selected_obj()

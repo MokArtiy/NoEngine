@@ -38,6 +38,8 @@ namespace NoEngine {
 		static void enable_stencil_testing();
 		static void enable_input();
 		static void disable_input();
+		static void enable_poligon_mode();
+		static void disable_poligon_mode();
 		static void configurate_opengl();
 		static void set_stencil_mask(unsigned int mask);
 		static void set_stencil_func(StencilFunc func, int ref, unsigned int mask);

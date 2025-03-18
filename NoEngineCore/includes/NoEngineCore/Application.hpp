@@ -1,5 +1,7 @@
 #pragma once
 
+#include "NE_VARIABLES.hpp"
+
 #include "NoEngineCore/Event.hpp"
 #include "NoEngineCore/Camera.hpp"
 #include "NoEngineCore/ResourceManager.hpp"
@@ -7,15 +9,6 @@
 #include <memory>
 #include <string>
 #include <array>
-
-#define NE_PLANE 0x000001
-#define NE_CUBE 0x000002
-#define NE_SPHERE 0x000003
-#define NE_POINT_LIGHT 0x000004
-
-#define NE_RUN 0x000005
-#define NE_PAUSE 0x000006
-#define NE_STOP 0x000007
 
 namespace NoEngine {
 
@@ -44,7 +37,7 @@ namespace NoEngine {
 		glm::vec2 get_current_cursor_position_in_scene() const;
 		bool check_cursor_in_scene();
 
-		Camera camera{ glm::vec3(-5, 5, 2), glm::vec3(0.f, 15.f, -45.f) };
+		Camera camera{ glm::vec3(5, -5, 2), glm::vec3(0.f, 15.f, 135.f) };
 
 		void add_editor_object(int object_type,
 			std::string object_name = "",
@@ -54,6 +47,7 @@ namespace NoEngine {
 		void remove_editor_object();
 		void draw_main_scene();
 		void pick_object(glm::vec2 mouse_pos);
+		void set_check_lights(bool check);
 		glm::vec3 get_selected_object_location();
 		void set_selected_object_location(float x, float y, float z);
 		glm::vec3 get_selected_object_rotation();
@@ -61,8 +55,26 @@ namespace NoEngine {
 		glm::vec3 get_selected_object_scale();
 		void set_selected_object_scale(float x, float y, float z);
 
+		float get_selected_object_constant();
+		void set_selected_object_constant(float constant);
+		float get_selected_object_linear();
+		void set_selected_object_linear(float linear);
+		float get_selected_object_quadratic();
+		void set_selected_object_quadratic(float quadratic);
+		glm::vec3 get_selected_object_color();
+		void set_selected_object_color(float r, float g, float b);
+		glm::vec3 get_selected_object_ambient();
+		void set_selected_object_ambient(float r, float g, float b);
+		glm::vec3 get_selected_object_diffuse();
+		void set_selected_object_diffuse(float r, float g, float b);
+		glm::vec3 get_selected_object_specular();
+		void set_selected_object_specular(float r, float g, float b);
+		float get_selected_object_shininess();
+		void set_selected_object_shininess(float shininess);
+
 		//update_func_obj
 		bool check_selected_obj();
+		int get_type_selected_obj();
 		std::array<std::array<std::string, 3>, 3> get_function_in_selected_obj();
 		void save_new_func();
 		void reset_new_func();

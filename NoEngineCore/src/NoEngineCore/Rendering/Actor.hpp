@@ -1,6 +1,6 @@
 #pragma once
 
-#define M_PI 3.14159265358979323846
+#include "../NoEngineCore/includes/NoEngineCore/NE_VARIABLES.hpp"
 
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
@@ -27,12 +27,19 @@ class Actor
 public:
     Actor(std::shared_ptr<NoEngine::ShaderProgram> shader,
         std::shared_ptr<NoEngine::ShaderProgram> outline_shader,
+        int type,
         const glm::vec3& position = glm::vec3(0.0f),
         const glm::vec3& rotation = glm::vec3(0.0f),
         const glm::vec3& scale = glm::vec3(1.0f),
+        const glm::vec3 ambient = glm::vec3(0.7f),
+        const glm::vec3 diffuse = glm::vec3(1.0f),
+        const glm::vec3 specular = glm::vec3(0.7f),
+        const float shininess = 32.f,
         const std::string name = "")
-        : p_shader(shader), p_outline_shader(outline_shader), m_position(position), m_rotation(rotation),
-        m_scale(scale), m_name(name), m_default_position(position), m_default_rotation(rotation), m_default_scale(scale)
+        : p_shader(shader), p_outline_shader(outline_shader), m_type(type),
+        m_position(position), m_rotation(rotation),
+        m_scale(scale), m_ambient(ambient), m_diffuse(diffuse), m_shininess(shininess), m_specular(specular),
+        m_name(name), m_default_position(position), m_default_rotation(rotation), m_default_scale(scale)
     {
     }
     virtual ~Actor() {}
@@ -122,12 +129,17 @@ public:
     std::shared_ptr<NoEngine::ShaderProgram> get_shader() { return p_shader; }
     void set_shader(std::shared_ptr<NoEngine::ShaderProgram> shader) { p_shader = shader; }
 
+    void set_check_draw(bool check) { m_check_draw = check; }
+    bool get_check_draw() const { return m_check_draw; }
+
     void set_ambient(glm::vec3 ambient) { m_ambient = ambient; }
     glm::vec3 get_ambient() const { return m_ambient; }
     void set_diffuse(glm::vec3 diffuse) { m_diffuse = diffuse; }
     glm::vec3 get_diffuse() const { return m_diffuse; }
     void set_specular(glm::vec3 specular) { m_specular = specular; }
     glm::vec3 get_specular() const { return m_specular; }
+    void set_shininess(float shininess) { m_shininess = shininess; }
+    float get_shininess() const { return m_shininess; }
 
     void set_material_shader()
     {
@@ -140,10 +152,10 @@ public:
         else
         {
             p_shader->bind();
-            p_shader->set_vec3("material.ambient_color", glm::vec3(0.7, 0.7, 0.7));
-            p_shader->set_vec3("material.diffuse_color", glm::vec3(1.0f, 1.0f, 1.0f));
-            p_shader->set_vec3("material.specular_color", glm::vec3(0.7, 0.7, 0.7));
-            p_shader->set_float("material.shininess", 32.f);
+            p_shader->set_vec3("material.ambient_color", m_ambient);
+            p_shader->set_vec3("material.diffuse_color", m_diffuse);
+            p_shader->set_vec3("material.specular_color", m_specular);
+            p_shader->set_float("material.shininess", m_shininess);
         }
     }
 
@@ -168,6 +180,8 @@ public:
 
     void set_check_update_func(const bool check_update_func) { m_new_update_func = check_update_func; }
     const bool get_check_update_func() const { return m_new_update_func; }
+
+    int get_obj_type() const { return m_type; }
 
     double parser_string(std::string function_string, float deltatime)
     {
@@ -238,6 +252,9 @@ protected:
     bool m_selected = true;
     bool m_new_update_func = false;
     bool m_use_texture = false;
+    bool m_check_draw = true;
+
+    int m_type;
 
     glm::vec3 m_default_position;
     glm::vec3 m_default_rotation;
@@ -246,6 +263,7 @@ protected:
 	glm::vec3 m_ambient;
 	glm::vec3 m_diffuse;
 	glm::vec3 m_specular;
+	float m_shininess;
 
     std::shared_ptr<NoEngine::ShaderProgram> p_outline_shader;
     std::shared_ptr<NoEngine::ShaderProgram> p_shader;

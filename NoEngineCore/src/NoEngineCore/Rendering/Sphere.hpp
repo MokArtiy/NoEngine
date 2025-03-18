@@ -7,14 +7,19 @@ class Sphere : public Actor
 public:
 	Sphere(std::shared_ptr<NoEngine::ShaderProgram> shader,
 		std::shared_ptr<NoEngine::ShaderProgram> outline_shader,
+        int type = NE_SPHERE,
 		const glm::vec3& position = glm::vec3(0.0f),
 		const glm::vec3& rotation = glm::vec3(0.0f),
 		const glm::vec3& scale = glm::vec3(1.0f),
+        const glm::vec3 ambient = glm::vec3(0.7f),
+        const glm::vec3 diffuse = glm::vec3(1.0f),
+        const glm::vec3 specular = glm::vec3(0.7f),
+        const float shininess = 32.f,
 		const std::string name = "",
         const float radius = 1.0f,
         const int sectors = 36,
         const int stacks = 18)
-		: Actor(shader, outline_shader, position, rotation, scale, name)
+		: Actor(shader, outline_shader, type, position, rotation, scale, ambient, diffuse, specular, shininess, name)
 	{
         m_radius = radius;
         m_sectors = sectors;

@@ -95,6 +95,7 @@ namespace NoEngine {
 				for (auto& light : NoEngine::EditorScene::get_scene_lights())
 				{
 					std::string point_number = std::to_string(count_light);
+					i.second->set_int("POINT_COUNT", count_light + 1);
 					i.second->set_vec3(("pointLights[" + point_number + "].position").c_str(), light.second->get_position());
 					i.second->set_vec3(("pointLights[" + point_number + "].ambient").c_str(), light.second->get_ambient());
 					i.second->set_vec3(("pointLights[" + point_number + "].diffuse").c_str(), light.second->get_diffuse());
@@ -102,7 +103,7 @@ namespace NoEngine {
 					i.second->set_float(("pointLights[" + point_number + "].constant").c_str(), light.second->get_constant());
 					i.second->set_float(("pointLights[" + point_number + "].linear").c_str(), light.second->get_linear());
 					i.second->set_float(("pointLights[" + point_number + "].quadratic").c_str(), light.second->get_quadratic());
-					count_light++;
+					++count_light;
 				}
 				break;
 			case NoEngine::TypeShader::PointLight:

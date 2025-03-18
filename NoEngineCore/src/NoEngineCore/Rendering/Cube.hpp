@@ -7,11 +7,16 @@ class Cube : public Actor
 public:
 	Cube(std::shared_ptr<NoEngine::ShaderProgram> shader,
 		std::shared_ptr<NoEngine::ShaderProgram> outline_shader,
+		int type = NE_CUBE,
 		 const glm::vec3& position = glm::vec3(0.0f),
 		 const glm::vec3& rotation = glm::vec3(0.0f),
 		 const glm::vec3& scale    = glm::vec3(1.0f),
+		 const glm::vec3 ambient = glm::vec3(0.7f),
+		 const glm::vec3 diffuse = glm::vec3(1.0f),
+		 const glm::vec3 specular = glm::vec3(0.7f),
+		const float shininess = 32.f,
 		 const std::string name = "")
-		: Actor(shader, outline_shader, position, rotation, scale, name)
+		: Actor(shader, outline_shader, type, position, rotation, scale, ambient, diffuse, specular, shininess, name)
 	{
 		p_vao = std::make_unique<NoEngine::VertexArray>();
 		p_position_vbo = std::make_unique<NoEngine::VertexBuffer>(pos_norm_uv, sizeof(pos_norm_uv), buffer_layout_vec3_vec3_vec2);

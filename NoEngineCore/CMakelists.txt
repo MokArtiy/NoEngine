@@ -10,6 +10,7 @@ set(ENGINE_PUBLIC_INCLUDES
 	includes/NoEngineCore/Keys.hpp
 	includes/NoEngineCore/Log.hpp
 	includes/NoEngineCore/ResourceManager.hpp
+	includes/NoEngineCore/NE_VARIABLES.hpp
 )
 
 set(ENGINE_PRIVATE_INCLUDES

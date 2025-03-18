@@ -184,6 +184,16 @@ namespace NoEngine {
 		glfwSetInputMode(m_pWindow, GLFW_STICKY_KEYS, GLFW_FALSE);
 	}
 
+	void Renderer_OpenGL::enable_poligon_mode()
+	{
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	}
+
+	void Renderer_OpenGL::disable_poligon_mode()
+	{
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	}
+
 	void Renderer_OpenGL::configurate_opengl()
 	{
 		glDepthFunc(GL_LESS);

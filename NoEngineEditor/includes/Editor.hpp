@@ -40,7 +40,21 @@ class NoEngineEditor : public NoEngine::Application
 	std::shared_ptr<NoEngine::Texture2D> texture_plane;
 	std::shared_ptr<NoEngine::Texture2D> texture_cube;
 	std::shared_ptr<NoEngine::Texture2D> texture_sphere;
+	std::shared_ptr<NoEngine::Texture2D> texture_pointlight;
 	std::shared_ptr<NoEngine::Texture2D> texture_add;
+	std::shared_ptr<NoEngine::Texture2D> texture_show_grid;
+	std::shared_ptr<NoEngine::Texture2D> texture_camera_perspective;
+	std::shared_ptr<NoEngine::Texture2D> texture_msaa_check;
+
+	//material
+	float constant = 0.0f;
+	float linear = 0.0f;
+	float quadratic = 0.0f;
+	float color[3] = { 0.0f, 0.0f ,0.0f };
+	float ambiend[3] = { 0.0f, 0.0f ,0.0f };
+	float diffuse[3] = { 0.0f, 0.0f ,0.0f };
+	float specular[3] = { 0.0f, 0.0f ,0.0f };
+	float shininess = 0.0f;
 
 	//update function
 	bool run = false;

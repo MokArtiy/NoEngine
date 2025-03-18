@@ -7,18 +7,24 @@ class PointLight : public Actor
 public:
 	PointLight(std::shared_ptr<NoEngine::ShaderProgram> shader,
 		std::shared_ptr<NoEngine::ShaderProgram> outline_shader,
+		int type = NE_POINT_LIGHT,
 		const glm::vec3& position = glm::vec3(0.0f),
 		const glm::vec3& rotation = glm::vec3(0.0f),
 		const glm::vec3& scale = glm::vec3(1.0f),
+		const glm::vec3 ambient = glm::vec3(0.1),
+		const glm::vec3 diffuse = glm::vec3(1.0f),
+		const glm::vec3 specular = glm::vec3(1.0f),
+		const float shininess = 32.f,
 		const std::string name = "")
-		: Actor(shader, outline_shader, position, rotation, scale, name)
+		: Actor(shader, outline_shader, type, position, rotation, scale, ambient, diffuse, specular, shininess, name)
 	{
 		generate_sphere();
 
 		m_color = glm::vec3(1.0f, 1.0f, 1.0f);
-		m_ambient = glm::vec3(m_color.x * 0.1f, m_color.y * 0.1f, m_color.z * 0.1f);
-		m_diffuse = m_color;
-		m_specular = m_color;
+
+		m_constant = 1.0f;
+		m_linear = 0.14f;
+		m_quadratic = 0.07f;
 
 		p_vao = std::make_unique<NoEngine::VertexArray>();
 		p_position_vbo = std::make_unique<NoEngine::VertexBuffer>(m_vertices.data(), m_vertices.size() * sizeof(float), buffer_layout_vec3_vec3_vec2);
@@ -49,27 +55,34 @@ public:
 
 	void draw(std::string param = "default") override
 	{
-		if (param == "stencil")
+		if (m_check_draw)
 		{
-			p_shader->bind();
-			p_shader->set_bool("stencil", true);
-			NoEngine::Renderer_OpenGL::draw(*p_vao);
-		}
-		else
-		{
-			p_shader->bind();
-			p_shader->set_bool("stencil", false);
-			p_shader->set_matrix4("model", get_model_matrix());
+			NoEngine::Renderer_OpenGL::disable_poligon_mode();
+			if (param == "stencil")
+			{
+				p_shader->bind();
+				p_shader->set_bool("stencil", true);
+				p_shader->set_matrix4("model", get_model_matrix());
 
-			NoEngine::Renderer_OpenGL::draw(*p_vao);
+				NoEngine::Renderer_OpenGL::draw(*p_vao);
+			}
+			else
+			{
+				p_shader->bind();
+				p_shader->set_bool("stencil", false);
+				p_shader->set_matrix4("model", get_model_matrix());
+
+				NoEngine::Renderer_OpenGL::draw(*p_vao);
+			}
+			p_vao->unbind();
+			NoEngine::Renderer_OpenGL::enable_poligon_mode();
 		}
-		p_vao->unbind();
 	}
 
 	bool intersect(const glm::vec3& ray_origin, const glm::vec3& ray_direction, float& distance) const override
 	{
 		glm::vec3 world_sphere_center = glm::vec3(get_model_matrix() * glm::vec4(m_local_center, 1.0f));
-		float world_radius = m_radius * glm::max(glm::max(get_scale().x, get_scale().y), get_scale().z);
+		float world_radius = (m_radius + 0.2) * glm::max(glm::max(get_scale().x, get_scale().y), get_scale().z);
 
 		glm::vec3 oc = ray_origin - world_sphere_center;
 		float a = glm::dot(ray_direction, ray_direction);
@@ -84,9 +97,9 @@ private:
 	std::vector<float> m_vertices;
 	std::vector<unsigned int> m_indices;
 
-	int m_sectors = 36;
-	int m_stacks = 18;
-	float m_radius = 0.3f;
+	int m_sectors = 24;
+	int m_stacks = 10;
+	float m_radius = 0.2f;
 
 	glm::vec3 m_local_center = glm::vec3(0.0f, 0.0f, 0.0f);
 	glm::vec3 m_color;
