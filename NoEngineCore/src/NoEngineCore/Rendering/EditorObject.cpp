@@ -174,7 +174,7 @@ namespace NoEngine{
 		}
 	}
 
-	void EditorScene::update_objets(float deltaTime, EngineState state)
+	void EditorScene::update_objets(float current_time, float deltaTime, EngineState state)
 	{
 		switch (state)
 		{
@@ -205,14 +205,14 @@ namespace NoEngine{
 			{
 				if (obj.second->get_check_update_func())
 				{
-					obj.second->update_function(deltaTime, obj.second->get_update_func());
+					obj.second->update_function(current_time, deltaTime, obj.second->get_update_func());
 				}
 			}
 			for (const auto& obj : m_scene_lights)
 			{
 				if (obj.second->get_check_update_func())
 				{
-					obj.second->update_function(deltaTime, obj.second->get_update_func());
+					obj.second->update_function(current_time, deltaTime, obj.second->get_update_func());
 				}
 			}
 			break;
@@ -221,14 +221,14 @@ namespace NoEngine{
 			{
 				if (obj.second->get_check_update_func())
 				{
-					obj.second->update_function(0, obj.second->get_update_func());
+					obj.second->update_function(0 ,0, obj.second->get_update_func());
 				}
 			}
 			for (const auto& obj : m_scene_lights)
 			{
 				if (obj.second->get_check_update_func())
 				{
-					obj.second->update_function(0, obj.second->get_update_func());
+					obj.second->update_function(0, 0, obj.second->get_update_func());
 				}
 			}
 			break;

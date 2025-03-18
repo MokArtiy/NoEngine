@@ -45,7 +45,7 @@ namespace NoEngine {
 		static void remove_object();
 		static void draw_objects();
 		static std::unordered_map<std::string, std::shared_ptr<PointLight>> get_scene_lights() { return m_scene_lights; }
-		static void update_objets(float deltaTime, EngineState state);
+		static void update_objets(float current_time, float deltaTime, EngineState state);
 		static void pick_object(const glm::vec2& mouse_pos, glm::mat4 view_matrix, glm::mat4 projection, glm::vec3 camera_position);
 		static std::shared_ptr<Actor> get_selected_obj();
 		static std::shared_ptr<PointLight> get_selected_light();

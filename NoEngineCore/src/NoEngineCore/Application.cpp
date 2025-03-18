@@ -500,16 +500,16 @@ namespace NoEngine {
 		switch (current_state_scene)
 		{
 		case NE_STOP:
-			EditorScene::update_objets(delta_time, NoEngine::EngineState::Stop);
+			EditorScene::update_objets(current_frame, delta_time, NoEngine::EngineState::Stop);
 			break;
 		case NE_RUN:
-			EditorScene::update_objets(delta_time, NoEngine::EngineState::Run);
+			EditorScene::update_objets(current_frame, delta_time, NoEngine::EngineState::Run);
 			break;
 		case NE_PAUSE:
-			EditorScene::update_objets(delta_time, NoEngine::EngineState::Pause);
+			EditorScene::update_objets(current_frame, delta_time, NoEngine::EngineState::Pause);
 			break;
 		default:
-			EditorScene::update_objets(delta_time, NoEngine::EngineState::Stop);
+			EditorScene::update_objets(current_frame, delta_time, NoEngine::EngineState::Stop);
 			break;
 		}
 		EditorScene::draw_objects();

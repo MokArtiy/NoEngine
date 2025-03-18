@@ -417,57 +417,25 @@ void NoEngineEditor::setup_object_menu()
 
 		ImGui::Text("Ambinent");
 		ImGui::SameLine();
-		ImGui::PushItemWidth(115.0f);
-		for (int i = 0; i < 3; i++)
+		ImGui::PushItemWidth(361.0f);
+		if (ImGui::ColorEdit3("##ambinent", ambiend, ImGuiColorEditFlags_Float))
 		{
-			ImGui::PushID(i + "ambinent");
-			if (ImGui::DragFloat("", &ambiend[i], 0.01f))
-			{
-				set_selected_object_ambient(ambiend[0], ambiend[1], ambiend[2]);
-			}
-			ImGui::PopID();
-
-			if (i < 2) {
-				ImGui::SameLine();
-			}
+			set_selected_object_ambient(ambiend[0], ambiend[1], ambiend[2]);
 		}
-		ImGui::PopItemWidth();
 
 		ImGui::Text("Diffuse     ");
 		ImGui::SameLine();
-		ImGui::PushItemWidth(115.0f);
-		for (int i = 0; i < 3; i++)
+		if (ImGui::ColorEdit3("##diffuse", diffuse, ImGuiColorEditFlags_Float))
 		{
-			ImGui::PushID(i + "diffuse");
-			if (ImGui::DragFloat("", &diffuse[i], 0.01f))
-			{
-				set_selected_object_diffuse(diffuse[0], diffuse[1], diffuse[2]);
-			}
-			ImGui::PopID();
-
-			if (i < 2) {
-				ImGui::SameLine();
-			}
+			set_selected_object_diffuse(diffuse[0], diffuse[1], diffuse[2]);
 		}
-		ImGui::PopItemWidth();
 
 		ImGui::Text("Specular  ");
 		ImGui::SameLine();
-		ImGui::PushItemWidth(115.0f);
-		for (int i = 0; i < 3; i++)
+		ImGui::SetCursorPosX(ImGui::GetCursorPosX() + 2.0f);
+		if (ImGui::ColorEdit3("##specular", specular, ImGuiColorEditFlags_Float))
 		{
-			ImGui::PushID(i + "specular");
-			if(i == 0)
-				ImGui::SetCursorPosX(ImGui::GetCursorPosX() + 2.0f);
-			if (ImGui::DragFloat("", &specular[i], 0.01f))
-			{
-				set_selected_object_specular(specular[0], specular[1], specular[2]);
-			}
-			ImGui::PopID();
-
-			if (i < 2) {
-				ImGui::SameLine();
-			}
+			set_selected_object_specular(specular[0], specular[1], specular[2]);
 		}
 		ImGui::PopItemWidth();
 
@@ -556,10 +524,15 @@ void NoEngineEditor::setup_object_menu()
 		}
 		ImGui::Spacing();
 
-		ImGui::Text(u8"TIME - текущее время в сцене (основа любого передвижения в движке)");
+		ImGui::Text(u8"TIME - текущее время в сцене (для криволинейного передвижения)");
 		ImGui::SameLine();
 		if (ImGui::Button("Copy##t")) {
 			ImGui::SetClipboardText("TIME");
+		}
+		ImGui::Text(u8"DELTA - время между кадрами на сцене (для прямолиненого передвижения)");
+		ImGui::SameLine();
+		if (ImGui::Button("Copy##d")) {
+			ImGui::SetClipboardText("DELTA");
 		}
 		ImGui::Spacing();
 

@@ -48,7 +48,7 @@ public:
     virtual void draw(std::string param = "default") {}
     virtual bool intersect(const glm::vec3& ray_origin, const glm::vec3& ray_direction, float& distance) const { return false; }
 
-    void update_function(float deltaTime, std::array<std::array<std::string, 3>, 3> function)
+    void update_function(float current_time, float deltaTime, std::array<std::array<std::string, 3>, 3> function)
     {
         if (function[0][0] != "" || function[0][1] != "" || function[0][2] != ""
             || function[1][0] != "" || function[1][1] != "" || function[1][2] != ""
@@ -58,45 +58,45 @@ public:
             if (function[0][0] == "")
                 pos_x = get_default_position().x;
             else
-                pos_x = parser_string(function[0][0], deltaTime);
+                pos_x = parser_string(function[0][0], current_time, deltaTime);
             if (function[0][1] == "")
                 pos_y = get_default_position().y;
             else
-                pos_y = parser_string(function[0][1], deltaTime);
+                pos_y = parser_string(function[0][1], current_time, deltaTime);
             if (function[0][2] == "")
                 pos_z = get_default_position().z;
             else
-                pos_z = parser_string(function[0][2], deltaTime);
+                pos_z = parser_string(function[0][2], current_time, deltaTime);
             set_position(glm::vec3(pos_x, pos_y, pos_z));
 
             float rot_x, rot_y, rot_z;
             if (function[1][0] == "")
                 rot_x = get_default_rotation().x;
             else
-                rot_x = parser_string(function[1][0], deltaTime);
+                rot_x = parser_string(function[1][0], current_time, deltaTime);
             if (function[1][1] == "")
                 rot_y = get_default_rotation().y;
             else
-                rot_y = parser_string(function[1][1], deltaTime);
+                rot_y = parser_string(function[1][1], current_time, deltaTime);
             if (function[1][2] == "")
                 rot_z = get_default_rotation().z;
             else
-                rot_z = parser_string(function[1][2], deltaTime);
+                rot_z = parser_string(function[1][2], current_time, deltaTime);
             set_rotation(glm::vec3(rot_x, rot_y, rot_z));
 
             float sc_x, sc_y, sc_z;
             if (function[2][0] == "")
                 sc_x = get_default_scale().x;
             else
-                sc_x = parser_string(function[2][0], deltaTime);
+                sc_x = parser_string(function[2][0], current_time, deltaTime);
             if (function[2][1] == "")
                 sc_y = get_default_scale().y;
             else
-                sc_y = parser_string(function[2][1], deltaTime);
+                sc_y = parser_string(function[2][1], current_time, deltaTime);
             if (function[2][2] == "")
                 sc_z = get_default_scale().z;
             else
-                sc_z = parser_string(function[2][2], deltaTime);
+                sc_z = parser_string(function[2][2], current_time, deltaTime);
 
             set_scale(glm::vec3(sc_x, sc_y, sc_z));
         }
@@ -183,7 +183,7 @@ public:
 
     int get_obj_type() const { return m_type; }
 
-    double parser_string(std::string function_string, float deltatime)
+    double parser_string(std::string function_string, float current_time, float deltatime)
     {
         if (function_string == "") {
             return 0;
@@ -202,7 +202,8 @@ public:
         double SC_X = static_cast<double>(get_scale().x);
         double SC_Y = static_cast<double>(get_scale().y);
         double SC_Z = static_cast<double>(get_scale().z);
-        double TIME = static_cast<double>(deltatime);
+        double TIME = static_cast<double>(current_time);
+        double DELTA = static_cast<double>(deltatime);
 
         symbol_table_t symbol_table;
         symbol_table.add_variable("POS_X", POS_X);
@@ -215,6 +216,7 @@ public:
         symbol_table.add_variable("SC_Y", SC_Y);
         symbol_table.add_variable("SC_Z", SC_Z);
         symbol_table.add_variable("TIME", TIME);
+        symbol_table.add_variable("DELTA", DELTA);
 
         expression_t expr;
         expr.register_symbol_table(symbol_table);
