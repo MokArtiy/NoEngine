@@ -284,38 +284,50 @@ namespace NoEngine{
 	{
 		glm::vec3 ray_direction = NoEngine::PhysicsSystem::get_ray_direction(mouse_pos, view_matrix, projection);
 
-		std::unordered_map<std::string, std::shared_ptr<Actor>> m_all_obj;
 		for (auto& obj : m_scene_objects)
 		{
-			m_all_obj.emplace(obj);
+			obj.second->set_selected(false);
 		}
 		for (auto& obj : m_scene_lights)
 		{
-			m_all_obj.emplace(obj);
+			obj.second->set_selected(false);
 		}
 
-		for (const auto& obj : m_all_obj)
+		std::shared_ptr<Actor> closest_obj = nullptr;
+		float closest_distance = std::numeric_limits<float>::max();
+
+		for (const auto& obj : m_scene_objects)
 		{
 			float distance;
 			if (obj.second->intersect(camera_position, ray_direction, distance))
 			{
-				for (const auto& objs : m_all_obj)
+				if (distance < closest_distance)
 				{
-					if (objs.second->get_selected())
-					{
-						objs.second->set_selected(false);
-					}
+					closest_distance = distance;
+					closest_obj = obj.second;
 				}
-				LOG_WARN("Pick object!");
-				obj.second->set_selected(true);
-			}
-			else
-			{
-				if(obj.second->get_selected())
-					obj.second->set_selected(false);
 			}
 		}
+
+		for (const auto& obj : m_scene_lights)
+		{
+			float distance;
+			if (obj.second->intersect(camera_position, ray_direction, distance))
+			{
+				if (distance < closest_distance)
+				{
+					closest_distance = distance;
+					closest_obj = obj.second;
+				}
+			}
+		}
+
+		if (closest_obj)
+		{
+			closest_obj->set_selected(true);
+		}
 	}
+
 	std::shared_ptr<Actor> EditorScene::get_selected_obj()
 	{
 		std::unordered_map<std::string, std::shared_ptr<Actor>> m_all_obj;
@@ -338,6 +350,7 @@ namespace NoEngine{
 		
 		return 0;
 	}
+
 	std::shared_ptr<PointLight> EditorScene::get_selected_light()
 	{
 		for (const auto& obj : m_scene_lights)
@@ -350,6 +363,7 @@ namespace NoEngine{
 
 		return 0;
 	}
+
 	void EditorScene::set_draw_light(bool check)
 	{
 		for (const auto& obj : m_scene_lights)
@@ -360,6 +374,7 @@ namespace NoEngine{
 			}
 		}
 	}
+
 	glm::vec3 EditorScene::get_selected_location()
 	{
 		auto& obj = get_selected_obj();
@@ -369,6 +384,7 @@ namespace NoEngine{
 		}
 		return glm::vec3(0.0f, 0.0f, 0.0f);
 	}
+
 	void EditorScene::set_selected_location(float x, float y, float z)
 	{
 		auto& obj = get_selected_obj();
@@ -377,6 +393,7 @@ namespace NoEngine{
 			obj->set_position(glm::vec3(x, y, z));
 		}
 	}
+
 	glm::vec3 EditorScene::get_selected_rotation()
 	{
 		auto& obj = get_selected_obj();
@@ -386,6 +403,7 @@ namespace NoEngine{
 		}
 		return glm::vec3(0.0f, 0.0f, 0.0f);
 	}
+
 	void EditorScene::set_selected_rotation(float x, float y, float z)
 	{
 		auto& obj = get_selected_obj();
@@ -397,6 +415,7 @@ namespace NoEngine{
 			}
 		}
 	}
+
 	glm::vec3 EditorScene::get_selected_scale()
 	{
 		auto& obj = get_selected_obj();
@@ -406,6 +425,9 @@ namespace NoEngine{
 		}
 		return glm::vec3(1.0f, 1.0f, 1.0f);
 	}
+
+	/*---------------------------------------------------------------*/
+
 	void EditorScene::set_selected_scale(float x, float y, float z)
 	{
 		auto& obj = get_selected_obj();

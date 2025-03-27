@@ -43,6 +43,7 @@ namespace NoEngine {
 		const glm::vec3 get_direction() const { return m_direction; }
 		const float get_far_clip_plane() const { return m_far_clip_plane; }
 		const float get_near_clip_plane() const { return m_near_clip_plane; }
+		const glm::vec2 get_viewport_size() const { return glm::vec2(m_viewport_width, m_viewport_height); }
 		const float get_field_of_view() const { return m_field_of_view; }
 		const float get_movement_speed() const { return m_movement_speed; }
 

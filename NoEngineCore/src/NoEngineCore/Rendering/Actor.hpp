@@ -146,8 +146,8 @@ public:
         if (m_use_texture)
         {
             p_shader->bind();
-            p_shader->set_int("material.diffuse", 0);
-            p_shader->set_int("material.specular", 1);
+            p_shader->set_int("diffuse_texture", 1);
+            p_shader->set_int("specular_texture", 2);
         }
         else
         {

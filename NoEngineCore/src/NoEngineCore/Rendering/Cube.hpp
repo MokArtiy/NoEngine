@@ -47,7 +47,7 @@ public:
 		{
 			p_shader->bind();
 			set_material_shader();
-			p_shader->set_bool("use_texture", false);
+			p_shader->set_bool("use_texture", m_use_texture);
 			p_shader->set_matrix4("model_matrix", get_model_matrix());
 			p_shader->set_matrix3("normal_matrix", glm::transpose(glm::inverse(glm::mat3(get_model_matrix()))));
 

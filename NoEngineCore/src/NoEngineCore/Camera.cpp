@@ -51,6 +51,10 @@ namespace NoEngine {
 
 	void Camera::set_viewport_size(const float width, const float height)
 	{
+		if (width == 0 || height == 0) {
+			return;
+		}
+
 		m_viewport_width = width;
 		m_viewport_height = height;
 		update_projection_matrix();
@@ -180,6 +184,11 @@ namespace NoEngine {
 	{
 		if (m_projection_mode == ProjectionMode::Perspective)
 		{
+			if (m_viewport_width <= 0.0f || m_viewport_height <= 0.0f) 
+			{
+				m_projection_matrix = glm::mat4(1.0f);
+			}
+
 			m_projection_matrix = glm::perspective(glm::radians(m_field_of_view), m_viewport_width / m_viewport_height, m_near_clip_plane, m_far_clip_plane);
 		}
 		else

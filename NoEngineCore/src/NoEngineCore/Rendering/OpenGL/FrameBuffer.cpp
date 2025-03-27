@@ -7,6 +7,10 @@
 namespace NoEngine {
 	void FrameBuffer::create(unsigned int width, unsigned int height)
 	{
+		if (width == 0 || height == 0) {
+			return;
+		}
+
 		m_width = width;
 		m_height = height;
 
@@ -27,7 +31,6 @@ namespace NoEngine {
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_texture_id, 0);
 
-
 		glGenRenderbuffers(1, &m_depth_id);
 		glBindRenderbuffer(GL_RENDERBUFFER, m_depth_id);
 		//glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, m_width, m_height);
@@ -46,12 +49,23 @@ namespace NoEngine {
 	{
 		if (m_id)
 		{
-			glDeleteFramebuffers(GL_FRAMEBUFFER, &m_id);
-			glDeleteTextures(1, &m_texture_id);
-			//glDeleteTextures(1, &m_depth_id);
-			glDeleteRenderbuffers(1, &m_depth_id);
-			m_texture_id = 0;
-			m_depth_id = 0;
+			if (m_id)
+			{
+				glDeleteFramebuffers(1, &m_id);
+				m_id = 0;
+			}
+
+			if (m_texture_id)
+			{
+				glDeleteTextures(1, &m_texture_id);
+				m_texture_id = 0;
+			}
+
+			if (m_depth_id)
+			{
+				glDeleteRenderbuffers(1, &m_depth_id);
+				m_depth_id = 0;
+			}
 		}
 	}
 

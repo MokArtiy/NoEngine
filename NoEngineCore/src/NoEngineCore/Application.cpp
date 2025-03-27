@@ -86,7 +86,7 @@ namespace NoEngine {
 		m_event_dispatcher.add_event_listener<EventWindowResize>(
 			[&](EventWindowResize& event)
 			{
-				LOG_INFO("[Resized] Changed size to {0}x{1}", event.width, event.height);
+				//LOG_INFO("[Resized] Changed size to {0}x{1}", event.width, event.height);
 				p_frame_buffer->create(event.width, event.height);
 				camera.set_viewport_size(event.width, event.height);
 				draw();
@@ -102,7 +102,7 @@ namespace NoEngine {
 		m_event_dispatcher.add_event_listener<EventMouseButtonPressed>(
 			[&](EventMouseButtonPressed& event)
 			{
-				LOG_INFO("Mouse button pressed: {0}, at ({1}, {2})", static_cast<int>(event.mouse_button), event.x_pos, event.y_pos);
+				//LOG_INFO("Mouse button pressed: {0}, at ({1}, {2})", static_cast<int>(event.mouse_button), event.x_pos, event.y_pos);
 				Input::PressMouseButton(event.mouse_button);
 				on_mouse_button_event(event.mouse_button, event.x_pos, event.y_pos, true);
 			});
@@ -110,7 +110,7 @@ namespace NoEngine {
 		m_event_dispatcher.add_event_listener<EventMouseButtonReleased>(
 			[&](EventMouseButtonReleased& event)
 			{
-				LOG_INFO("Mouse button released: {0}, at ({1}, {2})", static_cast<int>(event.mouse_button), event.x_pos, event.y_pos);
+				//LOG_INFO("Mouse button released: {0}, at ({1}, {2})", static_cast<int>(event.mouse_button), event.x_pos, event.y_pos);
 				Input::ReleaseMouseButton(event.mouse_button);
 				on_mouse_button_event(event.mouse_button, event.x_pos, event.y_pos, false);
 			});
@@ -118,7 +118,7 @@ namespace NoEngine {
 		m_event_dispatcher.add_event_listener<EventKeyPressed>(
 			[&](EventKeyPressed& event)
 			{
-				if (event.ket_code <= KeyCode::KEY_Z)
+				/*if (event.ket_code <= KeyCode::KEY_Z)
 				{
 					if (event.repeated)
 					{
@@ -128,17 +128,17 @@ namespace NoEngine {
 					{
 						LOG_INFO("Key pressed: {0}", static_cast<char>(event.ket_code));
 					}
-				}
+				}*/
 				Input::PressKey(event.ket_code);
 			});
 
 		m_event_dispatcher.add_event_listener<EventKeyReleased>(
 			[&](EventKeyReleased& event)
 			{
-				if (event.ket_code <= KeyCode::KEY_Z)
+				/*if (event.ket_code <= KeyCode::KEY_Z)
 				{
 					LOG_INFO("Key release: {0}", static_cast<char>(event.ket_code));
-				}
+				}*/
 				Input::ReleaseKey(event.ket_code);
 			});
 
@@ -246,8 +246,12 @@ namespace NoEngine {
 		const float window_width = ImGui::GetContentRegionAvail().x;
 		const float window_height = ImGui::GetContentRegionAvail().y;
 
-		camera.set_viewport_size(window_width, window_height);
+		if (window_width != camera.get_viewport_size().x || window_height != camera.get_viewport_size().y)
+		{
+			camera.set_viewport_size(window_width, window_height);
+		}
 
+		/*-----------------------------------------------------*/
 		if (ImGui::IsWindowHovered()) {
 			m_cursor_in_scene = true;
 		}
@@ -259,13 +263,14 @@ namespace NoEngine {
 		ImVec2 scene_pos = ImGui::GetWindowPos();
 		ImVec2 scene_size = ImGui::GetWindowSize();
 		m_cursor_pos_in_scene = glm::vec2(mouse_pos.x - scene_pos.x, mouse_pos.y - scene_pos.y);
+		/*-----------------------------------------------------*/
 
 		GLuint textureID = p_frame_buffer->get_texture_id();
-		ImGui::Image(textureID, ImVec2(window_width, window_height), ImVec2(0, 1), ImVec2(1, 0));
+		ImGui::Image((ImTextureID)(intptr_t)textureID, ImVec2(window_width, window_height), ImVec2(0, 1), ImVec2(1, 0));
 
 		ImVec2 content_avail = ImGui::GetContentRegionAvail();
-
 		button_scene_pos = glm::vec2(content_avail.x, content_avail.y);
+
 		on_ui_draw_in_scene();
 
 		ImGui::End();
