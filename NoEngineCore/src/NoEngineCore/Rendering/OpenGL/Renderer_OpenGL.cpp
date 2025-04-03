@@ -1,4 +1,5 @@
 #include "Renderer_OpenGL.hpp"
+#include "NoEngineCore/ResourceManager.hpp"
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -46,6 +47,20 @@ namespace NoEngine {
 	bool Renderer_OpenGL::init(GLFWwindow* pWindow)
 	{
 		m_pWindow = pWindow;
+
+		int width, height, channels;
+		unsigned char* pixels = stbi_load((ResourceManager::get_path() + "res/icon.png").c_str(), &width, &height, &channels, 4);
+
+		if (pixels) {
+			GLFWimage icon;
+			icon.width = width;
+			icon.height = height;
+			icon.pixels = pixels;
+
+			glfwSetWindowIcon(m_pWindow, 1, &icon);
+
+			stbi_image_free(pixels);
+		}
 
 		glfwMakeContextCurrent(pWindow);
 		//glfwSwapInterval(1);

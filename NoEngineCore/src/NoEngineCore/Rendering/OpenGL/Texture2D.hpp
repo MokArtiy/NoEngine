@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 namespace NoEngine {
 
 	class Texture2D {
@@ -11,6 +13,9 @@ namespace NoEngine {
 		Texture2D& operator=(const Texture2D&) = delete;
 		Texture2D& operator=(Texture2D&& texture) noexcept;
 		Texture2D(Texture2D&& texture) noexcept;
+
+		const unsigned int get_width() const { return m_width; }
+		const unsigned int get_height() const { return m_height; }
 
 		void bind(const unsigned int unit) const;
 		unsigned int get_id() const { return m_id; }

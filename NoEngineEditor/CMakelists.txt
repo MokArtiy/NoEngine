@@ -27,3 +27,7 @@ set_target_properties(${EDITOR_PROJECT_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY
 add_custom_command(TARGET ${EDITOR_PROJECT_NAME} POST_BUILD
 					COMMAND ${CMAKE_COMMAND} -E copy_directory
 					${CMAKE_SOURCE_DIR}/NoEngineEditor/res $<TARGET_FILE_DIR:${EDITOR_PROJECT_NAME}>/res)
+
+add_custom_command(TARGET ${EDITOR_PROJECT_NAME} POST_BUILD
+					COMMAND ${CMAKE_COMMAND} -E copy_directory
+					${CMAKE_SOURCE_DIR}/NoEngineEditor/scripts $<TARGET_FILE_DIR:${EDITOR_PROJECT_NAME}>/scripts)
