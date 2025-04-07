@@ -76,6 +76,10 @@ namespace NoEngine {
 		LOG_INFO("  OpenGL Renderer {0}", get_rendere_str());
 		LOG_INFO("  OpenGL Version {0}", get_version_str());
 
+		int max_samples;
+		glGetIntegerv(GL_MAX_SAMPLES, &max_samples);
+		LOG_INFO("  Max supported samples: {0}", max_samples);
+
 		//glEnable(GL_DEBUG_OUTPUT);
 		glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
 		glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_NOTIFICATION, 0, nullptr, GL_FALSE);
@@ -253,6 +257,15 @@ namespace NoEngine {
 		default:
 			glStencilFunc(GL_ALWAYS, ref, mask);
 			break;
+		}
+	}
+
+	void Renderer_OpenGL::get_error()
+	{
+		GLenum error = glGetError();
+		if (error != GL_NO_ERROR)
+		{
+			LOG_ERROR("Error rendering scene: {0}", error);
 		}
 	}
 

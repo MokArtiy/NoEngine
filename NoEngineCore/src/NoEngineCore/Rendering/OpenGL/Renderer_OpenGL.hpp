@@ -43,6 +43,7 @@ namespace NoEngine {
 		static void configurate_opengl();
 		static void set_stencil_mask(unsigned int mask);
 		static void set_stencil_func(StencilFunc func, int ref, unsigned int mask);
+		static void get_error();
 
 		static const char* get_vendor_str();
 		static const char* get_rendere_str();
