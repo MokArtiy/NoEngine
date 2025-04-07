@@ -88,7 +88,7 @@ begin
     'Version', 
     Version) then
   begin
-    Result := (CompareStr(Version, 'v14.30.30704.0') < 0);
+    Result := (CompareStr(Version, 'v14.42.34438.00') < 0);
     WriteToLog('Найдена версия VC++ Redistributable: ' + Version);
   end
   else
