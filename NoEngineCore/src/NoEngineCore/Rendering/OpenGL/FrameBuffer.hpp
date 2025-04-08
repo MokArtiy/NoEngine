@@ -5,10 +5,10 @@ namespace NoEngine {
 	class FrameBuffer
 	{
 	public:
-		FrameBuffer() : m_id{0}, m_depth_id{0} {}
-	    void create(unsigned int width, unsigned int height);
+		FrameBuffer() : m_id{ 0 }, m_depth_id{ 0 } {}
+		void create(unsigned int width, unsigned int height);
 		void delete_buffers();
-	    void bind();
+		void bind();
 		static void unbind();
 
 		unsigned int get_texture_id() const { return m_texture_id; }

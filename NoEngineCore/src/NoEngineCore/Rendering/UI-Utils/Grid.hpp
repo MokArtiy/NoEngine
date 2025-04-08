@@ -61,7 +61,7 @@ namespace NoEngine {
 	private:
 		const int size = 75;
 		const int step = 1;
-		static const int grid_lines = (100 * 2 / 1) + 1;
+		static const int grid_lines = (75 * 2 / 1) + 1;
 		static const int num_vertices = grid_lines * 4;
 		GLfloat m_vertices[num_vertices * 6];
 		static const int numIndices = grid_lines * 4; // 2 индекса на линию, 2 направления (X и Z)

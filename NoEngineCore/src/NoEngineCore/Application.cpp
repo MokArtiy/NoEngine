@@ -155,11 +155,6 @@ namespace NoEngine {
 		p_outline_shader = ResourceManager::load_shader(NoEngine::TypeShader::Outline, "p_outline_shader", "res/shaders/object_outlining.vert", "res/shaders/object_outlining.frag");
 		p_grid_shader = ResourceManager::load_shader(NoEngine::TypeShader::Grid, "p_grid_shader", "res/shaders/grid.vert", "res/shaders/grid.frag");
 		p_light_point_shader = ResourceManager::load_shader(NoEngine::TypeShader::PointLight, "p_light_point_shader", "res/shaders/light_source.vert", "res/shaders/light_source.frag");
-		
-		p_texture_container = ResourceManager::load_texture("container_texture", "res/textures/container_iron.png");
-		p_texture_container->bind(1);
-		p_texture_container_specular = ResourceManager::load_texture("container_specular", "res/textures/container_specular.png");
-		p_texture_container_specular->bind(2);
 
 		BufferLayout buffer_layout_1vec3
 		{
@@ -267,6 +262,8 @@ namespace NoEngine {
 
 		GLuint textureID = p_frame_buffer->get_texture_id();
 		ImGui::Image((ImTextureID)(intptr_t)textureID, ImVec2(window_width, window_height), ImVec2(0, 1), ImVec2(1, 0));
+
+		Renderer_OpenGL::get_error();
 
 		ImVec2 content_avail = ImGui::GetContentRegionAvail();
 		button_scene_pos = glm::vec2(content_avail.x, content_avail.y);
@@ -519,7 +516,11 @@ namespace NoEngine {
 		}
 		EditorScene::draw_objects();
 
+		Renderer_OpenGL::get_error();
+
 		p_frame_buffer->unbind();
+
+		Renderer_OpenGL::get_error();
 
 		UIModule::on_ui_draw_begin();
 		on_ui_draw();
