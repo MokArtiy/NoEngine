@@ -8,9 +8,15 @@ set(PUBLIC_HEADER
 set(PUBLIC_SOURCE
 	src/Editor.cpp
 )
+set(RESOURCES 
+	res/resources.rc
+)
+enable_language(RC)
+set(RC_FILES ${RESOURCES})
 set(ALL_SOURCES
 	${PUBLIC_HEADER}
 	${PUBLIC_SOURCE}
+	${RC_FILES}
 	src/main.cpp
 )
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${ALL_SOURCES})
