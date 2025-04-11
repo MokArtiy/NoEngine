@@ -14,6 +14,27 @@ namespace NoEngine {
 		Notequal,
 		Always
 	};
+	enum class DepthFunc
+	{
+		Never,
+		Less,
+		Lequal,
+		Greater,
+		Gequal,
+		Equal,
+		Notequal,
+		Always
+	};
+	enum class StencilOp {
+		Keep,    
+		Zero,    
+		Replace, 
+		Incr,    
+		IncrWrap,
+		Decr,    
+		DecrWrap,
+		Invert   
+	};
 	enum class DrawMode
 	{
 		Triangles,
@@ -36,6 +57,9 @@ namespace NoEngine {
 		static void disable_depth_testing();
 		static void disable_stencil_testing();
 		static void enable_stencil_testing();
+		static void save_depth_mask(unsigned char depth_mask);
+		static void set_depth_mask(unsigned char depth_mask);
+		static void set_depth_func(DepthFunc depth_func);
 		static void enable_input();
 		static void disable_input();
 		static void enable_poligon_mode();
@@ -43,6 +67,7 @@ namespace NoEngine {
 		static void configurate_opengl();
 		static void set_stencil_mask(unsigned int mask);
 		static void set_stencil_func(StencilFunc func, int ref, unsigned int mask);
+		static void set_stencil_op(StencilOp sfail, StencilOp dpfail, StencilOp dppass);
 		static void get_error();
 
 		static const char* get_vendor_str();
@@ -51,5 +76,7 @@ namespace NoEngine {
 	
 	private:
 		static GLFWwindow* m_pWindow;
+
+		static unsigned int convert_stencil_op(StencilOp op);
 	};
 }

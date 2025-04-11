@@ -193,6 +193,51 @@ namespace NoEngine {
 		glEnable(GL_STENCIL_TEST);
 	}
 
+	void Renderer_OpenGL::save_depth_mask(unsigned char depth_mask)
+	{
+		glGetBooleanv(GL_DEPTH_WRITEMASK, &depth_mask);
+		glDepthMask(GL_FALSE);
+	}
+
+	void Renderer_OpenGL::set_depth_mask(unsigned char depth_mask)
+	{
+		glDepthMask(depth_mask);
+	}
+
+	void Renderer_OpenGL::set_depth_func(DepthFunc func)
+	{
+		switch (func)
+		{
+		case NoEngine::DepthFunc::Never:
+			glDepthFunc(GL_NEVER);
+			break;
+		case NoEngine::DepthFunc::Less:
+			glDepthFunc(GL_LESS);
+			break;
+		case NoEngine::DepthFunc::Lequal:
+			glDepthFunc(GL_LEQUAL);
+			break;
+		case NoEngine::DepthFunc::Greater:
+			glDepthFunc(GL_GREATER);
+			break;
+		case NoEngine::DepthFunc::Gequal:
+			glDepthFunc(GL_GEQUAL);
+			break;
+		case NoEngine::DepthFunc::Equal:
+			glDepthFunc(GL_EQUAL);
+			break;
+		case NoEngine::DepthFunc::Notequal:
+			glDepthFunc(GL_NOTEQUAL);
+			break;
+		case NoEngine::DepthFunc::Always:
+			glDepthFunc(GL_ALWAYS);
+			break;
+		default:
+			glDepthFunc(GL_ALWAYS);
+			break;
+		}
+	}
+
 	void Renderer_OpenGL::enable_input()
 	{
 		glfwSetInputMode(m_pWindow, GLFW_STICKY_KEYS, GLFW_TRUE);
@@ -216,7 +261,7 @@ namespace NoEngine {
 	void Renderer_OpenGL::configurate_opengl()
 	{
 		glDepthFunc(GL_LESS);
-		glEnable(GL_STENCIL_TEST);
+		glEnable(GL_DEPTH_TEST);
 		glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
 		glStencilOp(GL_KEEP, GL_REPLACE, GL_REPLACE);
 	}
@@ -260,6 +305,15 @@ namespace NoEngine {
 		}
 	}
 
+	void Renderer_OpenGL::set_stencil_op(StencilOp sfail, StencilOp dpfail, StencilOp dppass)
+	{
+		GLenum gl_sfail = convert_stencil_op(sfail);
+		GLenum gl_dpfail = convert_stencil_op(dpfail);
+		GLenum gl_dppass = convert_stencil_op(dppass);
+
+		glStencilOp(gl_sfail, gl_dpfail, gl_dppass);
+	}
+
 	void Renderer_OpenGL::get_error()
 	{
 		GLenum error = glGetError();
@@ -284,4 +338,18 @@ namespace NoEngine {
 		return reinterpret_cast<const char*>(glGetString(GL_VERSION));
 	}
 
+	unsigned int Renderer_OpenGL::convert_stencil_op(StencilOp op)
+	{
+		switch (op) {
+		case StencilOp::Keep:       return GL_KEEP;
+		case StencilOp::Zero:       return GL_ZERO;
+		case StencilOp::Replace:    return GL_REPLACE;
+		case StencilOp::Incr:       return GL_INCR;
+		case StencilOp::IncrWrap:   return GL_INCR_WRAP;
+		case StencilOp::Decr:       return GL_DECR;
+		case StencilOp::DecrWrap:   return GL_DECR_WRAP;
+		case StencilOp::Invert:     return GL_INVERT;
+		default:                    return GL_KEEP;
+		}
+	}
 }

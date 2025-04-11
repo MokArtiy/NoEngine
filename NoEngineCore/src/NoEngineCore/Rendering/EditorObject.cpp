@@ -131,44 +131,56 @@ namespace NoEngine{
 	{
 		if (m_scene_objects.size() != 0)
 		{
-			for (auto i : m_scene_objects)
-			{
-				NoEngine::Renderer_OpenGL::configurate_opengl();
-				Renderer_OpenGL::set_stencil_func(StencilFunc::Always, 1, 0xFF);
-				Renderer_OpenGL::set_stencil_mask(0xFF);
-				NoEngine::Renderer_OpenGL::clear_stencil();
+			if (m_scene_objects.empty()) return;
 
-				i.second->draw();
-				
-				if (i.second->get_selected())
-				{
-					
-					NoEngine::Renderer_OpenGL::set_stencil_func(NoEngine::StencilFunc::Notequal, 1, 0xFF);
-					NoEngine::Renderer_OpenGL::set_stencil_mask(0x00);
-					NoEngine::Renderer_OpenGL::disable_depth_testing();
-
-					i.second->draw("stencil");
-
-					NoEngine::Renderer_OpenGL::set_stencil_mask(0xFF);
-					NoEngine::Renderer_OpenGL::set_stencil_func(NoEngine::StencilFunc::Always, 0, 0xFF);
-					NoEngine::Renderer_OpenGL::enable_depth_testing();
-					NoEngine::Renderer_OpenGL::disable_stencil_testing();
-
-					NoEngine::Renderer_OpenGL::clear_stencil();
+			// 1. Сначала рисуем все невыделенные объекты
+			for (auto& [id, obj] : m_scene_objects) {
+				if (!obj->get_selected()) {
+					Renderer_OpenGL::configurate_opengl();
+					obj->draw();
 				}
 			}
-		}
 
-		if (m_scene_lights.size() != 0)
-		{
-			for (auto i : m_scene_lights)
-			{
-				if (i.second->get_selected())
-				{
-					i.second->draw("stencil");
+			// 2. Настройка stencil для выделенных объектов
+			Renderer_OpenGL::enable_stencil_testing();
+			Renderer_OpenGL::set_stencil_func(StencilFunc::Always, 1, 0xFF);
+			Renderer_OpenGL::set_stencil_op(StencilOp::Keep, StencilOp::Replace, StencilOp::Replace);
+			Renderer_OpenGL::set_stencil_mask(0xFF);
+
+			// 3. Рендерим выделенные объекты (запись в stencil)
+			for (auto& [id, obj] : m_scene_objects) {
+				if (obj->get_selected()) {
+					obj->draw();
 				}
-				else {
-					i.second->draw();
+			}
+
+			// 4. Рендерим обводки
+			Renderer_OpenGL::set_stencil_func(StencilFunc::Notequal, 1, 0xFF);
+			Renderer_OpenGL::set_stencil_mask(0x00);
+			Renderer_OpenGL::disable_depth_testing();
+
+			for (auto& [id, obj] : m_scene_objects) {
+				if (obj->get_selected()) {
+					obj->draw("stencil");
+				}
+			}
+
+			// 5. Восстановление состояния
+			Renderer_OpenGL::enable_depth_testing();
+			Renderer_OpenGL::disable_stencil_testing();
+			Renderer_OpenGL::set_stencil_mask(0xFF);
+
+			if (m_scene_lights.size() != 0)
+			{
+				for (auto i : m_scene_lights)
+				{
+					if (i.second->get_selected())
+					{
+						i.second->draw("stencil");
+					}
+					else {
+						i.second->draw();
+					}
 				}
 			}
 		}

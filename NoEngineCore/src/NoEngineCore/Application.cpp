@@ -234,8 +234,6 @@ namespace NoEngine {
 
 	void Application::draw_main_scene()
 	{
-		p_frame_buffer->unbind();
-
 		ImGui::Begin("Scene");
 
 		const float window_width = ImGui::GetContentRegionAvail().x;
@@ -244,6 +242,7 @@ namespace NoEngine {
 		if (window_width != camera.get_viewport_size().x || window_height != camera.get_viewport_size().y)
 		{
 			camera.set_viewport_size(window_width, window_height);
+			p_frame_buffer->create(window_width, window_height);
 		}
 
 		/*-----------------------------------------------------*/
@@ -260,7 +259,7 @@ namespace NoEngine {
 		m_cursor_pos_in_scene = glm::vec2(mouse_pos.x - scene_pos.x, mouse_pos.y - scene_pos.y);
 		/*-----------------------------------------------------*/
 
-		GLuint textureID = p_frame_buffer->get_texture_id();
+		GLuint textureID = p_frame_buffer->getTextureID();
 		ImGui::Image((ImTextureID)(intptr_t)textureID, ImVec2(window_width, window_height), ImVec2(0, 1), ImVec2(1, 0));
 
 		Renderer_OpenGL::get_error();
@@ -492,8 +491,6 @@ namespace NoEngine {
 		}
 
 		//DRAW
-		Renderer_OpenGL::set_stencil_mask(0x00);
-
 		if (check_grid)
 		{
 			p_grid->draw(p_grid_shader);
@@ -514,18 +511,19 @@ namespace NoEngine {
 			EditorScene::update_objets(current_frame, delta_time, NoEngine::EngineState::Stop);
 			break;
 		}
+
 		EditorScene::draw_objects();
 
 		Renderer_OpenGL::get_error();
 
 		p_frame_buffer->unbind();
+		p_frame_buffer->resolveToTexture();
 
 		Renderer_OpenGL::get_error();
 
 		UIModule::on_ui_draw_begin();
 		on_ui_draw();
 		draw_main_scene();
-
 		UIModule::on_ui_draw_end();
 
 		m_pWindow->on_update();

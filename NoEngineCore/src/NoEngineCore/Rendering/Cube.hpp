@@ -39,9 +39,16 @@ public:
 		{
 			p_outline_shader->bind();
 			glm::mat4 model = get_model_matrix();
-			model = glm::scale(model, glm::vec3(1.01f));
+			model = glm::scale(model, glm::vec3(1.03f));
 			p_outline_shader->set_matrix4("model_matrix", model);
+
+			// Временное отключение теста глубины
+			GLboolean  depth_mask = GL_TRUE;
+			NoEngine::Renderer_OpenGL::save_depth_mask(depth_mask);
+
 			NoEngine::Renderer_OpenGL::draw(*p_vao);
+
+			NoEngine::Renderer_OpenGL::set_depth_mask(depth_mask);
 		}
 		else
 		{

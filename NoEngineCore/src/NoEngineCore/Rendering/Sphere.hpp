@@ -48,7 +48,7 @@ public:
         {
             p_outline_shader->bind();
             glm::mat4 model = get_model_matrix();
-            model = glm::scale(model, glm::vec3(1.01f));
+            model = glm::scale(model, glm::vec3(1.03f));
             p_outline_shader->set_matrix4("model_matrix", model);
             NoEngine::Renderer_OpenGL::draw(*p_vao);
         }
