@@ -151,7 +151,7 @@ cmake --build . --config Release
       <strong>Переключение режимов камеры</strong>
     </td>
     <td valign="top" width="25%" style="padding: 10px; text-align: center;">
-      <img src="https://github.com/user-attachments/assets/e447ab19-8e0c-46e4-b61e-144acb628e54" style="height: 128px; width: 200px; object-fit: contain; display: block; margin: 0 auto;"><br>
+      <img src="https://github.com/user-attachments/assets/e447ab19-8e0c-46e4-b61e-144acb628e54" style="height: 100px; width: 200px; object-fit: contain; display: block; margin: 0 auto;"><br><br>
       <strong>Управление состояниями сцены</strong>
     </td>
   </tr>
